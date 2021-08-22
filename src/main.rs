@@ -1,4 +1,5 @@
 use std::io::Write;
+use std::process::Command;
 
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
@@ -17,14 +18,13 @@ fn main() {
         input = input.trim().to_string();
         if input.contains(' ') {
             let input = input.split(' ').collect::<Vec<&str>>();
-            let mut child = std::process::Command::new(input[0])
+            let mut child = Command::new(input[0])
                 .args(&input[1..])
                 .spawn()
                 .unwrap();
             child.wait().unwrap();
         } else {
-            let mut child = std::process::Command::new(input)
-                .stderr(std::process::Stdio::null())
+            let mut child = Command::new(input)
                 .spawn()
                 .unwrap();
             child.wait().unwrap();
