@@ -9,7 +9,9 @@ fn main() {
         std::process::exit(0);
     }
     loop {
-        print!("[crusty]: ");
+        let crusty_prompt = String::from("[crusty]: ");
+        let prompt = std::env::var("PROMPT").unwrap_or(crusty_prompt);
+        print!("{}", prompt);
         std::io::stdout().flush().unwrap();
         let mut input = std::string::String::new();
         std::io::stdin()

@@ -7,3 +7,7 @@ TODO:
 - can run commands [done]
 - can run commands with args [done]
 - customizable prompt
+  + settable via PROMPT env variable [done]
+  + colors
+  + variables that can be replaced in the prompt
+  + command output in the prompt
