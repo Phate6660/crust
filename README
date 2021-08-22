@@ -1,0 +1,9 @@
+### cRUSTy ###
+
+cRUSTy is a toy shell that I'm writing in Rust for fun.
+
+TODO:
+- basic shell and prompt [done]
+- can run commands [done]
+- can run commands with args [done]
+- customizable prompt
