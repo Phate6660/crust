@@ -20,16 +20,14 @@ fn main() {
         input = input.trim().to_string();
         if input.contains(' ') {
             let input = input.split(' ').collect::<Vec<&str>>();
-            let mut child = Command::new(input[0])
+            Command::new(input[0])
                 .args(&input[1..])
                 .spawn()
-                .unwrap();
-            child.wait().unwrap();
+                .unwrap().wait().unwrap();
         } else {
-            let mut child = Command::new(input)
+            Command::new(input)
                 .spawn()
-                .unwrap();
-            child.wait().unwrap();
+                .unwrap().wait().unwrap();
         };
     }
 }
