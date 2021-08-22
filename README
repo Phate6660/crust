@@ -11,3 +11,5 @@ TODO:
   + colors
   + variables that can be replaced in the prompt
   + command output in the prompt
+- error handling
+  + gracefully handle command not found [done]

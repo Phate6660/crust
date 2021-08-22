@@ -20,14 +20,24 @@ fn main() {
         input = input.trim().to_string();
         if input.contains(' ') {
             let input = input.split(' ').collect::<Vec<&str>>();
-            Command::new(input[0])
+            let child = Command::new(input[0])
                 .args(&input[1..])
                 .spawn()
-                .unwrap().wait().unwrap();
+                .or(Err("invalid"));
+             if child.is_err() {
+                println!("Sorrry, '{}' was not found!", input[0]);
+            } else {
+                child.unwrap().wait().unwrap();
+            }
         } else {
-            Command::new(input)
+            let child = Command::new(&input)
                 .spawn()
-                .unwrap().wait().unwrap();
+                .or(Err("invalid"));
+            if child.is_err() {
+                println!("Sorry, '{}' was not found!", input);
+            } else {
+                child.unwrap().wait().unwrap();
+            }
         };
     }
 }
