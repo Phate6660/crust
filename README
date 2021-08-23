@@ -6,6 +6,7 @@ TODO:
 - basic shell and prompt [done]
 - can run commands [done]
 - can run commands with args [done]
+- can run non-interactive commands [done]
 - customizable prompt
   + settable via PROMPT env variable [done]
   + colors
