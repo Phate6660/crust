@@ -22,35 +22,36 @@ fn parse_input(op: &str) -> String {
             .trim().to_string()
     }
 }
+fn calc(problem: String, math_op: &str) {
+    let problem_vector = problem.split(math_op).collect::<Vec<&str>>();
+    let first_number = problem_vector[0].parse::<i32>().unwrap();
+    let second_number = problem_vector[1].parse::<i32>().unwrap();
+    match math_op {
+        "x" => println!("{}", first_number * second_number),
+        "/" => println!("{}", first_number / second_number),
+        "+" => println!("{}", first_number + second_number),
+        "-" => println!("{}", first_number - second_number),
+        _ => println!("Error, '{}' is an unsupported operation.", math_op),
+    }
+}
 
-fn calc(input: &str) {
+
+fn calc_main(input: &str) {
     let problem = input.split(' ').collect::<Vec<&str>>()[1].trim().to_string();
     if problem.contains('x') {
-        let problem_vector = problem.split('x').collect::<Vec<&str>>();
-        println!("{}", 
-            problem_vector[0].parse::<i32>().unwrap() 
-            * problem_vector[1].parse::<i32>().unwrap());
+        calc(problem, "x");
     } else if problem.contains('/') {
-        let problem_vector = problem.split('/').collect::<Vec<&str>>();
-        println!("{}", 
-            problem_vector[0].parse::<i32>().unwrap() 
-            / problem_vector[1].parse::<i32>().unwrap());
+        calc(problem, "/");
     } else if problem.contains('+') {
-        let problem_vector = problem.split('+').collect::<Vec<&str>>();
-        println!("{}", 
-            problem_vector[0].parse::<i32>().unwrap() 
-            + problem_vector[1].parse::<i32>().unwrap());
+        calc(problem, "+");
     } else if problem.contains('-') {
-        let problem_vector = problem.split('-').collect::<Vec<&str>>();
-        println!("{}", 
-            problem_vector[0].parse::<i32>().unwrap() 
-            - problem_vector[1].parse::<i32>().unwrap());
+        calc(problem, "-");
     }
 }
 
 fn run_command(input: String) {
     if input.starts_with("calc") {
-        calc(&input);
+        calc_main(&input);
     } else if input.contains(' ') {
         let input = input.split(' ').collect::<Vec<&str>>();
         let child = Command::new(input[0])
