@@ -49,16 +49,26 @@ fn run_command(input: String) {
     }
 }
 
-#[cfg(feature = "readline")]
-fn main() -> Result<()> {
-    let crusty_prompt = String::from("[crusty]: ");
+fn vars() -> (Vec<String>, String, String) {
     let args = std::env::args().collect::<Vec<String>>();
+    let crusty_prompt = String::from("[crusty]: ");
     let na = String::from("no args");
+    (args, crusty_prompt, na)
+}
+
+fn non_interactive(args: Vec<String>, na: String) {
     if args.get(1).unwrap_or(&na) == "-c" {
         let input = parse_input("non-interactive");
         run_command(input);
         std::process::exit(0);
     }
+}
+
+
+#[cfg(feature = "readline")]
+fn main() -> Result<()> {
+    let (args, crusty_prompt, na) = vars();
+    non_interactive(args, na);
     loop {
         display(crusty_prompt.clone())?;
         let input = parse_input("interactive");
@@ -68,14 +78,8 @@ fn main() -> Result<()> {
 
 #[cfg(not(feature = "readline"))]
 fn main() {
-    let crusty_prompt = String::from("[crusty]: ");
-    let args = std::env::args().collect::<Vec<String>>();
-    let na = String::from("no args");
-    if args.get(1).unwrap_or(&na) == "-c" {
-        let input = parse_input("non-interactive");
-        run_command(input);
-        std::process::exit(0);
-    }
+    let (args, crusty_prompt, na) = vars();
+    non_interactive(args, na);
     loop {
         display(crusty_prompt.clone());
         let input = parse_input("interactive");
