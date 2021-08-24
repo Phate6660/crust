@@ -1,8 +1,7 @@
 use std::io::Write;
 use std::process::Command;
 
-// Displays the prompt for the shell
-fn prompt() {
+fn display_prompt() {
     let crusty_prompt = String::from("[crusty]: ");
     let prompt = std::env::var("PROMPT").unwrap_or(crusty_prompt);
     print!("{}", prompt);
@@ -24,13 +23,40 @@ fn parse_input(op: &str) -> String {
     }
 }
 
-fn run(input: String) {
-    if input.contains(' ') {
+fn calc(input: &str) {
+    let problem = input.split(' ').collect::<Vec<&str>>()[1].trim().to_string();
+    if problem.contains('x') {
+        let problem_vector = problem.split('x').collect::<Vec<&str>>();
+        println!("{}", 
+            problem_vector[0].parse::<i32>().unwrap() 
+            * problem_vector[1].parse::<i32>().unwrap());
+    } else if problem.contains('/') {
+        let problem_vector = problem.split('/').collect::<Vec<&str>>();
+        println!("{}", 
+            problem_vector[0].parse::<i32>().unwrap() 
+            / problem_vector[1].parse::<i32>().unwrap());
+    } else if problem.contains('+') {
+        let problem_vector = problem.split('+').collect::<Vec<&str>>();
+        println!("{}", 
+            problem_vector[0].parse::<i32>().unwrap() 
+            + problem_vector[1].parse::<i32>().unwrap());
+    } else if problem.contains('-') {
+        let problem_vector = problem.split('-').collect::<Vec<&str>>();
+        println!("{}", 
+            problem_vector[0].parse::<i32>().unwrap() 
+            - problem_vector[1].parse::<i32>().unwrap());
+    }
+}
+
+fn run_command(input: String) {
+    if input.starts_with("calc") {
+        calc(&input);
+    } else if input.contains(' ') {
         let input = input.split(' ').collect::<Vec<&str>>();
         let child = Command::new(input[0])
             .args(&input[1..])
             .spawn()
-            .or(Err(""));
+            .or(Err(()));
         if child.is_err() {
             println!("Sorrry, '{}' was not found!", input[0]);
         } else {
@@ -39,7 +65,7 @@ fn run(input: String) {
     } else {
         let child = Command::new(&input)
             .spawn()
-            .or(Err(""));
+            .or(Err(()));
         if child.is_err() {
             println!("Sorry, '{}' was not found!", input);
         } else {
@@ -53,12 +79,12 @@ fn main() {
     let na = String::from("no args");
     if args.get(1).unwrap_or(&na) == "-c" {
         let input = parse_input("non-interactive");
-        run(input);
+        run_command(input);
         std::process::exit(0);
     }
     loop {
-        prompt();
+        display_prompt();
         let input = parse_input("interactive");
-        run(input);
+        run_command(input);
     }
 }

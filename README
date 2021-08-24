@@ -7,6 +7,9 @@ TODO:
 - can run commands [done]
 - can run commands with args [done]
 - can run non-interactive commands [done]
+- builtin calculator (use builtin calc command)
+  + basic math operations (MDAS) [done]
+  + PEMDAS
 - customizable prompt
   + settable via PROMPT env variable [done]
   + colors
