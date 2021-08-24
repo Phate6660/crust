@@ -1,26 +1,12 @@
 #[cfg(feature = "readline")]
-use rustyline::{Editor, Result};
+use rustyline::Result;
 
-use std::io::Write;
+mod calc;
+mod prompt;
+
+use calc::calc_run;
+use prompt::display;
 use std::process::Command;
-
-#[cfg(feature = "readline")]
-fn display_prompt() -> Result<()> {
-    let mut rl = Editor::<()>::new();
-    let crusty_prompt = String::from("[crusty]: ");
-    let prompt = rl.readline(&std::env::var("PROMPT").unwrap_or(crusty_prompt))?;
-    print!("{}", prompt);
-    std::io::stdout().flush().unwrap();
-    Ok(())
-}
-
-#[cfg(not(feature = "readline"))]
-fn display_prompt() {
-    let crusty_prompt = String::from("[crusty]: ");
-    let prompt = std::env::var("PROMPT").unwrap_or(crusty_prompt);
-    print!("{}", prompt);
-    std::io::stdout().flush().unwrap();
-}
 
 fn parse_input(op: &str) -> String {
     if op == "interactive" {
@@ -37,35 +23,9 @@ fn parse_input(op: &str) -> String {
     }
 }
 
-fn calc(problem: String, math_op: &str) {
-    let problem_vector = problem.split(math_op).collect::<Vec<&str>>();
-    let first_number = problem_vector[0].parse::<i32>().unwrap();
-    let second_number = problem_vector[1].parse::<i32>().unwrap();
-    match math_op {
-        "x" => println!("{}", first_number * second_number),
-        "/" => println!("{}", first_number / second_number),
-        "+" => println!("{}", first_number + second_number),
-        "-" => println!("{}", first_number - second_number),
-        _ => println!("Error, '{}' is an unsupported operation.", math_op),
-    }
-}
-
-fn calc_main(input: &str) {
-    let problem = input.split(' ').collect::<Vec<&str>>()[1].trim().to_string();
-    if problem.contains('x') {
-        calc(problem, "x");
-    } else if problem.contains('/') {
-        calc(problem, "/");
-    } else if problem.contains('+') {
-        calc(problem, "+");
-    } else if problem.contains('-') {
-        calc(problem, "-");
-    }
-}
-
 fn run_command(input: String) {
     if input.starts_with("calc") {
-        calc_main(&input);
+        calc_run(&input);
     } else if input.contains(' ') {
         let input = input.split(' ').collect::<Vec<&str>>();
         let child = Command::new(input[0])
@@ -91,6 +51,7 @@ fn run_command(input: String) {
 
 #[cfg(feature = "readline")]
 fn main() -> Result<()> {
+    let crusty_prompt = String::from("[crusty]: ");
     let args = std::env::args().collect::<Vec<String>>();
     let na = String::from("no args");
     if args.get(1).unwrap_or(&na) == "-c" {
@@ -99,7 +60,7 @@ fn main() -> Result<()> {
         std::process::exit(0);
     }
     loop {
-        display_prompt()?;
+        display(crusty_prompt.clone())?;
         let input = parse_input("interactive");
         run_command(input);
     }
@@ -107,6 +68,7 @@ fn main() -> Result<()> {
 
 #[cfg(not(feature = "readline"))]
 fn main() {
+    let crusty_prompt = String::from("[crusty]: ");
     let args = std::env::args().collect::<Vec<String>>();
     let na = String::from("no args");
     if args.get(1).unwrap_or(&na) == "-c" {
@@ -115,7 +77,7 @@ fn main() {
         std::process::exit(0);
     }
     loop {
-        display_prompt();
+        display(crusty_prompt.clone());
         let input = parse_input("interactive");
         run_command(input);
     }
