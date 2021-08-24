@@ -17,3 +17,7 @@ TODO:
   + command output in the prompt
 - error handling
   + gracefully handle command not found [done]
+- readline support via rustyline (use readline feature)
+  + minimal line editing setup [done]
+  + basic completions
+  + modifiable keybindings

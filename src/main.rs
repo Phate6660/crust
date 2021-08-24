@@ -1,6 +1,20 @@
+#[cfg(feature = "readline")]
+use rustyline::{Editor, Result};
+
 use std::io::Write;
 use std::process::Command;
 
+#[cfg(feature = "readline")]
+fn display_prompt() -> Result<()> {
+    let mut rl = Editor::<()>::new();
+    let crusty_prompt = String::from("[crusty]: ");
+    let prompt = rl.readline(&std::env::var("PROMPT").unwrap_or(crusty_prompt))?;
+    print!("{}", prompt);
+    std::io::stdout().flush().unwrap();
+    Ok(())
+}
+
+#[cfg(not(feature = "readline"))]
 fn display_prompt() {
     let crusty_prompt = String::from("[crusty]: ");
     let prompt = std::env::var("PROMPT").unwrap_or(crusty_prompt);
@@ -22,6 +36,7 @@ fn parse_input(op: &str) -> String {
             .trim().to_string()
     }
 }
+
 fn calc(problem: String, math_op: &str) {
     let problem_vector = problem.split(math_op).collect::<Vec<&str>>();
     let first_number = problem_vector[0].parse::<i32>().unwrap();
@@ -34,7 +49,6 @@ fn calc(problem: String, math_op: &str) {
         _ => println!("Error, '{}' is an unsupported operation.", math_op),
     }
 }
-
 
 fn calc_main(input: &str) {
     let problem = input.split(' ').collect::<Vec<&str>>()[1].trim().to_string();
@@ -75,6 +89,23 @@ fn run_command(input: String) {
     }
 }
 
+#[cfg(feature = "readline")]
+fn main() -> Result<()> {
+    let args = std::env::args().collect::<Vec<String>>();
+    let na = String::from("no args");
+    if args.get(1).unwrap_or(&na) == "-c" {
+        let input = parse_input("non-interactive");
+        run_command(input);
+        std::process::exit(0);
+    }
+    loop {
+        display_prompt()?;
+        let input = parse_input("interactive");
+        run_command(input);
+    }
+}
+
+#[cfg(not(feature = "readline"))]
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
     let na = String::from("no args");
