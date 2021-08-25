@@ -4,12 +4,16 @@ cRUSTy is a toy shell that I'm writing in Rust for fun.
 
 TODO:
 - basic shell and prompt [done]
-- can run commands [done]
-- can run commands with args [done]
-- can run non-interactive commands [done]
-- builtin calculator (use builtin calc command)
-  + basic math operations (MDAS) [done]
-  + PEMDAS
+- commands [done]
+  + with args [done]
+  + non-interactive [done]
+- builtins 
+  + calculator (use builtin calc command)
+    * basic math operations (MDAS) [done]
+    * PEMDAS
+  + ls
+    * specify dir, use . if otherwise [done]
+    * color-coding dirs/files
 - customizable prompt
   + settable via PROMPT env variable [done]
   + colors
@@ -18,6 +22,8 @@ TODO:
 - error handling
   + gracefully handle command not found [done]
 - readline support via rustyline (use readline feature)
+  + NOTE: There is a bug I can't figure out where you have to input commands twice!
   + minimal line editing setup [done]
   + basic completions
   + modifiable keybindings
+

@@ -1,11 +1,15 @@
 #[cfg(feature = "readline")]
-use rustyline::Result;
+use rustyline::{Editor, Result};
 
 mod calc;
-mod prompt;
+mod ls;
 
 use calc::calc_run;
-use prompt::display;
+use ls::ls;
+
+#[cfg(not(feature = "readline"))]
+use std::io::Write;
+
 use std::process::Command;
 
 fn parse_input(op: &str) -> String {
@@ -26,6 +30,13 @@ fn parse_input(op: &str) -> String {
 fn run_command(input: String) {
     if input.starts_with("calc") {
         calc_run(&input);
+    } else if input.starts_with("ls") {
+        if input == "ls" {
+            ls(".");
+        } else {
+            let input = input.split(' ').collect::<Vec<&str>>()[1];
+            ls(input);
+        }
     } else if input.contains(' ') {
         let input = input.split(' ').collect::<Vec<&str>>();
         let child = Command::new(input[0])
@@ -69,8 +80,10 @@ fn non_interactive(args: Vec<String>, na: String) {
 fn main() -> Result<()> {
     let (args, crusty_prompt, na) = vars();
     non_interactive(args, na);
+    let mut rl = Editor::<()>::new();
     loop {
-        display(crusty_prompt.clone())?;
+        let prompt = rl.readline(&std::env::var("PROMPT").unwrap_or(crusty_prompt.clone()))?;
+        print!("{}", prompt);
         let input = parse_input("interactive");
         run_command(input);
     }
@@ -81,7 +94,9 @@ fn main() {
     let (args, crusty_prompt, na) = vars();
     non_interactive(args, na);
     loop {
-        display(crusty_prompt.clone());
+        let prompt = std::env::var("PROMPT").unwrap_or(crusty_prompt.clone());
+        print!("{}", prompt);
+        std::io::stdout().flush().unwrap();
         let input = parse_input("interactive");
         run_command(input);
     }
