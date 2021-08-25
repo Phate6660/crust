@@ -12,6 +12,8 @@ TODO:
     * basic math operations (MDAS) [done]
     * PEMDAS
   + cd [done]
+  + exit [done]
+    * specify exit code [done]
   + ls
     * specify dir, use . if otherwise [done]
     * color-coding dirs/files [done]

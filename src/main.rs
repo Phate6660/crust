@@ -37,6 +37,13 @@ fn run_command(input: String) {
         if cd(input).is_err() {
             println!("Failed to change directory to '{}'", input);
         }
+    } else if input.starts_with("exit") {
+        if input.contains(' ') {
+            let input = input.split(' ').collect::<Vec<&str>>()[1];
+            std::process::exit(input.parse::<i32>().unwrap_or_else(|_| 0));
+        } else {
+            std::process::exit(0);
+        }
     } else if input.starts_with("ls") {
         if input == "ls" {
             ls(".");
