@@ -33,9 +33,17 @@ fn run_command(input: String) {
     if input.starts_with("calc") {
         calc_run(&input);
     } else if input.starts_with("cd") {
-        let input = input.split(' ').collect::<Vec<&str>>()[1];
-        if cd(input).is_err() {
-            println!("Failed to change directory to '{}'", input);
+        fn cd_helper(dir: &str) {
+            if cd(dir).is_err() {
+                println!("Failed to change directory to '{}'", dir);
+            }
+        }
+        if input == "cd" {
+            let home = std::env::var("HOME").unwrap();
+            cd_helper(&home);
+        } else {
+            let input = input.split(' ').collect::<Vec<&str>>()[1];
+            cd_helper(input);
         }
     } else if input.starts_with("echo") {
         let input = input.split(' ').collect::<Vec<&str>>();

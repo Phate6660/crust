@@ -11,7 +11,10 @@ TODO:
   + calculator (use builtin calc command)
     * basic math operations (MDAS) [done]
     * PEMDAS
-  + cd [done]
+  + cd
+    * changing directories with relative/exact paths [done]
+    * cd without args takes you $HOME [done]
+    * cd with '-' takes you to previous dir
   + echo
     + basic echo functions [done]
     + escape sequence support
