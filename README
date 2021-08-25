@@ -12,7 +12,9 @@ TODO:
     * basic math operations (MDAS) [done]
     * PEMDAS
   + cd [done]
-  + echo [done]
+  + echo
+    + basic echo functions [done]
+    + escape sequence support
   + exit [done]
     * specify exit code [done]
   + ls
