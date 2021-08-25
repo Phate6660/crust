@@ -5,7 +5,13 @@ use std::io::prelude::*;
 pub fn ls(input: &str) {
     let mut t = term::stdout().unwrap();
 
-    let path = std::fs::read_dir(input).unwrap();
+    let path;
+    if std::path::Path::new(input).exists() {
+        path = std::fs::read_dir(input).unwrap()
+    } else {
+        println!("ERROR: '{}' is not a valid file or directory.", input);
+        return
+    }
     for file in path {
         let raw_entry = file.unwrap().path();
         let still_raw_entry = raw_entry.to_str().unwrap().replace("./", "");
@@ -35,11 +41,16 @@ pub fn ls(input: &str) {
 }
 
 #[cfg(target_os = "windows")]
-pub fn ls() {
+pub fn ls(input: &str) {
     let mut t = term::stdout().unwrap();
 
-    let args = std::env::args().collect::<Vec<String>>();
-    let path = std::fs::read_dir(input).unwrap();
+    let path;
+    if std::path::Path::new(input).exists() {
+        path = std::fs::read_dir(input).unwrap()
+    } else {
+        println!("ERROR: '{}' is not a valid file or directory.", input);
+        return
+    }
     for file in path {
         let raw_entry = file.unwrap().path();
         let still_raw_entry = raw_entry.to_str().unwrap().replace(".\\", "");

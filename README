@@ -38,7 +38,7 @@ TODO:
   + command output in the prompt
 - error handling
   + gracefully handle command not found [done]
-  + make sure dir exists when using ls
+  + make sure dir exists when using ls [done]
 - io
   + piping
   + redirection
