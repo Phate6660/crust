@@ -22,6 +22,9 @@ TODO:
     + escape sequence support
   + exit [done]
     * specify exit code [done]
+  + help
+    * display list of builtins [done]
+    * individual helps for builtins (e.g. help cd)
   + ls
     * specify dir, use . if otherwise [done]
     * color-coding dirs/files [done]
