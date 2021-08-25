@@ -37,6 +37,14 @@ fn run_command(input: String) {
         if cd(input).is_err() {
             println!("Failed to change directory to '{}'", input);
         }
+    } else if input.starts_with("echo") {
+        let input = input.split(' ').collect::<Vec<&str>>();
+        let output = &input[1..];
+        for arg in output {
+            print!("{} ", arg);
+            std::io::stdout().flush().unwrap();
+        }
+        println!();
     } else if input.starts_with("exit") {
         if input.contains(' ') {
             let input = input.split(' ').collect::<Vec<&str>>()[1];
