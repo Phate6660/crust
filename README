@@ -11,6 +11,7 @@ TODO:
   + calculator (use builtin calc command)
     * basic math operations (MDAS) [done]
     * PEMDAS
+  + cd [done]
   + ls
     * specify dir, use . if otherwise [done]
     * color-coding dirs/files [done]

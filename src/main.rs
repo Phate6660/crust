@@ -2,8 +2,10 @@
 use rustyline::{Editor, Result};
 
 mod calc;
+mod cd;
 mod ls;
 
+use cd::cd;
 use calc::calc_run;
 use ls::ls;
 
@@ -30,6 +32,11 @@ fn parse_input(op: &str) -> String {
 fn run_command(input: String) {
     if input.starts_with("calc") {
         calc_run(&input);
+    } else if input.starts_with("cd") {
+        let input = input.split(' ').collect::<Vec<&str>>()[1];
+        if cd(input).is_err() {
+            println!("Failed to change directory to '{}'", input);
+        }
     } else if input.starts_with("ls") {
         if input == "ls" {
             ls(".");
