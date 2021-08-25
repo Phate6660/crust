@@ -61,17 +61,17 @@ fn run_command(input: String) {
             std::process::exit(0);
         }
     } else if input.starts_with("help") {
-        println!("
-cRUSTy [https://github.com/Phate6660/crusty]
-builtins:
----------
-calc
-cd
-echo
-exit
-help
-ls
-pwd
+        println!("\
+            cRUSTy [https://github.com/Phate6660/crusty]\n\
+            builtins:\n\
+            ---------\n\
+            calc\n\
+            cd\n\
+            echo\n\
+            exit\n\
+            help\n\
+            ls\n\
+            pwd\
         ")
     } else if input.starts_with("ls") {
         if input == "ls" {
