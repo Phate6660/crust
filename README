@@ -37,6 +37,7 @@ TODO:
   + command output in the prompt
 - error handling
   + gracefully handle command not found [done]
+  + make sure dir exists when using ls
 - readline support via rustyline (use readline feature)
   + NOTE: There is a bug I can't figure out where you have to input commands twice!
   + minimal line editing setup [done]
