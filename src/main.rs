@@ -91,7 +91,7 @@ fn main() -> Result<()> {
     non_interactive(args, na);
     let mut rl = Editor::<()>::new();
     loop {
-        let prompt = rl.readline(&std::env::var("PROMPT").unwrap_or(crusty_prompt.clone()))?;
+        let prompt = rl.readline(&std::env::var("PROMPT").unwrap_or_else(|_| crusty_prompt.clone()))?;
         println!("{}", prompt);
         let input = parse_input("interactive");
         run_command(input);
@@ -103,7 +103,7 @@ fn main() {
     let (args, crusty_prompt, na) = vars();
     non_interactive(args, na);
     loop {
-        let prompt = std::env::var("PROMPT").unwrap_or(crusty_prompt.clone());
+        let prompt = std::env::var("PROMPT").unwrap_or_else(|_| crusty_prompt.clone());
         print!("{}", prompt);
         std::io::stdout().flush().unwrap();
         let input = parse_input("interactive");

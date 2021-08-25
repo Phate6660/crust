@@ -29,7 +29,7 @@ pub fn ls(input: &str) {
                     write!(t, "/").unwrap();
                 }
             }
-            print!("\n");
+            println!();
         }
     } 
 }
@@ -63,7 +63,7 @@ pub fn ls() {
                     write!(t, "\\").unwrap();
                 }
             }
-            print!("\n");
+            println!();
         }
     } 
 }
