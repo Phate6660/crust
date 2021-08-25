@@ -13,7 +13,8 @@ TODO:
     * PEMDAS
   + ls
     * specify dir, use . if otherwise [done]
-    * color-coding dirs/files
+    * color-coding dirs/files [done]
+    * additional details / args
 - customizable prompt
   + settable via PROMPT env variable [done]
   + colors
