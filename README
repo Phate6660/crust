@@ -15,6 +15,7 @@ TODO:
     * specify dir, use . if otherwise [done]
     * color-coding dirs/files [done]
     * additional details / args
+  + pwd [done]
 - customizable prompt
   + settable via PROMPT env variable [done]
   + colors

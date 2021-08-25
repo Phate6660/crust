@@ -37,6 +37,8 @@ fn run_command(input: String) {
             let input = input.split(' ').collect::<Vec<&str>>()[1];
             ls(input);
         }
+    } else if input == "pwd" {
+        println!("{}", std::env::current_dir().unwrap().display());
     } else if input.contains(' ') {
         let input = input.split(' ').collect::<Vec<&str>>();
         let child = Command::new(input[0])
@@ -83,7 +85,7 @@ fn main() -> Result<()> {
     let mut rl = Editor::<()>::new();
     loop {
         let prompt = rl.readline(&std::env::var("PROMPT").unwrap_or(crusty_prompt.clone()))?;
-        print!("{}", prompt);
+        println!("{}", prompt);
         let input = parse_input("interactive");
         run_command(input);
     }
