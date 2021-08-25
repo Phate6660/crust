@@ -8,7 +8,7 @@ TODO:
   + with args [done]
   + non-interactive [done]
 - builtins 
-  + calculator (use builtin calc command)
+  + calc
     * basic math operations (MDAS) [done]
     * PEMDAS
   + cd
@@ -37,4 +37,3 @@ TODO:
   + minimal line editing setup [done]
   + basic completions
   + modifiable keybindings
-
