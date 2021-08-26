@@ -1,7 +1,6 @@
 extern crate term;
 use std::io::prelude::*;
 
-#[cfg(target_os = "linux")]
 pub fn ls(input: &str) {
     let mut t = term::stdout().unwrap();
 
