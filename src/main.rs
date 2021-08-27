@@ -6,7 +6,7 @@ mod cd;
 mod ls;
 
 use cd::cd;
-use calc::calc_run;
+use calc::{calc_return, calc_run};
 use ls::ls;
 
 #[cfg(not(feature = "readline"))]
@@ -130,7 +130,21 @@ fn cmd(input: &str, args: bool) {
 
 fn run_command(input: String) {
     if input.starts_with("calc") {
-        calc_run(&input);
+        let problem = input.split(' ').collect::<Vec<&str>>()[1].trim();
+        if input.contains('|') {
+            let calculation = calc_return(problem);
+            let line_vector = input.split('|').collect::<Vec<&str>>();
+            let cmd2 = line_vector[1];
+            let mut cmd2_with_args = cmd2.split(' ').collect::<Vec<&str>>();
+            cmd2_with_args.remove(0);
+            if cmd2.contains(' ') {
+                piped_text(&calculation.to_string(), true, cmd2_with_args);
+            } else {
+                piped_text(&calculation.to_string(), false, cmd2_with_args);
+            }
+        } else {
+            calc_run(problem);
+        }
     } else if input.starts_with("cd") {
         fn cd_helper(dir: &str) {
             if cd(dir).is_err() {
