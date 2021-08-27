@@ -4,7 +4,20 @@ cRUSTy is a toy shell that I'm writing in Rust for fun.
 If there are any issues, feature requests, or whatever, feel free to open an issue.
 As currently I'm just implementing whatever comes into mind.
 
-TODO:
+## Running
+
+(running normally)
+$ cargo run --release
+
+(running with WIP readline feature)
+$ cargo run --release --features=readline
+
+(running a non-interactive command)
+$ cargo run --release -- -c "echo this is an example"
+
+----
+
+List of features, everything is WIP unless labelled 'done':
 - basic shell and prompt [done]
 - builtins 
   + calc
