@@ -30,7 +30,7 @@ fn parse_input(op: &str) -> String {
     }
 }
 
-fn piped(input: &str) {
+fn piped_cmd(input: &str) {
     let input = input.split('|').collect::<Vec<&str>>();
     let mut cmd1 = input[0].split(' ').collect::<Vec<&str>>();
     let mut cmd2 = input[1].split(' ').collect::<Vec<&str>>();
@@ -60,6 +60,45 @@ fn piped(input: &str) {
         let mut output = String::new();
         match child2.stdout.unwrap().read_to_string(&mut output) {
             Err(why) => println!("could not read cmd2 stdout: {}", why),
+            Ok(_) => println!("{}", output.trim()),
+        }
+    }
+}
+
+fn piped_text(input: &str, args: bool, cmd: Vec<&str>) {
+    if args {
+        let child = match Command::new(cmd[0])
+            .args(&cmd[1..])
+            .stdin(std::process::Stdio::piped())
+            .stdout(std::process::Stdio::piped())
+            .spawn() {
+                Err(why) => panic!("couldn't spwn cmd: {}", why),
+                Ok(child) => child,
+            };
+        match child.stdin.unwrap().write_all(input.as_bytes()) {
+            Err(why) => println!("ERROR: couldn't write cmd stdin because of {}", why),
+            Ok(_) => (),
+        }
+        let mut output = String::new();
+        match child.stdout.unwrap().read_to_string(&mut output) {
+            Err(why) => println!("could not read cmd stdout: {}", why),
+            Ok(_) => println!("{}", output.trim()),
+        }
+    } else {
+        let child = match Command::new(cmd[0])
+            .stdin(std::process::Stdio::piped())
+            .stdout(std::process::Stdio::piped())
+            .spawn() {
+                Err(why) => panic!("couldn't spwn cmd: {}", why),
+                Ok(child) => child,
+            };
+        match child.stdin.unwrap().write_all(input.as_bytes()) {
+            Err(why) => println!("ERROR: couldn't write cmd stdin because of {}", why),
+            Ok(_) => (),
+        }
+        let mut output = String::new();
+        match child.stdout.unwrap().read_to_string(&mut output) {
+            Err(why) => println!("could not read cmd stdout: {}", why),
             Ok(_) => println!("{}", output.trim()),
         }
     }
@@ -137,13 +176,52 @@ fn run_command(input: String) {
         if input == "ls" {
             ls(".");
         } else {
-            let input = input.split(' ').collect::<Vec<&str>>()[1];
-            ls(input);
+            if input.contains('|') {
+                let ls_input = input.split('|').collect::<Vec<&str>>()[0];
+                let path = if ls_input.trim() == "ls" {
+                    std::fs::read_dir(".").unwrap()
+                } else if ls_input.contains(' ') {
+                    let ls_input = ls_input.split(' ').collect::<Vec<&str>>()[1];
+                    if std::path::Path::new(ls_input).exists() {
+                        std::fs::read_dir(ls_input).unwrap()
+                    } else {
+                        std::fs::read_dir(".").unwrap()
+                    }
+                } else {
+                    std::fs::read_dir(".").unwrap()
+                };
+                let mut output = "".to_string();
+                for file in path {
+                    let raw_entry = file.unwrap().path();
+                    #[cfg(target_os = "linux")]
+                    let still_raw_entry = raw_entry.to_str().unwrap().replace("./", ""); 
+                    #[cfg(target_os = "windows")]
+                    let still_raw_entry = raw_entry.to_str().unwrap().replace(".\\", "");
+                    let paths = still_raw_entry.split('\n');
+                    let pre_output = "";
+                    for file in paths {
+                        let pre_output = &[pre_output, file, "\n"].concat();
+                        output.push_str(pre_output);
+                    }
+                }
+                let cmd = input.split('|').collect::<Vec<&str>>()[1];
+                if cmd.contains(' ') {
+                    let mut cmd_with_args = cmd.split(' ').collect::<Vec<&str>>();
+                    cmd_with_args.remove(0);
+                    piped_text(&output, true, cmd_with_args);
+                } else {
+                    let cmd = cmd.split(' ').collect::<Vec<&str>>();
+                    piped_text(&output, false, cmd);
+                }
+            } else {
+                let input = input.split(' ').collect::<Vec<&str>>()[1];
+                ls(input);
+            }
         }
     } else if input == "pwd" {
         println!("{}", std::env::current_dir().unwrap().display());
     } else if input.contains('|') {
-        piped(&input);
+        piped_cmd(&input);
     } else if input.contains(' ') {
         cmd(&input, true);
     } else {

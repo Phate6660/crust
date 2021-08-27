@@ -11,6 +11,7 @@ pub fn ls(input: &str) {
         println!("ERROR: '{}' is not a valid file or directory.", input);
         return
     }
+
     for file in path {
         let raw_entry = file.unwrap().path();
         #[cfg(target_os = "linux")]
