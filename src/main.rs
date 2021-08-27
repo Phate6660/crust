@@ -145,13 +145,32 @@ fn run_command(input: String) {
             cd_helper(input);
         }
     } else if input.starts_with("echo") {
-        let input = input.split(' ').collect::<Vec<&str>>();
-        let output = &input[1..];
-        for arg in output {
-            print!("{} ", arg);
-            std::io::stdout().flush().unwrap();
+        if input.contains('|') {
+            let line_vector = input.split('|').collect::<Vec<&str>>();
+            let cmd = line_vector[0];
+            let mut cmd_vector = cmd.split(' ').collect::<Vec<&str>>();
+            cmd_vector.remove(0);
+            let mut message = "".to_string();
+            for word in cmd_vector {
+                message.push_str(word);
+            }
+            let cmd2 = line_vector[1];
+            let mut cmd2_with_args = cmd2.split(' ').collect::<Vec<&str>>();
+            cmd2_with_args.remove(0);
+            if cmd2.contains(' ') {
+                piped_text(&message, true, cmd2_with_args);
+            } else {
+                piped_text(&message, false, cmd2_with_args);
+            }
+        } else {
+            let input = input.split(' ').collect::<Vec<&str>>();
+            let output = &input[1..];
+            for arg in output {
+                print!("{} ", arg);
+                std::io::stdout().flush().unwrap();
+            }
+            println!();
         }
-        println!();
     } else if input.starts_with("exit") {
         if input.contains(' ') {
             let input = input.split(' ').collect::<Vec<&str>>()[1];
