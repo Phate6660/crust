@@ -155,7 +155,7 @@ fn run_command(input: String) {
     } else if input.starts_with("exit") {
         if input.contains(' ') {
             let input = input.split(' ').collect::<Vec<&str>>()[1];
-            std::process::exit(input.parse::<i32>().unwrap_or_else(|_| 0));
+            std::process::exit(input.parse::<i32>().unwrap_or(0));
         } else {
             std::process::exit(0);
         }
@@ -175,48 +175,46 @@ fn run_command(input: String) {
     } else if input.starts_with("ls") {
         if input == "ls" {
             ls(".");
-        } else {
-            if input.contains('|') {
-                let ls_input = input.split('|').collect::<Vec<&str>>()[0];
-                let path = if ls_input.trim() == "ls" {
-                    std::fs::read_dir(".").unwrap()
-                } else if ls_input.contains(' ') {
-                    let ls_input = ls_input.split(' ').collect::<Vec<&str>>()[1];
-                    if std::path::Path::new(ls_input).exists() {
-                        std::fs::read_dir(ls_input).unwrap()
-                    } else {
-                        std::fs::read_dir(".").unwrap()
-                    }
+        } else if input.contains('|') {
+            let ls_input = input.split('|').collect::<Vec<&str>>()[0];
+            let path = if ls_input.trim() == "ls" {
+                std::fs::read_dir(".").unwrap()
+            } else if ls_input.contains(' ') {
+                let ls_input = ls_input.split(' ').collect::<Vec<&str>>()[1];
+                if std::path::Path::new(ls_input).exists() {
+                    std::fs::read_dir(ls_input).unwrap()
                 } else {
                     std::fs::read_dir(".").unwrap()
-                };
-                let mut output = "".to_string();
-                for file in path {
-                    let raw_entry = file.unwrap().path();
-                    #[cfg(target_os = "linux")]
-                    let still_raw_entry = raw_entry.to_str().unwrap().replace("./", ""); 
-                    #[cfg(target_os = "windows")]
-                    let still_raw_entry = raw_entry.to_str().unwrap().replace(".\\", "");
-                    let paths = still_raw_entry.split('\n');
-                    let pre_output = "";
-                    for file in paths {
-                        let pre_output = &[pre_output, file, "\n"].concat();
-                        output.push_str(pre_output);
-                    }
-                }
-                let cmd = input.split('|').collect::<Vec<&str>>()[1];
-                if cmd.contains(' ') {
-                    let mut cmd_with_args = cmd.split(' ').collect::<Vec<&str>>();
-                    cmd_with_args.remove(0);
-                    piped_text(&output, true, cmd_with_args);
-                } else {
-                    let cmd = cmd.split(' ').collect::<Vec<&str>>();
-                    piped_text(&output, false, cmd);
                 }
             } else {
-                let input = input.split(' ').collect::<Vec<&str>>()[1];
-                ls(input);
+                std::fs::read_dir(".").unwrap()
+            };
+            let mut output = "".to_string();
+            for file in path {
+                let raw_entry = file.unwrap().path();
+                #[cfg(target_os = "linux")]
+                let still_raw_entry = raw_entry.to_str().unwrap().replace("./", ""); 
+                #[cfg(target_os = "windows")]
+                let still_raw_entry = raw_entry.to_str().unwrap().replace(".\\", "");
+                let paths = still_raw_entry.split('\n');
+                let pre_output = "";
+                for file in paths {
+                    let pre_output = &[pre_output, file, "\n"].concat();
+                    output.push_str(pre_output);
+                }
             }
+            let cmd = input.split('|').collect::<Vec<&str>>()[1];
+            if cmd.contains(' ') {
+                let mut cmd_with_args = cmd.split(' ').collect::<Vec<&str>>();
+                cmd_with_args.remove(0);
+                piped_text(&output, true, cmd_with_args);
+            } else {
+                let cmd = cmd.split(' ').collect::<Vec<&str>>();
+                piped_text(&output, false, cmd);
+            }
+        } else {
+            let input = input.split(' ').collect::<Vec<&str>>()[1];
+            ls(input);
         }
     } else if input == "pwd" {
         println!("{}", std::env::current_dir().unwrap().display());
