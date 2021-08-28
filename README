@@ -1,6 +1,6 @@
 ### cRUSTy ###
 
-cRUSTy is a toy shell that I'm writing in Rust for fun.
+cRUSTy is a shell that I'm writing in Rust.
 If there are any issues, feature requests, or whatever, feel free to open an issue.
 As currently I'm just implementing whatever comes into mind.
 
