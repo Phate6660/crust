@@ -1,5 +1,49 @@
 extern crate term;
+use crate::shared_functions::get_calc_vars;
 use std::io::prelude::*;
+
+pub fn calc_run(problem: &str) {
+    let (math_op, first_number, second_number) = get_calc_vars(problem);
+    match math_op {
+        "x" => println!("{}", first_number * second_number),
+        "/" => println!("{}", first_number / second_number),
+        "+" => println!("{}", first_number + second_number),
+        "-" => println!("{}", first_number - second_number),
+        _ => println!("Error, '{}' is an unsupported operation.", math_op),
+    }
+}
+
+pub fn calc_return(problem: &str) -> i32 {
+    let (math_op, first_number, second_number) = get_calc_vars(problem);
+    match math_op {
+        "x" => first_number * second_number,
+        "/" => first_number / second_number,
+        "+" => first_number + second_number,
+        "-" => first_number - second_number,
+        _ => 123456789,
+    }
+}
+
+pub fn cd(input: &str) -> std::io::Result<()> {
+    let path = std::path::Path::new(input);
+    std::env::set_current_dir(&path)?;
+    Ok(())
+}
+
+pub fn help() {
+    println!("\
+        cRUSTy [https://github.com/Phate6660/crusty]\n\
+        builtins:\n\
+        ---------\n\
+        calc\n\
+        cd\n\
+        echo\n\
+        exit\n\
+        help\n\
+        ls\n\
+        pwd\
+        ");
+}
 
 pub fn ls(input: &str) {
     let mut t = term::stdout().unwrap();
