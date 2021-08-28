@@ -52,6 +52,12 @@ pub fn get_calc_vars(problem: &str) -> (&str, i32, i32) {
     (math_op, first_number, second_number)
 }
 
+pub fn non_interactive() {
+    let input = parse_input("non-interactive");
+    crate::run_command(input);
+    std::process::exit(0);
+}
+
 pub fn parse_input(op: &str) -> String {
     if op == "interactive" {
         let mut input = std::string::String::new();

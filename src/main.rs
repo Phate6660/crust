@@ -8,7 +8,7 @@ mod builtins;
 mod shared_functions;
 
 use builtins::{calc_return, calc_run, help, ls};
-use shared_functions::{cd_helper, cmd, parse_input, piped_cmd, piped_text};
+use shared_functions::{cd_helper, cmd, non_interactive, parse_input, piped_cmd, piped_text};
 use std::process::exit;
 
 fn run_command(input: String) {
@@ -16,9 +16,9 @@ fn run_command(input: String) {
         let problem = input.split(' ').collect::<Vec<&str>>()[1].trim();
         if input.contains('|') {
             let calculation = calc_return(problem);
-            let line_vector = input.split('|').collect::<Vec<&str>>();
+            let line_vector: Vec<&str> = input.split('|').collect();
             let cmd2 = line_vector[1];
-            let mut cmd2_with_args = cmd2.split(' ').collect::<Vec<&str>>();
+            let mut cmd2_with_args: Vec<&str> = cmd2.split(' ').collect();
             cmd2_with_args.remove(0);
             if cmd2.contains(' ') {
                 piped_text(&calculation.to_string(), true, cmd2_with_args);
@@ -30,7 +30,8 @@ fn run_command(input: String) {
         }
     } else if input.starts_with("cd") {
         if input == "cd" {
-            let home = std::env::var("HOME").unwrap();
+            // Default to /home directory in case $HOME isn't set for some reason.
+            let home = std::env::var("HOME").unwrap_or("/home".to_string());
             cd_helper(&home);
         } else {
             let input = input.split(' ').collect::<Vec<&str>>()[1];
@@ -38,16 +39,16 @@ fn run_command(input: String) {
         }
     } else if input.starts_with("echo") {
         if input.contains('|') {
-            let line_vector = input.split('|').collect::<Vec<&str>>();
+            let line_vector: Vec<&str> = input.split('|').collect();
             let cmd = line_vector[0];
-            let mut cmd_vector = cmd.split(' ').collect::<Vec<&str>>();
+            let mut cmd_vector: Vec<&str> = cmd.split(' ').collect();
             cmd_vector.remove(0);
             let mut message = "".to_string();
             for word in cmd_vector {
                 message.push_str(word);
             }
             let cmd2 = line_vector[1];
-            let mut cmd2_with_args = cmd2.split(' ').collect::<Vec<&str>>();
+            let mut cmd2_with_args: Vec<&str> = cmd2.split(' ').collect();
             cmd2_with_args.remove(0);
             if cmd2.contains(' ') {
                 piped_text(&message, true, cmd2_with_args);
@@ -55,7 +56,7 @@ fn run_command(input: String) {
                 piped_text(&message, false, cmd2_with_args);
             }
         } else {
-            let input = input.split(' ').collect::<Vec<&str>>();
+            let input: Vec<&str> = input.split(' ').collect();
             let output = &input[1..];
             for arg in output {
                 print!("{} ", arg);
@@ -105,11 +106,11 @@ fn run_command(input: String) {
             }
             let cmd = input.split('|').collect::<Vec<&str>>()[1];
             if cmd.contains(' ') {
-                let mut cmd_with_args = cmd.split(' ').collect::<Vec<&str>>();
+                let mut cmd_with_args: Vec<&str> = cmd.split(' ').collect();
                 cmd_with_args.remove(0);
                 piped_text(&output, true, cmd_with_args);
             } else {
-                let cmd = cmd.split(' ').collect::<Vec<&str>>();
+                let cmd: Vec<&str> = cmd.split(' ').collect();
                 piped_text(&output, false, cmd);
             }
         } else {
@@ -132,12 +133,6 @@ fn vars() -> (Vec<String>, String, String) {
     let crusty_prompt = String::from("[crusty]: ");
     let na = String::from("no args");
     (args, crusty_prompt, na)
-}
-
-fn non_interactive() {
-    let input = parse_input("non-interactive");
-    run_command(input);
-    std::process::exit(0);
 }
 
 #[cfg(feature = "readline")]
