@@ -20,8 +20,9 @@ $ cargo run --release -- -c "echo this is an example"
 List of features, everything is WIP unless labelled 'done':
 - basic shell and prompt [done]
 - builtins 
-  + calc
-    * basic math operations (MDAS) [done]
+  + calc (syntax example: calc 2+2)
+    * basic math operations mul/div/add/sub [done]
+    * more advanced algorith / equation solving
     * PEMDAS
   + cd
     * changing directories with relative/exact paths [done]
@@ -55,8 +56,8 @@ List of features, everything is WIP unless labelled 'done':
 - io
   + piping [done]
   + redirection
-- readline support via rustyline (use readline feature)
-  + NOTE: There is a bug I can't figure out where you have to input commands twice!
+- readline support via rustyline 
+(NOTE: There is a bug I can't figure out where you have to input commands twice!)
   + minimal line editing setup [done]
   + basic completions
   + modifiable keybindings
