@@ -42,7 +42,7 @@ pub fn help() {
         help\n\
         ls\n\
         pwd\
-        ");
+    ");
 }
 
 pub fn ls(input: &str) {
