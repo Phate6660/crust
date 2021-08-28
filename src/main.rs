@@ -7,7 +7,12 @@ mod builtins;
 mod shared_functions;
 
 use builtins::{calc_return, calc_run, help, ls};
-use shared_functions::{cd_helper, cmd, non_interactive, parse_input, piped_cmd, piped_text};
+use shared_functions::{
+    cd_helper, cmd, 
+    main_vars,
+    non_interactive, 
+    parse_input, piped_cmd, piped_text
+};
 use std::process::exit;
 
 fn run_command(input: String) {
@@ -127,16 +132,9 @@ fn run_command(input: String) {
     }
 }
 
-fn vars() -> (Vec<String>, String, String) {
-    let args = std::env::args().collect::<Vec<String>>();
-    let crusty_prompt = String::from("[crusty]: ");
-    let na = String::from("no args");
-    (args, crusty_prompt, na)
-}
-
 #[cfg(feature = "readline")]
 fn main() -> Result<()> {
-    let (args, crusty_prompt, na) = vars();
+    let (args, crusty_prompt, na) = main_vars();
     if args.get(1).unwrap_or(&na) == "-c" {
         non_interactive();
     }
@@ -151,7 +149,7 @@ fn main() -> Result<()> {
 
 #[cfg(not(feature = "readline"))]
 fn main() {
-    let (args, crusty_prompt, na) = vars();
+    let (args, crusty_prompt, na) = main_vars();
     if args.get(1).unwrap_or(&na) == "-c" {
         non_interactive();
     }

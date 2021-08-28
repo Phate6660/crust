@@ -51,6 +51,13 @@ pub fn get_calc_vars(problem: &str) -> (&str, i32, i32) {
     (math_op, first_number, second_number)
 }
 
+pub fn main_vars() -> (Vec<String>, String, String) {
+    let args = std::env::args().collect::<Vec<String>>();
+    let crusty_prompt = String::from("[crusty]: ");
+    let na = String::from("no args");
+    (args, crusty_prompt, na)
+}
+
 pub fn non_interactive() {
     let input = parse_input("non-interactive");
     crate::run_command(input);
