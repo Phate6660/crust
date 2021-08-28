@@ -96,11 +96,10 @@ pub fn piped_cmd(input: &str) {
                 Err(why) => panic!("ERROR: couldn't spwn cmd2: {}", why),
                 Ok(child2) => child2,
             };
-        match child2.stdin.unwrap().write_all(
+        if let Err(why) = child2.stdin.unwrap().write_all(
             String::from_utf8_lossy(&child1.unwrap().stdout).trim().as_bytes()
-        ) {
-            Err(why) => println!("ERROR: couldn't write to cmd2's stdin because of {}", why),
-            Ok(_) => (),
+         ) { 
+            println!("ERROR: couldn't write to cmd2's stdin because of {}", why) 
         }
         let mut output = String::new();
         match child2.stdout.unwrap().read_to_string(&mut output) {
@@ -120,9 +119,8 @@ pub fn piped_text(input: &str, args: bool, cmd: Vec<&str>) {
                 Err(why) => panic!("couldn't spwn cmd: {}", why),
                 Ok(child) => child,
             };
-        match child.stdin.unwrap().write_all(input.as_bytes()) {
-            Err(why) => println!("ERROR: couldn't write cmd stdin because of {}", why),
-            Ok(_) => (),
+        if let Err(why) = child.stdin.unwrap().write_all(input.as_bytes()) { 
+            println!("ERROR: couldn't write cmd stdin because of {}", why) 
         }
         let mut output = String::new();
         match child.stdout.unwrap().read_to_string(&mut output) {
@@ -137,9 +135,8 @@ pub fn piped_text(input: &str, args: bool, cmd: Vec<&str>) {
                 Err(why) => panic!("couldn't spwn cmd: {}", why),
                 Ok(child) => child,
             };
-        match child.stdin.unwrap().write_all(input.as_bytes()) {
-            Err(why) => println!("ERROR: couldn't write cmd stdin because of {}", why),
-            Ok(_) => (),
+        if let Err(why) = child.stdin.unwrap().write_all(input.as_bytes()) { 
+            println!("ERROR: couldn't write cmd stdin because of {}", why) 
         }
         let mut output = String::new();
         match child.stdout.unwrap().read_to_string(&mut output) {

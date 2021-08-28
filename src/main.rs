@@ -31,7 +31,7 @@ fn run_command(input: String) {
     } else if input.starts_with("cd") {
         if input == "cd" {
             // Default to /home directory in case $HOME isn't set for some reason.
-            let home = std::env::var("HOME").unwrap_or("/home".to_string());
+            let home = std::env::var("HOME").unwrap_or_else(|_| "/home".to_string());
             cd_helper(&home);
         } else {
             let input = input.split(' ').collect::<Vec<&str>>()[1];
