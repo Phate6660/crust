@@ -1,7 +1,6 @@
 #[cfg(feature = "readline")]
 use rustyline::{Editor, Result};
 
-#[cfg(not(feature = "readline"))]
 use std::io::Write;
 
 mod builtins;

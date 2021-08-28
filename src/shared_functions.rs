@@ -1,4 +1,3 @@
-#[cfg(not(feature = "readline"))]
 use std::io::Write;
 
 use std::process::{Command, Stdio};
