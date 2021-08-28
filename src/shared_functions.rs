@@ -34,6 +34,24 @@ pub fn cmd(input: &str, args: bool) {
     }
 }
 
+pub fn get_calc_vars(problem: &str) -> (&str, i32, i32) {
+    let math_op = if problem.contains('x') {
+        "x"
+    } else if problem.contains('/') {
+        "/"
+    } else if problem.contains('+') {
+        "+"
+    } else if problem.contains('-') {
+        "-"
+    } else {
+        ""
+    };
+    let problem_vector: Vec<&str> = problem.split(math_op).collect();
+    let first_number: i32 = problem_vector[0].parse().unwrap();
+    let second_number: i32 = problem_vector[1].parse().unwrap();
+    (math_op, first_number, second_number)
+}
+
 pub fn parse_input(op: &str) -> String {
     if op == "interactive" {
         let mut input = std::string::String::new();

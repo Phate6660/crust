@@ -1,15 +1,15 @@
 #[cfg(feature = "readline")]
 use rustyline::{Editor, Result};
 
+#[cfg(not(feature = "readline"))]
+use std::io::Write;
+
 mod builtins;
 mod shared_functions;
 
 use builtins::{calc_return, calc_run, help, ls};
 use shared_functions::{cd_helper, cmd, parse_input, piped_cmd, piped_text};
 use std::process::exit;
-
-#[cfg(not(feature = "readline"))]
-use std::io::Write;
 
 fn run_command(input: String) {
     if input.starts_with("calc") {
@@ -134,18 +134,18 @@ fn vars() -> (Vec<String>, String, String) {
     (args, crusty_prompt, na)
 }
 
-fn non_interactive(args: Vec<String>, na: String) {
-    if args.get(1).unwrap_or(&na) == "-c" {
-        let input = parse_input("non-interactive");
-        run_command(input);
-        std::process::exit(0);
-    }
+fn non_interactive() {
+    let input = parse_input("non-interactive");
+    run_command(input);
+    std::process::exit(0);
 }
 
 #[cfg(feature = "readline")]
 fn main() -> Result<()> {
     let (args, crusty_prompt, na) = vars();
-    non_interactive(args, na);
+    if args.get(1).unwrap_or(&na) == "-c" {
+        non_interactive();
+    }
     let mut rl = Editor::<()>::new();
     loop {
         let prompt = rl.readline(&std::env::var("PROMPT").unwrap_or_else(|_| crusty_prompt.clone()))?;
@@ -158,7 +158,9 @@ fn main() -> Result<()> {
 #[cfg(not(feature = "readline"))]
 fn main() {
     let (args, crusty_prompt, na) = vars();
-    non_interactive(args, na);
+    if args.get(1).unwrap_or(&na) == "-c" {
+        non_interactive();
+    }
     loop {
         let prompt = std::env::var("PROMPT").unwrap_or_else(|_| crusty_prompt.clone());
         print!("{}", prompt);
