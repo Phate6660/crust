@@ -25,7 +25,12 @@ pub fn calc_return(problem: &str) -> i32 {
 }
 
 pub fn cd(input: &str) -> std::io::Result<()> {
-    let path = std::path::Path::new(input);
+    let curdir = std::env::current_dir().unwrap();
+    let path;
+    match input {
+        "-" => path = std::path::Path::new(curdir.as_path().parent().unwrap()),
+        _ => path = std::path::Path::new(input),
+    }
     std::env::set_current_dir(&path)?;
     Ok(())
 }
