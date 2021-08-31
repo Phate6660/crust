@@ -11,8 +11,12 @@ use shared_functions::{
     cd_helper, cmd, 
     main_vars,
     non_interactive, 
-    parse_input, piped_cmd, piped_text
+    piped_cmd, piped_text
 };
+
+#[cfg(not(feature = "readline"))]
+use shared_functions::parse_input;
+
 use std::process::exit;
 
 fn run_command(input: String) {
@@ -143,7 +147,6 @@ fn main() {
         let prompt = rl.readline(&crusty_prompt);
         match prompt {
             Ok(line) => {
-                println!("{}", line);
                 run_command(line);
             },
             Err(ReadlineError::Interrupted) => {

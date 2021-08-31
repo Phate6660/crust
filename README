@@ -4,13 +4,15 @@ cRUSTy is a shell that I'm writing in Rust.
 If there are any issues, feature requests, or whatever, feel free to open an issue.
 As currently I'm just implementing whatever comes into mind.
 
+The readline feature is now enabled by default now that I have fixed the issue with it. :D
+If you wish to have a barebones prompt, disable the readline feature.
+I will always support with and without line editing features.
+Everyone has different preferences.
+
 ## Running ##
 
 (running normally)
 $ cargo run --release
-
-(running with WIP readline feature)
-$ cargo run --release --features=readline
 
 (running a non-interactive command)
 $ cargo run --release -- -c "echo this is an example"
