@@ -1,5 +1,5 @@
 #[cfg(feature = "readline")]
-use rustyline::{Editor, Result};
+use rustyline::{Editor, error::ReadlineError};
 
 use std::io::Write;
 
@@ -133,17 +133,32 @@ fn run_command(input: String) {
 }
 
 #[cfg(feature = "readline")]
-fn main() -> Result<()> {
+fn main() {
     let (args, crusty_prompt, na) = main_vars();
     if args.get(1).unwrap_or(&na) == "-c" {
         non_interactive();
     }
     let mut rl = Editor::<()>::new();
     loop {
-        let prompt = rl.readline(&std::env::var("PROMPT").unwrap_or_else(|_| crusty_prompt.clone()))?;
-        println!("{}", prompt);
-        let input = parse_input("interactive");
-        run_command(input);
+        let prompt = rl.readline(&crusty_prompt);
+        match prompt {
+            Ok(line) => {
+                println!("{}", line);
+                run_command(line);
+            },
+            Err(ReadlineError::Interrupted) => {
+                println!("CTRL-C");
+                break
+            },
+            Err(ReadlineError::Eof) => {
+                println!("CTRL-D");
+                break
+            },
+            Err(err) => {
+                println!("Error: {:?}", err);
+                break
+            }
+        }
     }
 }
 
@@ -154,8 +169,7 @@ fn main() {
         non_interactive();
     }
     loop {
-        let prompt = std::env::var("PROMPT").unwrap_or_else(|_| crusty_prompt.clone());
-        print!("{}", prompt);
+        print!("{}", crusty_prompt);
         std::io::stdout().flush().unwrap();
         let input = parse_input("interactive");
         run_command(input);

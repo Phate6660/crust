@@ -53,7 +53,7 @@ pub fn get_calc_vars(problem: &str) -> (&str, i32, i32) {
 
 pub fn main_vars() -> (Vec<String>, String, String) {
     let args = std::env::args().collect::<Vec<String>>();
-    let crusty_prompt = String::from("[crusty]: ");
+    let crusty_prompt = std::env::var("PROMPT").unwrap_or(String::from("[crusty]: "));
     let na = String::from("no args");
     (args, crusty_prompt, na)
 }
