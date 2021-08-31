@@ -72,13 +72,6 @@ fn run_command(input: String) {
             }
             println!();
         }
-    } else if input.starts_with("exit") {
-        if input.contains(' ') {
-            let input = input.split(' ').collect::<Vec<&str>>()[1];
-            exit(input.parse::<i32>().unwrap_or(0));
-        } else {
-            exit(0);
-        }
     } else if input.starts_with("help") {
         help();
     } else if input.starts_with("ls") {
@@ -164,6 +157,16 @@ fn main() {
         match prompt {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
+                if line.starts_with("exit") {
+                    if line.contains(' ') {
+                        let input = line.split(' ').collect::<Vec<&str>>()[1];
+                        rl.save_history(&history_file).unwrap();
+                        exit(input.parse::<i32>().unwrap_or(0));
+                    } else {
+                        rl.save_history(&history_file).unwrap();
+                        exit(0);
+                    }
+                }
                 run_command(line);
             },
             Err(ReadlineError::Interrupted) => {
