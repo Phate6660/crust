@@ -143,10 +143,27 @@ fn main() {
         non_interactive();
     }
     let mut rl = Editor::<()>::new();
+    let home = std::env::var("HOME").unwrap_or("unknown".to_string());
+    let share_dir = if home == "unknown" {
+        let user = std::env::var("USER").unwrap();
+        let home_path = ["/home/", user.as_str()].concat();
+        [home_path, "/.local/share/crusty".to_string()].concat()
+    } else {
+        [home, "/.local/share/crusty".to_string()].concat()
+    };
+    let share_dir_usable = std::path::Path::new(&share_dir);
+    if !share_dir_usable.exists() {
+        std::fs::create_dir(share_dir_usable).unwrap();
+    }
+    let history_file = [share_dir, "/crusty.history".to_string()].concat();
+    if rl.load_history(&history_file).is_err() {
+        println!("There was no previous history to load.");
+    }
     loop {
         let prompt = rl.readline(&crusty_prompt);
         match prompt {
             Ok(line) => {
+                rl.add_history_entry(line.as_str());
                 run_command(line);
             },
             Err(ReadlineError::Interrupted) => {
@@ -163,6 +180,7 @@ fn main() {
             }
         }
     }
+    rl.save_history(&history_file).unwrap();
 }
 
 #[cfg(not(feature = "readline"))]

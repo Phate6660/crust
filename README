@@ -60,6 +60,7 @@ $ cargo run --release -- -c "echo this is an example"
   + redirection
 - readline support via rustyline 
   + minimal line editing setup [done]
+  + command history [done]
   + basic completions
   + modifiable keybindings
   + syntax highlighting
