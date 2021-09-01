@@ -1,7 +1,7 @@
 use std::io::Write;
 
-use std::process::{Command, Stdio};
 use std::io::Read;
+use std::process::{Command, Stdio};
 
 pub fn cd_helper(dir: &str) {
     if crate::builtins::cd(dir).is_err() {
@@ -22,9 +22,7 @@ pub fn cmd(input: &str, args: bool) {
             child.unwrap().wait().unwrap();
         }
     } else {
-        let child = Command::new(&input)
-            .spawn()
-            .or(Err(()));
+        let child = Command::new(&input).spawn().or(Err(()));
         if child.is_err() {
             println!("Sorry, '{}' was not found!", input);
         } else {
@@ -72,10 +70,13 @@ pub fn parse_input(op: &str) -> String {
             .expect("failed to read user input");
         input.trim().to_string()
     } else {
-        std::env::args().collect::<Vec<String>>()
-            .get(2).unwrap()
+        std::env::args()
+            .collect::<Vec<String>>()
+            .get(2)
+            .unwrap()
             .replace('"', "")
-            .trim().to_string()
+            .trim()
+            .to_string()
     }
 }
 
@@ -98,14 +99,17 @@ pub fn piped_cmd(input: &str) {
             .args(&cmd2[1..])
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
-            .spawn() {
-                Err(why) => panic!("ERROR: couldn't spwn cmd2: {}", why),
-                Ok(child2) => child2,
-            };
+            .spawn()
+        {
+            Err(why) => panic!("ERROR: couldn't spwn cmd2: {}", why),
+            Ok(child2) => child2,
+        };
         if let Err(why) = child2.stdin.unwrap().write_all(
-            String::from_utf8_lossy(&child1.unwrap().stdout).trim().as_bytes()
-         ) { 
-            println!("ERROR: couldn't write to cmd2's stdin because of {}", why) 
+            String::from_utf8_lossy(&child1.unwrap().stdout)
+                .trim()
+                .as_bytes(),
+        ) {
+            println!("ERROR: couldn't write to cmd2's stdin because of {}", why)
         }
         let mut output = String::new();
         match child2.stdout.unwrap().read_to_string(&mut output) {
@@ -121,12 +125,13 @@ pub fn piped_text(input: &str, args: bool, cmd: Vec<&str>) {
             .args(&cmd[1..])
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
-            .spawn() {
-                Err(why) => panic!("couldn't spwn cmd: {}", why),
-                Ok(child) => child,
-            };
-        if let Err(why) = child.stdin.unwrap().write_all(input.as_bytes()) { 
-            println!("ERROR: couldn't write cmd stdin because of {}", why) 
+            .spawn()
+        {
+            Err(why) => panic!("couldn't spwn cmd: {}", why),
+            Ok(child) => child,
+        };
+        if let Err(why) = child.stdin.unwrap().write_all(input.as_bytes()) {
+            println!("ERROR: couldn't write cmd stdin because of {}", why)
         }
         let mut output = String::new();
         match child.stdout.unwrap().read_to_string(&mut output) {
@@ -137,12 +142,13 @@ pub fn piped_text(input: &str, args: bool, cmd: Vec<&str>) {
         let child = match Command::new(cmd[0])
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
-            .spawn() {
-                Err(why) => panic!("couldn't spwn cmd: {}", why),
-                Ok(child) => child,
-            };
-        if let Err(why) = child.stdin.unwrap().write_all(input.as_bytes()) { 
-            println!("ERROR: couldn't write cmd stdin because of {}", why) 
+            .spawn()
+        {
+            Err(why) => panic!("couldn't spwn cmd: {}", why),
+            Ok(child) => child,
+        };
+        if let Err(why) = child.stdin.unwrap().write_all(input.as_bytes()) {
+            println!("ERROR: couldn't write cmd stdin because of {}", why)
         }
         let mut output = String::new();
         match child.stdout.unwrap().read_to_string(&mut output) {

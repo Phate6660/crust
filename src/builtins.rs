@@ -31,7 +31,8 @@ pub fn cd(input: &str) -> std::io::Result<()> {
 }
 
 pub fn help() {
-    println!("\
+    println!(
+        "\
         cRUSTy [https://github.com/Phate6660/crusty]\n\
         builtins:\n\
         ---------\n\
@@ -42,7 +43,8 @@ pub fn help() {
         help\n\
         ls\n\
         pwd\
-    ");
+    "
+    );
 }
 
 pub fn ls(input: &str) {
@@ -53,13 +55,13 @@ pub fn ls(input: &str) {
         path = std::fs::read_dir(input).unwrap()
     } else {
         println!("ERROR: '{}' is not a valid file or directory.", input);
-        return
+        return;
     }
 
     for file in path {
         let raw_entry = file.unwrap().path();
         #[cfg(target_os = "linux")]
-        let still_raw_entry = raw_entry.to_str().unwrap().replace("./", ""); 
+        let still_raw_entry = raw_entry.to_str().unwrap().replace("./", "");
         #[cfg(target_os = "windows")]
         let still_raw_entry = raw_entry.to_str().unwrap().replace(".\\", "");
         let paths = still_raw_entry.split('\n');
@@ -93,5 +95,5 @@ pub fn ls(input: &str) {
             }
             println!();
         }
-    } 
+    }
 }

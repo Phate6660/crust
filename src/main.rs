@@ -1,5 +1,5 @@
 #[cfg(feature = "readline")]
-use rustyline::{Editor, error::ReadlineError};
+use rustyline::{error::ReadlineError, Editor};
 
 use std::io::Write;
 
@@ -7,12 +7,7 @@ mod builtins;
 mod shared_functions;
 
 use builtins::{calc_return, calc_run, help, ls};
-use shared_functions::{
-    cd_helper, cmd, 
-    main_vars,
-    non_interactive, 
-    piped_cmd, piped_text
-};
+use shared_functions::{cd_helper, cmd, main_vars, non_interactive, piped_cmd, piped_text};
 
 #[cfg(not(feature = "readline"))]
 use shared_functions::parse_input;
@@ -39,6 +34,7 @@ fn run_command(input: String) {
     } else if input.starts_with("cd") {
         if input == "cd" {
             // Default to /home directory in case $HOME isn't set for some reason.
+            // TODO: Make home directory manually
             let home = std::env::var("HOME").unwrap_or_else(|_| "/home".to_string());
             cd_helper(&home);
         } else {
@@ -95,7 +91,7 @@ fn run_command(input: String) {
             for file in path {
                 let raw_entry = file.unwrap().path();
                 #[cfg(target_os = "linux")]
-                let still_raw_entry = raw_entry.to_str().unwrap().replace("./", ""); 
+                let still_raw_entry = raw_entry.to_str().unwrap().replace("./", "");
                 #[cfg(target_os = "windows")]
                 let still_raw_entry = raw_entry.to_str().unwrap().replace(".\\", "");
                 let paths = still_raw_entry.split('\n');
@@ -168,18 +164,18 @@ fn main() {
                     }
                 }
                 run_command(line);
-            },
+            }
             Err(ReadlineError::Interrupted) => {
                 println!("CTRL-C");
-                break
-            },
+                break;
+            }
             Err(ReadlineError::Eof) => {
                 println!("CTRL-D");
-                break
-            },
+                break;
+            }
             Err(err) => {
                 println!("Error: {:?}", err);
-                break
+                break;
             }
         }
     }
