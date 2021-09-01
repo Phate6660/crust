@@ -1,8 +1,9 @@
 extern crate term;
+use crate::piped_text;
 use crate::shared_functions::get_calc_vars;
 use std::io::prelude::*;
 
-pub fn calc_run(problem: &str) {
+fn calc_run(problem: &str) {
     let (math_op, first_number, second_number) = get_calc_vars(problem);
     match math_op {
         "x" => println!("{}", first_number * second_number),
@@ -13,7 +14,7 @@ pub fn calc_run(problem: &str) {
     }
 }
 
-pub fn calc_return(problem: &str) -> i32 {
+fn calc_return(problem: &str) -> i32 {
     let (math_op, first_number, second_number) = get_calc_vars(problem);
     match math_op {
         "x" => first_number * second_number,
@@ -24,30 +25,77 @@ pub fn calc_return(problem: &str) -> i32 {
     }
 }
 
-pub fn cd(input: &str) -> std::io::Result<()> {
+pub fn calc(input: &str) {
+    let problem = input.split(' ').collect::<Vec<&str>>()[1].trim();
+    if input.contains('|') {
+        let calculation = calc_return(problem);
+        let line_vector: Vec<&str> = input.split('|').collect();
+        let cmd2 = line_vector[1];
+        let mut cmd2_with_args: Vec<&str> = cmd2.split(' ').collect();
+        cmd2_with_args.remove(0);
+        if cmd2.contains(' ') {
+            piped_text(&calculation.to_string(), true, cmd2_with_args);
+        } else {
+            piped_text(&calculation.to_string(), false, cmd2_with_args);
+        }
+    } else {
+        calc_run(problem);
+    }
+}
+
+fn cd_do(input: &str) -> std::io::Result<()> {
     let path = std::path::Path::new(input);
     std::env::set_current_dir(&path)?;
     Ok(())
 }
 
-pub fn help() {
-    println!(
-        "\
-        cRUSTy [https://github.com/Phate6660/crusty]\n\
-        builtins:\n\
-        ---------\n\
-        calc\n\
-        cd\n\
-        echo\n\
-        exit\n\
-        help\n\
-        ls\n\
-        pwd\
-    "
-    );
+fn cd_helper(dir: &str) {
+    if cd_do(dir).is_err() {
+        println!("Failed to change directory to '{}'", dir);
+    }
 }
 
-pub fn ls(input: &str) {
+pub fn cd(input: &str) {
+    if input == "cd" {
+        let user = std::env::var("USER").unwrap();
+        let home = ["/home/", user.as_str()].concat();
+        cd_helper(&home);
+    } else {
+        let input = input.split(' ').collect::<Vec<&str>>()[1];
+        cd_helper(input);
+    }
+}
+
+pub fn echo(input: &str) {
+    if input.contains('|') {
+        let line_vector: Vec<&str> = input.split('|').collect();
+        let cmd = line_vector[0];
+        let mut cmd_vector: Vec<&str> = cmd.split(' ').collect();
+        cmd_vector.remove(0);
+        let mut message = "".to_string();
+        for word in cmd_vector {
+            message.push_str(word);
+        }
+        let cmd2 = line_vector[1];
+        let mut cmd2_with_args: Vec<&str> = cmd2.split(' ').collect();
+        cmd2_with_args.remove(0);
+        if cmd2.contains(' ') {
+            piped_text(&message, true, cmd2_with_args);
+        } else {
+            piped_text(&message, false, cmd2_with_args);
+        }
+    } else {
+        let input: Vec<&str> = input.split(' ').collect();
+        let output = &input[1..];
+        for arg in output {
+            print!("{} ", arg);
+            std::io::stdout().flush().unwrap();
+        }
+        println!();
+    }
+}
+
+fn ls_do(input: &str) {
     let mut t = term::stdout().unwrap();
 
     let path;
@@ -97,3 +145,67 @@ pub fn ls(input: &str) {
         }
     }
 }
+
+pub fn ls(input: &str) {
+    if input == "ls" {
+        ls_do(".");
+    } else if input.contains('|') {
+        let ls_input = input.split('|').collect::<Vec<&str>>()[0];
+        let path = if ls_input.trim() == "ls" {
+            std::fs::read_dir(".").unwrap()
+        } else if ls_input.contains(' ') {
+            let ls_input = ls_input.split(' ').collect::<Vec<&str>>()[1];
+            if std::path::Path::new(ls_input).exists() {
+                std::fs::read_dir(ls_input).unwrap()
+            } else {
+                std::fs::read_dir(".").unwrap()
+            }
+        } else {
+            std::fs::read_dir(".").unwrap()
+        };
+        let mut output = "".to_string();
+        for file in path {
+            let raw_entry = file.unwrap().path();
+            #[cfg(target_os = "linux")]
+            let still_raw_entry = raw_entry.to_str().unwrap().replace("./", "");
+            #[cfg(target_os = "windows")]
+            let still_raw_entry = raw_entry.to_str().unwrap().replace(".\\", "");
+            let paths = still_raw_entry.split('\n');
+            let pre_output = "";
+            for file in paths {
+                let pre_output = &[pre_output, file, "\n"].concat();
+                output.push_str(pre_output);
+            }
+        }
+        let cmd = input.split('|').collect::<Vec<&str>>()[1];
+        if cmd.contains(' ') {
+            let mut cmd_with_args: Vec<&str> = cmd.split(' ').collect();
+            cmd_with_args.remove(0);
+            piped_text(&output, true, cmd_with_args);
+        } else {
+            let cmd: Vec<&str> = cmd.split(' ').collect();
+            piped_text(&output, false, cmd);
+        }
+    } else {
+        let input = input.split(' ').collect::<Vec<&str>>()[1];
+        ls_do(input);
+    }
+}
+
+pub fn help() {
+    println!(
+        "\
+        cRUSTy [https://github.com/Phate6660/crusty]\n\
+        builtins:\n\
+        ---------\n\
+        calc\n\
+        cd\n\
+        echo\n\
+        exit\n\
+        help\n\
+        ls\n\
+        pwd\
+    "
+    );
+}
+

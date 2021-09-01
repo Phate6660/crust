@@ -1,14 +1,8 @@
-use std::io::Write;
-
-use std::io::Read;
+use std::io::{Read, Write};
+use std::path::Path;
 use std::process::{Command, Stdio};
 
-pub fn cd_helper(dir: &str) {
-    if crate::builtins::cd(dir).is_err() {
-        println!("Failed to change directory to '{}'", dir);
-    }
-}
-
+/// Helper function to a command, optionally with args.
 pub fn cmd(input: &str, args: bool) {
     if args {
         let input: Vec<&str> = input.split(' ').collect();
@@ -30,7 +24,14 @@ pub fn cmd(input: &str, args: bool) {
         }
     }
 }
+/// Ensures that a directory exists.
+fn ensure_directory(dir: &Path) {
+    if !dir.exists() {
+        std::fs::create_dir(dir).unwrap();
+    }
+}
 
+/// Get the calculator vars (math_op, first_number, second_number) for calc.
 pub fn get_calc_vars(problem: &str) -> (&str, i32, i32) {
     let math_op = if problem.contains('x') {
         "x"
@@ -49,19 +50,30 @@ pub fn get_calc_vars(problem: &str) -> (&str, i32, i32) {
     (math_op, first_number, second_number)
 }
 
-pub fn main_vars() -> (Vec<String>, String, String) {
+/// Get the vars required in the main function and/or the rest of the program.
+pub fn main_vars() -> (Vec<String>, String, String, String) {
     let args = std::env::args().collect::<Vec<String>>();
     let crusty_prompt = std::env::var("PROMPT").unwrap_or_else(|_| String::from("[crusty]: "));
     let na = String::from("no args");
-    (args, crusty_prompt, na)
+    let user = std::env::var("USER").unwrap();
+    let home = ["/home/", user.as_str()].concat();
+    let share_dir = [home.as_str(), "/.local/share/crusty"].concat();
+    ensure_directory(Path::new(&share_dir));
+    (args, crusty_prompt, na, share_dir)
 }
 
-pub fn non_interactive() {
-    let input = parse_input("non-interactive");
-    crate::run_command(input);
-    std::process::exit(0);
+/// A helper function to run a non-interactive command,
+/// it will automatically check if `-c` was passed as an arg
+/// and run commands non-interactively.
+pub fn non_interactive(args: Vec<String>, na: String) {
+    if args.get(1).unwrap_or(&na) == "-c" {
+        let input = parse_input("non-interactive");
+        crate::process_input(input);
+        std::process::exit(0);
+    }
 }
 
+/// A function to parse input, used for the barebones prompt.
 pub fn parse_input(op: &str) -> String {
     if op == "interactive" {
         let mut input = String::new();
@@ -80,6 +92,7 @@ pub fn parse_input(op: &str) -> String {
     }
 }
 
+/// A function to pipe the output of one command into another.
 pub fn piped_cmd(input: &str) {
     let input: Vec<&str> = input.split('|').collect();
     let mut cmd1: Vec<&str> = input[0].split(' ').collect();
@@ -119,6 +132,7 @@ pub fn piped_cmd(input: &str) {
     }
 }
 
+/// A function to pipe text into a command.
 pub fn piped_text(input: &str, args: bool, cmd: Vec<&str>) {
     if args {
         let child = match Command::new(cmd[0])
