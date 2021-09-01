@@ -136,7 +136,7 @@ fn main() {
         non_interactive();
     }
     let mut rl = Editor::<()>::new();
-    let home = std::env::var("HOME").unwrap_or("unknown".to_string());
+    let home = std::env::var("HOME").unwrap_or_else(|_| "unknown".to_string());
     let share_dir = if home == "unknown" {
         let user = std::env::var("USER").unwrap();
         let home_path = ["/home/", user.as_str()].concat();
