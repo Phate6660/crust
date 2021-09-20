@@ -1,6 +1,44 @@
 use std::io::{Read, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+
+/// Holds all important informations for and about the shell
+pub struct ShellState {
+    pub args: Vec<String>,
+    pub prompt: String,
+    pub user: String,
+    pub home: String,
+    pub na: String,
+    pub share_dir: String,
+    pub cd_prev_dir: Option<PathBuf>,
+}
+
+impl ShellState {
+    /// Ensures that a directory exists
+    fn ensure_directory(dir: &Path) {
+        if !dir.exists() {
+            std::fs::create_dir(dir).unwrap();
+        }
+    }
+
+    /// Initalizes the shell state with all the informations needed
+    ///
+    /// cd_prev_dir doesnt hold a value, because there is no previous
+    /// dir yet
+    pub fn init() -> ShellState {
+        let shell_state = ShellState {
+            args: std::env::args().collect(),
+            prompt: std::env::var("PROMPT").unwrap_or_else(|_| String::from("[crusty]: ")),
+            user: std::env::var("USER").unwrap(),
+            home: ["/home/", std::env::var("USER").unwrap().as_str()].concat(),
+            na: String::from("no args"),
+            share_dir: [["/home/", std::env::var("USER").unwrap().as_str()].concat().as_str(), "/.local/share/crusty"].concat(),
+            cd_prev_dir: None,
+        };
+        ShellState::ensure_directory(Path::new(&shell_state.share_dir));
+        shell_state
+    }
+}
 
 /// Helper function to a command, optionally with args.
 pub fn cmd(input: &str, args: bool) {
@@ -24,12 +62,6 @@ pub fn cmd(input: &str, args: bool) {
         }
     }
 }
-/// Ensures that a directory exists.
-fn ensure_directory(dir: &Path) {
-    if !dir.exists() {
-        std::fs::create_dir(dir).unwrap();
-    }
-}
 
 /// Get the calculator vars (math_op, first_number, second_number) for calc.
 pub fn get_calc_vars(problem: &str) -> (&str, i32, i32) {
@@ -50,25 +82,13 @@ pub fn get_calc_vars(problem: &str) -> (&str, i32, i32) {
     (math_op, first_number, second_number)
 }
 
-/// Get the vars required in the main function and/or the rest of the program.
-pub fn main_vars() -> (Vec<String>, String, String, String) {
-    let args = std::env::args().collect::<Vec<String>>();
-    let crusty_prompt = std::env::var("PROMPT").unwrap_or_else(|_| String::from("[crusty]: "));
-    let na = String::from("no args");
-    let user = std::env::var("USER").unwrap();
-    let home = ["/home/", user.as_str()].concat();
-    let share_dir = [home.as_str(), "/.local/share/crusty"].concat();
-    ensure_directory(Path::new(&share_dir));
-    (args, crusty_prompt, na, share_dir)
-}
-
 /// A helper function to run a non-interactive command,
 /// it will automatically check if `-c` was passed as an arg
 /// and run commands non-interactively.
-pub fn non_interactive(args: Vec<String>, na: String) {
-    if args.get(1).unwrap_or(&na) == "-c" {
+pub fn non_interactive(shell_state: &mut ShellState) {
+    if shell_state.args.get(1).unwrap_or(&shell_state.na) == "-c" {
         let input = parse_input("non-interactive");
-        crate::process_input(input);
+        crate::process_input(shell_state, input);
         std::process::exit(0);
     }
 }
