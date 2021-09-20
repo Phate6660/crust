@@ -62,6 +62,8 @@ pub fn cd(shell_state: &mut ShellState, input: &str) {
             println!("No previous dir found");
             return
         }
+        // unwrap can be safely used here, because function would've returned
+        // if cd_prev_dir is None
         match &shell_state.cd_prev_dir.as_ref().unwrap().to_str() {
             Some(path) => cd_helper(path),
             None => {
