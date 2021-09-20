@@ -11,11 +11,11 @@ use shared_functions::{cmd, ShellState, non_interactive, piped_cmd, piped_text};
 use shared_functions::parse_input;
 
 // Process the input to run the appropriate builtin or external command.
-fn process_input(_shell_state: &mut ShellState, input: String) {
+fn process_input(shell_state: &mut ShellState, input: String) {
     if input.starts_with("calc") {
         calc(&input);
     } else if input.starts_with("cd") {
-        cd(&input);
+        cd(shell_state, &input);
     } else if input.starts_with("echo") {
         echo(&input);
     } else if input.starts_with("help") {

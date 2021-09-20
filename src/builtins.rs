@@ -1,6 +1,6 @@
 extern crate term;
 use crate::piped_text;
-use crate::shared_functions::get_calc_vars;
+use crate::shared_functions::{ShellState, get_calc_vars};
 use std::io::prelude::*;
 
 fn calc_run(problem: &str) {
@@ -43,24 +43,35 @@ pub fn calc(input: &str) {
     }
 }
 
-fn cd_do(input: &str) -> std::io::Result<()> {
-    let path = std::path::Path::new(input);
-    std::env::set_current_dir(&path)?;
-    Ok(())
-}
-
 fn cd_helper(dir: &str) {
-    if cd_do(dir).is_err() {
-        println!("Failed to change directory to '{}'", dir);
+    let path = std::path::Path::new(dir);
+    match std::env::set_current_dir(&path) {
+        Ok(()) => (),
+        Err(_) => println!("Failed to change directory to '{}'", path.display()),
     }
 }
 
-pub fn cd(input: &str) {
+pub fn cd(shell_state: &mut ShellState, input: &str) {
     if input == "cd" {
+        shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap().to_owned());
         let user = std::env::var("USER").unwrap();
         let home = ["/home/", user.as_str()].concat();
         cd_helper(&home);
+    } else if input == "cd -" {
+        if shell_state.cd_prev_dir.is_none() {
+            println!("No previous dir found");
+            return
+        }
+        match &shell_state.cd_prev_dir.as_ref().unwrap().to_str() {
+            Some(path) => cd_helper(path),
+            None => {
+                println!("Could not convert Path to String (src/buildins.rs in function cd)");
+                shell_state.cd_prev_dir = None;
+            },
+        }
+        shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap().to_owned());
     } else {
+        shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap().to_owned());
         let input = input.split(' ').collect::<Vec<&str>>()[1];
         cd_helper(input);
     }
