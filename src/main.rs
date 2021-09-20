@@ -5,13 +5,13 @@ use builtins::{calc, cd, echo, help, ls};
 #[cfg(feature = "readline")]
 use rustyline::{error::ReadlineError, Editor};
 use std::process::exit;
-use shared_functions::{cmd, main_vars, non_interactive, piped_cmd, piped_text};
+use shared_functions::{cmd, ShellState, non_interactive, piped_cmd, piped_text};
 
 #[cfg(not(feature = "readline"))]
 use shared_functions::parse_input;
 
 // Process the input to run the appropriate builtin or external command.
-fn process_input(input: String) {
+fn process_input(_shell_state: &mut ShellState, input: String) {
     if input.starts_with("calc") {
         calc(&input);
     } else if input.starts_with("cd") {
@@ -35,15 +35,15 @@ fn process_input(input: String) {
 
 #[cfg(feature = "readline")]
 fn main() {
-    let (args, crusty_prompt, na, share_dir) = main_vars();
-    non_interactive(args, na);
+    let mut shell_state = ShellState::init();
+    non_interactive(&mut shell_state);
     let mut rl = Editor::<()>::new();
-    let history_file = [share_dir.as_str(), "/crusty.history"].concat();
+    let history_file = [shell_state.share_dir.as_str(), "/crusty.history"].concat();
     if rl.load_history(&history_file).is_err() {
         println!("There was no previous history to load.");
     }
     loop {
-        let prompt = rl.readline(&crusty_prompt);
+        let prompt = rl.readline(&shell_state.prompt);
         match prompt {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
@@ -57,7 +57,7 @@ fn main() {
                         exit(0);
                     }
                 }
-                process_input(line);
+                process_input(&mut shell_state, line);
             }
             Err(ReadlineError::Interrupted) => {
                 println!("CTRL-C");
@@ -78,12 +78,12 @@ fn main() {
 
 #[cfg(not(feature = "readline"))]
 fn main() {
-    let (args, crusty_prompt, na) = main_vars();
-    non_interactive(args, na);
+    let shell_state = ShellState::new();
+    non_interactive(&mut shell_state);
     loop {
-        print!("{}", crusty_prompt);
+        print!("{}", shell_state.prompt);
         std::io::stdout().flush().unwrap();
         let input = parse_input("interactive");
-        process_input(input);
+        process_input(&mut shell_state, input);
     }
 }
