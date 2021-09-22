@@ -78,7 +78,7 @@ pub fn cd(shell_state: &mut ShellState, command: ShellCommand) {
     }
 }
 
-pub fn echo(input: &str) {
+pub fn echo(command: ShellCommand) {
     /*if input.contains('|') {
         let line_vector: Vec<&str> = input.split('|').collect();
         let cmd = line_vector[0];
@@ -97,9 +97,7 @@ pub fn echo(input: &str) {
             piped_text(&message, false, cmd2_with_args);
         }
     } else {*/
-        let input: Vec<&str> = input.split(' ').collect();
-        let output = &input[1..];
-        for arg in output {
+        for arg in command.args {
             print!("{} ", arg);
             std::io::stdout().flush().unwrap();
         }
