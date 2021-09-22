@@ -51,13 +51,13 @@ fn cd_helper(dir: &str) {
     }
 }
 
-pub fn cd(shell_state: &mut ShellState, input: &str) {
-    if input == "cd" {
+pub fn cd(shell_state: &mut ShellState, command: ShellCommand) {
+    if command.args.len() <= 0 {
         shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap().to_owned());
         let user = std::env::var("USER").unwrap();
         let home = ["/home/", user.as_str()].concat();
         cd_helper(&home);
-    } else if input == "cd -" {
+    } else if command.args[0] == "-" {
         if shell_state.cd_prev_dir.is_none() {
             println!("No previous dir found");
             return
@@ -74,8 +74,7 @@ pub fn cd(shell_state: &mut ShellState, input: &str) {
         shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap().to_owned());
     } else {
         shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap().to_owned());
-        let input = input.split(' ').collect::<Vec<&str>>()[1];
-        cd_helper(input);
+        cd_helper(&command.args[0]);
     }
 }
 

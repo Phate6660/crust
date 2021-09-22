@@ -63,7 +63,7 @@ impl ShellCommand {
     pub fn run(shell_state: &mut ShellState, command: ShellCommand) {
         match command.name.as_str() {
             "calc" => calc(command),
-            "cd" => cd(shell_state, command.args),
+            "cd" => cd(shell_state, command),
             "echo" => echo(command),
             "help" => help(),
             "ls" => ls(command),
