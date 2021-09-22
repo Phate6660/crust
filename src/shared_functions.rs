@@ -40,6 +40,82 @@ impl ShellState {
     }
 }
 
+#[derive(Debug)]
+pub struct ShellCommand {
+    pub name: String,
+    pub args: Vec<String>,
+}
+
+impl ShellCommand {
+    pub fn new(input: String) -> ShellCommand {
+        let split_input: Vec<&str> = input.split_whitespace().collect();
+        let mut split_input_string: Vec<String> = Vec::new();
+        for arg in split_input {
+            split_input_string.push(arg.to_string());
+        }
+        let shell_command = ShellCommand {
+            name: split_input_string[0].clone(),
+            args: split_input_string[1..].to_vec(),
+        };
+        shell_command
+    }
+    pub fn run(shell_state: &mut ShellState, command: ShellCommand) {
+        match command.name.as_str() {
+            "calc" => calc(command),
+            "cd" => cd(shell_state, command.args),
+            "echo" => echo(command),
+            "help" => help(),
+            "ls" => ls(command),
+            "pwd" => println!("{}", std::env::current_dir().unwrap().display()),
+            _ => {
+                if command.args.contains(&String::from("|")) {
+                    piped_cmd(PipedShellCommand::from(command));
+                } else {
+                    cmd(command);
+                }
+            }
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct PipedShellCommand {
+    pub commands: Vec<ShellCommand>,
+    pub text: Option<String>,
+}
+
+impl PipedShellCommand {
+    pub fn from(input: ShellCommand) -> PipedShellCommand {
+        let parts = input.args.split(|arg| arg == &String::from("|"));
+        let mut commands: Vec<ShellCommand> = Vec::new();
+        for (idx, part) in parts.enumerate() {
+            if idx == 0 {
+                let command = ShellCommand {
+                    name: input.name.clone(),
+                    args: part[0..].to_vec(),
+                };
+                commands.push(command);
+            } else {
+                let command = ShellCommand {
+                    name: part[0].clone(),
+                    args: part[1..].to_vec(),
+                };
+                commands.push(command);
+            }
+        }
+        let pipe = PipedShellCommand {
+            commands: commands,
+            text: None,
+        };
+        pipe
+    }
+    pub fn with_text_from(text: String, command: ShellCommand) -> PipedShellCommand {
+        let mut pipe = PipedShellCommand::from(command);
+        pipe.text = Some(text);
+        pipe
+    }
+}
+
 /// Helper function to a command, optionally with args.
 pub fn cmd(input: &str, args: bool) {
     if args {

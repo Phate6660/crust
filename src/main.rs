@@ -5,7 +5,7 @@ use builtins::{calc, cd, echo, help, ls};
 #[cfg(feature = "readline")]
 use rustyline::{error::ReadlineError, Editor};
 use std::process::exit;
-use shared_functions::{cmd, ShellState, non_interactive, piped_cmd, piped_text};
+use shared_functions::{cmd, ShellState, ShellCommand, PipedShellCommand, non_interactive, piped_cmd, piped_text};
 
 #[cfg(not(feature = "readline"))]
 use shared_functions::parse_input;
