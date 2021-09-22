@@ -105,9 +105,18 @@ pub fn echo(command: ShellCommand) {
     //}
 }
 
-fn ls_do(input: &str) {
+fn ls_do(args: Vec<String>) {
     let mut t = term::stdout().unwrap();
+    let mut path_idx = 0;
 
+    for (idx, arg) in args.iter().enumerate() {
+        if !arg.starts_with("--") || !arg.starts_with("-") {
+            path_idx = idx;
+        }
+    }
+
+
+    let input = &args[path_idx];
     let path;
     if std::path::Path::new(input).exists() {
         path = std::fs::read_dir(input).unwrap()
@@ -156,9 +165,9 @@ fn ls_do(input: &str) {
     }
 }
 
-pub fn ls(input: &str) {
-    if input == "ls" {
-        ls_do(".");
+pub fn ls(command: ShellCommand) {
+    if command.args.len() <= 0 {
+        ls_do(vec![".".to_string()]);
     }/* else if input.contains('|') {
         let ls_input = input.split('|').collect::<Vec<&str>>()[0];
         let path = if ls_input.trim() == "ls" {
@@ -197,8 +206,7 @@ pub fn ls(input: &str) {
             piped_text(&output, false, cmd);
         }*/
     else {
-        let input = input.split(' ').collect::<Vec<&str>>()[1];
-        ls_do(input);
+        ls_do(command.args);
     }
 }
 
