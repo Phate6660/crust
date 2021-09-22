@@ -1,6 +1,6 @@
 extern crate term;
 use crate::piped_text;
-use crate::shared_functions::{ShellState, get_calc_vars};
+use crate::shared_functions::{ShellState, ShellCommand, PipedShellCommand, get_calc_vars};
 use std::io::prelude::*;
 
 fn calc_run(problem: &str) {
@@ -25,9 +25,9 @@ fn calc_return(problem: &str) -> i32 {
     }
 }
 
-pub fn calc(input: &str) {
-    let problem = input.split(' ').collect::<Vec<&str>>()[1].trim();
-    if input.contains('|') {
+pub fn calc(command: ShellCommand) {
+    let problem = command.args.concat();
+    /*if command.args.contains('|') {
         let calculation = calc_return(problem);
         let line_vector: Vec<&str> = input.split('|').collect();
         let cmd2 = line_vector[1];
@@ -38,9 +38,9 @@ pub fn calc(input: &str) {
         } else {
             piped_text(&calculation.to_string(), false, cmd2_with_args);
         }
-    } else {
-        calc_run(problem);
-    }
+    } else {*/
+
+    calc_run(&problem);
 }
 
 fn cd_helper(dir: &str) {
@@ -80,7 +80,7 @@ pub fn cd(shell_state: &mut ShellState, input: &str) {
 }
 
 pub fn echo(input: &str) {
-    if input.contains('|') {
+    /*if input.contains('|') {
         let line_vector: Vec<&str> = input.split('|').collect();
         let cmd = line_vector[0];
         let mut cmd_vector: Vec<&str> = cmd.split(' ').collect();
@@ -97,7 +97,7 @@ pub fn echo(input: &str) {
         } else {
             piped_text(&message, false, cmd2_with_args);
         }
-    } else {
+    } else {*/
         let input: Vec<&str> = input.split(' ').collect();
         let output = &input[1..];
         for arg in output {
@@ -105,7 +105,7 @@ pub fn echo(input: &str) {
             std::io::stdout().flush().unwrap();
         }
         println!();
-    }
+    //}
 }
 
 fn ls_do(input: &str) {
@@ -162,7 +162,7 @@ fn ls_do(input: &str) {
 pub fn ls(input: &str) {
     if input == "ls" {
         ls_do(".");
-    } else if input.contains('|') {
+    }/* else if input.contains('|') {
         let ls_input = input.split('|').collect::<Vec<&str>>()[0];
         let path = if ls_input.trim() == "ls" {
             std::fs::read_dir(".").unwrap()
@@ -198,8 +198,8 @@ pub fn ls(input: &str) {
         } else {
             let cmd: Vec<&str> = cmd.split(' ').collect();
             piped_text(&output, false, cmd);
-        }
-    } else {
+        }*/
+    else {
         let input = input.split(' ').collect::<Vec<&str>>()[1];
         ls_do(input);
     }
