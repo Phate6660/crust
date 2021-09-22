@@ -118,25 +118,15 @@ impl PipedShellCommand {
 }
 
 /// Helper function to a command, optionally with args.
-pub fn cmd(input: &str, args: bool) {
-    if args {
-        let input: Vec<&str> = input.split(' ').collect();
-        let child = Command::new(&input[0])
-            .args(&input[1..])
-            .spawn()
-            .or(Err(()));
-        if child.is_err() {
-            println!("Sorry, '{}' was not found!", input[0]);
-        } else {
-            child.unwrap().wait().unwrap();
-        }
+pub fn cmd(command: ShellCommand) {
+    let child = Command::new(&command.name)
+        .args(&command.args)
+        .spawn()
+        .or(Err(()));
+    if child.is_err() {
+        println!("Sorry, '{}' was not found!", command.name);
     } else {
-        let child = Command::new(&input).spawn().or(Err(()));
-        if child.is_err() {
-            println!("Sorry, '{}' was not found!", input);
-        } else {
-            child.unwrap().wait().unwrap();
-        }
+        child.unwrap().wait().unwrap();
     }
 }
 
