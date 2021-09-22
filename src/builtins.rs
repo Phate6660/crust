@@ -1,5 +1,4 @@
 extern crate term;
-use crate::piped_text;
 use crate::shared_functions::{ShellState, ShellCommand, PipedShellCommand, get_calc_vars};
 use std::io::prelude::*;
 
