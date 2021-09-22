@@ -1,7 +1,6 @@
 mod builtins;
 mod shared_functions;
 
-use builtins::{calc, cd, echo, help, ls};
 #[cfg(feature = "readline")]
 use rustyline::{error::ReadlineError, Editor};
 use std::process::exit;
@@ -12,25 +11,8 @@ use shared_functions::parse_input;
 
 // Process the input to run the appropriate builtin or external command.
 fn process_input(shell_state: &mut ShellState, input: String) {
-    if input.starts_with("calc") {
-        calc(&input);
-    } else if input.starts_with("cd") {
-        cd(shell_state, &input);
-    } else if input.starts_with("echo") {
-        echo(&input);
-    } else if input.starts_with("help") {
-        help();
-    } else if input.starts_with("ls") {
-        ls(&input);
-    } else if input == "pwd" {
-        println!("{}", std::env::current_dir().unwrap().display());
-    } else if input.contains('|') {
-        piped_cmd(&input);
-    } else if input.contains(' ') {
-        cmd(&input, true);
-    } else {
-        cmd(&input, false);
-    }
+    let command = ShellCommand::new(input);
+    ShellCommand::run(shell_state, command);
 }
 
 #[cfg(feature = "readline")]

@@ -1,6 +1,7 @@
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use crate::builtins::{calc, ls, help, echo, cd};
 
 /// Holds all important informations for and about the shell
 pub struct ShellState {
