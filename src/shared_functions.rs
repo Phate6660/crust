@@ -180,23 +180,18 @@ pub fn parse_input(op: &str) -> String {
 }
 
 /// A function to pipe the output of one command into another.
-pub fn piped_cmd(input: &str) {
-    let input: Vec<&str> = input.split('|').collect();
-    let mut cmd1: Vec<&str> = input[0].split(' ').collect();
-    let mut cmd2: Vec<&str> = input[1].split(' ').collect();
-    cmd1.pop();
-    cmd2.remove(0);
-    let child1 = Command::new(cmd1[0])
-        .args(&cmd1[1..])
+pub fn piped_cmd(pipe: PipedShellCommand) {
+    let child1 = Command::new(pipe.commands[0].name.clone())
+        .args(&pipe.commands[0].args)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .output()
         .or(Err(()));
     if child1.is_err() {
-        println!("Sorrry, '{}' was not found!", input[0]);
+        println!("Sorrry, '{}' was not found!", pipe.commands[0].name);
     } else {
-        let child2 = match Command::new(cmd2[0])
-            .args(&cmd2[1..])
+        let child2 = match Command::new(pipe.commands[1].name.clone())
+            .args(&pipe.commands[1].args)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .spawn()
