@@ -82,7 +82,6 @@ impl ShellCommand {
 #[derive(Debug)]
 pub struct PipedShellCommand {
     pub commands: Vec<ShellCommand>,
-    pub text: Option<String>,
 }
 
 impl PipedShellCommand {
@@ -106,13 +105,7 @@ impl PipedShellCommand {
         }
         let pipe = PipedShellCommand {
             commands: commands,
-            text: None,
         };
-        pipe
-    }
-    pub fn with_text_from(text: String, command: ShellCommand) -> PipedShellCommand {
-        let mut pipe = PipedShellCommand::from(command);
-        pipe.text = Some(text);
         pipe
     }
 }
@@ -181,14 +174,63 @@ pub fn parse_input(op: &str) -> String {
 
 /// A function to pipe the output of one command into another.
 pub fn piped_cmd(pipe: PipedShellCommand) {
-    let child1 = Command::new(pipe.commands[0].name.clone())
+    let child = Command::new(pipe.commands[0].name.clone())
+        .args(&pipe.commands[0].args)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .or(Err(()));
+    if child.is_err() {
+        println!("{} failed", pipe.commands[0].name.clone());
+    }
+    let mut output_prev = String::new();
+    child.unwrap().stdout.unwrap().read_to_string(&mut output_prev).unwrap();
+    for (idx, command) in pipe.commands.iter().enumerate() {
+        if idx == 0 {
+            continue;
+        } else if idx == pipe.commands.len() {
+            break;
+        } else {
+            let child = Command::new(command.name.clone())
+                .args(&command.args)
+                .stdout(Stdio::piped())
+                .stdin(Stdio::piped())
+                .spawn()
+                .or(Err(()));
+            match child {
+                Ok(mut child) => {
+                    child.stdin.take().unwrap().write_all(output_prev.trim().as_bytes()).unwrap();
+                    child.stdout.unwrap().read_to_string(&mut output_prev).unwrap();
+                }
+                Err(_) => println!("{} failed", command.name.clone()),
+            }
+        }
+    }
+    let child = Command::new(pipe.commands[pipe.commands.len() - 1].name.clone())
+        .args(&pipe.commands[pipe.commands.len() - 1].args)
+        .stdout(Stdio::piped())
+        .stdin(Stdio::piped())
+        .spawn()
+        .or(Err(()));
+    match child {
+        Ok(mut child) => {
+            child.stdin.take().unwrap().write_all(output_prev.trim().as_bytes()).unwrap();
+            let mut output = String::new();
+            match child.stdout.take().unwrap().read_to_string(&mut output) {
+                Err(why) => println!("ERROR: could not read cmd2 stdout: {}", why),
+                Ok(_) => println!("{}", output.trim()),
+            }
+        }
+        Err(_) => println!("{} failed", pipe.commands[pipe.commands.len() - 1].name.clone()),
+    }
+    /*let child1 = Command::new(pipe.commands[0].name.clone())
         .args(&pipe.commands[0].args)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .output()
         .or(Err(()));
     if child1.is_err() {
-        println!("Sorrry, '{}' was not found!", pipe.commands[0].name);
+        println!("sorrry, '{}' was not found!", pipe.commands[0].name);
     } else {
         let child2 = match Command::new(pipe.commands[1].name.clone())
             .args(&pipe.commands[1].args)
@@ -211,7 +253,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             Err(why) => println!("ERROR: could not read cmd2 stdout: {}", why),
             Ok(_) => println!("{}", output.trim()),
         }
-    }
+    }*/
 }
 
 /// A function to pipe text into a command.

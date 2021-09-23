@@ -4,13 +4,16 @@ mod shared_functions;
 #[cfg(feature = "readline")]
 use rustyline::{error::ReadlineError, Editor};
 use std::process::exit;
-use shared_functions::{ShellState, ShellCommand, PipedShellCommand, non_interactive};
+use shared_functions::{ShellState, ShellCommand, non_interactive};
 
 #[cfg(not(feature = "readline"))]
 use shared_functions::parse_input;
 
 // Process the input to run the appropriate builtin or external command.
 fn process_input(shell_state: &mut ShellState, input: String) {
+    if input.len() == 0 {
+        return
+    }
     let command = ShellCommand::new(input);
     ShellCommand::run(shell_state, command);
 }
