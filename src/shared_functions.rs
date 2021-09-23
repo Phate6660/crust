@@ -188,16 +188,11 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
         println!("{} failed", pipe.commands[0].name.clone());
     }
     let mut output_prev = String::new();
-    child
-        .unwrap()
-        .stdout
-        .unwrap()
-        .read_to_string(&mut output_prev)
-        .unwrap();
+    child.unwrap().stdout.unwrap().read_to_string(&mut output_prev).unwrap();
     for (idx, command) in pipe.commands.iter().enumerate() {
         if idx == 0 {
             continue;
-        } else if idx == pipe.commands.len() {
+        } else if idx == pipe.commands.len() - 1 {
             break;
         } else {
             let child = Command::new(command.name.clone())
@@ -214,6 +209,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
                         .unwrap()
                         .write_all(output_prev.trim().as_bytes())
                         .unwrap();
+                    output_prev = "".to_string();
                     child
                         .stdout
                         .unwrap()
