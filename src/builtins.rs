@@ -2,31 +2,18 @@ extern crate term;
 use crate::shared_functions::{ShellState, ShellCommand, PipedShellCommand, piped_cmd, get_calc_vars};
 use std::io::prelude::*;
 
-fn calc_run(problem: &str) {
-    let (math_op, first_number, second_number) = get_calc_vars(problem);
+pub fn calc(args: Vec<String>) -> String {
+    let problem = args.concat();
+    let mut output = String::new();
+    let (math_op, first_number, second_number) = get_calc_vars(&problem);
     match math_op {
-        "x" => println!("{}", first_number * second_number),
-        "/" => println!("{}", first_number / second_number),
-        "+" => println!("{}", first_number + second_number),
-        "-" => println!("{}", first_number - second_number),
-        _ => println!("Error, '{}' is an unsupported operation.", math_op),
+        "x" => output.push_str(format!("{}", first_number * second_number).as_str()),
+        "/" => output.push_str(format!("{}", first_number / second_number).as_str()),
+        "+" => output.push_str(format!("{}", first_number + second_number).as_str()),
+        "-" => output.push_str(format!("{}", first_number - second_number).as_str()),
+        _ => output.push_str(format!("Error, '{}' is an unsupported operation.", math_op).as_str()),
     }
-}
-
-fn calc_return(problem: &str) -> i32 {
-    let (math_op, first_number, second_number) = get_calc_vars(problem);
-    match math_op {
-        "x" => first_number * second_number,
-        "/" => first_number / second_number,
-        "+" => first_number + second_number,
-        "-" => first_number - second_number,
-        _ => 123456789,
-    }
-}
-
-pub fn calc(command: ShellCommand) {
-    let problem = command.args.concat();
-    calc_run(&problem);
+    output
 }
 
 fn cd_helper(dir: &str) {
