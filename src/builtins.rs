@@ -4,15 +4,24 @@ use crate::shared_functions::{
 use colored::*;
 
 pub fn calc(args: Vec<String>) -> String {
-    let problem = args.concat();
     let mut output = String::new();
-    let (math_op, first_number, second_number) = get_calc_vars(&problem);
-    match math_op {
-        "x" => output.push_str(format!("{}", first_number * second_number).as_str()),
-        "/" => output.push_str(format!("{}", first_number / second_number).as_str()),
-        "+" => output.push_str(format!("{}", first_number + second_number).as_str()),
-        "-" => output.push_str(format!("{}", first_number - second_number).as_str()),
-        _ => output.push_str(format!("Error, '{}' is an unsupported operation.", math_op).as_str()),
+    if args.contains(&"|".to_string()) {
+        let command = ShellCommand {
+            name: "calc".to_string(),
+            args: args,
+        };
+        let pipe = PipedShellCommand::from(command);
+        piped_cmd(pipe);
+    } else {
+        let problem = args.concat();
+        let (math_op, first_number, second_number) = get_calc_vars(&problem);
+        match math_op {
+            "x" => output.push_str(format!("{}", first_number * second_number).as_str()),
+            "/" => output.push_str(format!("{}", first_number / second_number).as_str()),
+            "+" => output.push_str(format!("{}", first_number + second_number).as_str()),
+            "-" => output.push_str(format!("{}", first_number - second_number).as_str()),
+            _ => output.push_str(format!("Error, '{}' is an unsupported operation.", math_op).as_str()),
+        }
     }
     output
 }
@@ -63,7 +72,7 @@ pub fn echo(args: Vec<String>) -> String {
         piped_cmd(pipe);
     } else {
         for arg in args {
-            output.push_str(&format!("{} ", arg).to_string());
+            output.push_str(format!("{} ", arg).as_str());
         }
     }
     output

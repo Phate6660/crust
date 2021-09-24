@@ -68,9 +68,9 @@ impl ShellCommand {
     }
     pub fn run(shell_state: &mut ShellState, command: ShellCommand) {
         match command.name.as_str() {
-            "calc" => println!("{}", calc(command.args)),
+            "calc" => print!("{}", calc(command.args)),
             "cd" => cd(shell_state, command),
-            "echo" => print!("{}", echo(command.args)),
+            "echo" => println!("{}", echo(command.args)),
             "help" => help(),
             "ls" => print!("{}", ls(command.args)),
             "pwd" => println!("{}", std::env::current_dir().unwrap().display()),
