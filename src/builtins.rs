@@ -1,5 +1,5 @@
 extern crate term;
-use crate::shared_functions::{ShellState, ShellCommand, PipedShellCommand, get_calc_vars};
+use crate::shared_functions::{ShellState, ShellCommand, PipedShellCommand, piped_cmd, get_calc_vars};
 use std::io::prelude::*;
 
 fn calc_run(problem: &str) {
@@ -26,19 +26,6 @@ fn calc_return(problem: &str) -> i32 {
 
 pub fn calc(command: ShellCommand) {
     let problem = command.args.concat();
-    /*if command.args.contains('|') {
-        let calculation = calc_return(problem);
-        let line_vector: Vec<&str> = input.split('|').collect();
-        let cmd2 = line_vector[1];
-        let mut cmd2_with_args: Vec<&str> = cmd2.split(' ').collect();
-        cmd2_with_args.remove(0);
-        if cmd2.contains(' ') {
-            piped_text(&calculation.to_string(), true, cmd2_with_args);
-        } else {
-            piped_text(&calculation.to_string(), false, cmd2_with_args);
-        }
-    } else {*/
-
     calc_run(&problem);
 }
 
@@ -77,31 +64,21 @@ pub fn cd(shell_state: &mut ShellState, command: ShellCommand) {
     }
 }
 
-pub fn echo(command: ShellCommand) {
-    /*if input.contains('|') {
-        let line_vector: Vec<&str> = input.split('|').collect();
-        let cmd = line_vector[0];
-        let mut cmd_vector: Vec<&str> = cmd.split(' ').collect();
-        cmd_vector.remove(0);
-        let mut message = "".to_string();
-        for word in cmd_vector {
-            message.push_str(word);
+pub fn echo(args: Vec<String>) -> String {
+    let mut output = String::new();
+    if args.contains(&"|".to_string()) {
+        let command = ShellCommand {
+            name: "echo".to_string(),
+            args: args,
+        };
+        let pipe = PipedShellCommand::from(command);
+        piped_cmd(pipe);
+    } else {
+        for arg in args {
+            output.push_str(&format!("{} ", arg).to_string());
         }
-        let cmd2 = line_vector[1];
-        let mut cmd2_with_args: Vec<&str> = cmd2.split(' ').collect();
-        cmd2_with_args.remove(0);
-        if cmd2.contains(' ') {
-            piped_text(&message, true, cmd2_with_args);
-        } else {
-            piped_text(&message, false, cmd2_with_args);
-        }
-    } else {*/
-        for arg in command.args {
-            print!("{} ", arg);
-            std::io::stdout().flush().unwrap();
-        }
-        println!();
-    //}
+    }
+    output
 }
 
 fn ls_do(args: Vec<String>) {
