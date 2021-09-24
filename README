@@ -60,7 +60,7 @@ $ cargo run --release -- -c "echo this is an example"
    which can recursively handle running commands, piping, and redirection all at once.)
   + piping
     * can pipe between two programs [done]
-    * can pipe between any amount of programs without restraint
+    * can pipe between any amount of programs without restraint [done]
   + redirection
 - readline support via rustyline 
   + minimal line editing setup [done]
