@@ -72,7 +72,7 @@ impl ShellCommand {
             "cd" => cd(shell_state, command),
             "echo" => print!("{}", echo(command.args)),
             "help" => help(),
-            "ls" => ls(command),
+            "ls" => print!("{}", ls(command.args)),
             "pwd" => println!("{}", std::env::current_dir().unwrap().display()),
             _ => {
                 if command.args.contains(&String::from("|")) {
@@ -182,6 +182,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
     match pipe.commands[0].name.as_str() {
         "echo" => output_prev = echo(pipe.commands[0].args.clone()),
         "calc" => output_prev = calc(pipe.commands[0].args.clone()),
+        "ls" => output_prev = ls(pipe.commands[0].args.clone()),
         _ => {
             let child = Command::new(pipe.commands[0].name.clone())
                 .args(&pipe.commands[0].args)
@@ -209,6 +210,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             match command.name.as_str() {
                 "echo" => output_prev = echo(command.args.clone()),
                 "calc" => output_prev = calc(command.args.clone()),
+                "ls" => output_prev = ls(command.args.clone()),
                 _ => {
                     let child = Command::new(command.name.clone())
                         .args(&command.args)
@@ -237,9 +239,10 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             }
         }
     }
-    match pipe.commands[0].name.as_str() {
-        "echo" => println!("{}", echo(pipe.commands[pipe.commands.len() - 1].args.clone())),
-        "calc" => println!("{}", calc(pipe.commands[pipe.commands.len() - 1].args.clone())),
+    match pipe.commands[pipe.commands.len() -1].name.as_str() {
+        "echo" => print!("{}", echo(pipe.commands[pipe.commands.len() - 1].args.clone())),
+        "calc" => print!("{}", calc(pipe.commands[pipe.commands.len() - 1].args.clone())),
+        "ls" => print!("{}", ls(pipe.commands[pipe.commands.len() - 1].args.clone())),
         _ => {
             let child = Command::new(pipe.commands[pipe.commands.len() - 1].name.clone())
                 .args(&pipe.commands[pipe.commands.len() - 1].args)
