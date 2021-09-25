@@ -58,11 +58,10 @@ impl ShellCommand {
         for arg in split_input {
             split_input_string.push(arg.to_string());
         }
-        let shell_command = ShellCommand {
+        ShellCommand {
             name: split_input_string[0].clone(),
             args: split_input_string[1..].to_vec(),
-        };
-        shell_command
+        }
     }
     pub fn run(shell_state: &mut ShellState, command: ShellCommand) {
         match command.name.as_str() {
@@ -107,8 +106,7 @@ impl PipedShellCommand {
                 commands.push(command);
             }
         }
-        let pipe = PipedShellCommand { commands: commands };
-        pipe
+        PipedShellCommand { commands }
     }
 }
 

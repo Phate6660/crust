@@ -9,7 +9,7 @@ pub fn calc(args: Vec<String>) -> String {
     if args.contains(&"|".to_string()) {
         let command = ShellCommand {
             name: "calc".to_string(),
-            args: args,
+            args,
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -38,8 +38,8 @@ fn cd_helper(dir: &str) {
 }
 
 pub fn cd(shell_state: &mut ShellState, command: ShellCommand) {
-    if command.args.len() <= 0 {
-        shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap().to_owned());
+    if command.args.is_empty() {
+        shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap());
         let user = std::env::var("USER").unwrap();
         let home = ["/home/", user.as_str()].concat();
         cd_helper(&home);
@@ -57,9 +57,9 @@ pub fn cd(shell_state: &mut ShellState, command: ShellCommand) {
                 shell_state.cd_prev_dir = None;
             }
         }
-        shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap().to_owned());
+        shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap());
     } else {
-        shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap().to_owned());
+        shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap());
         cd_helper(&command.args[0]);
     }
 }
@@ -69,7 +69,7 @@ pub fn echo(args: Vec<String>) -> String {
     if args.contains(&"|".to_string()) {
         let command = ShellCommand {
             name: "echo".to_string(),
-            args: args,
+            args,
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -83,21 +83,21 @@ pub fn echo(args: Vec<String>) -> String {
 
 pub fn ls(mut args: Vec<String>) -> String {
     let mut output = String::new();
-    if args.len() == 0 {
+    if args.is_empty() {
         args.push(".".to_string());
     }
 
     if args.contains(&"|".to_string()) {
         let command = ShellCommand {
             name: "ls".to_string(),
-            args: args,
+            args,
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
     } else {
         let mut path_idx = 0;
         for (idx, arg) in args.iter().enumerate() {
-            if !arg.starts_with("--") || !arg.starts_with("-") {
+            if !arg.starts_with("--") || !arg.starts_with('-') {
                 path_idx = idx;
             }
         }
@@ -138,10 +138,10 @@ pub fn ls(mut args: Vec<String>) -> String {
                     if n == parts_count {
                         break;
                     } else {
-                        output.push_str("/");
+                        output.push('/');
                     }
                 }
-                output.push_str("\n");
+                output.push('\n');
             }
         }
     }

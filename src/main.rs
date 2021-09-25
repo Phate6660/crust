@@ -11,7 +11,7 @@ use shared_functions::parse_input;
 
 // Process the input to run the appropriate builtin or external command.
 fn process_input(shell_state: &mut ShellState, input: String) {
-    if input.len() == 0 {
+    if input.is_empty() {
         return;
     }
     let command = ShellCommand::new(input);
