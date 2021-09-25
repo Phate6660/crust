@@ -34,13 +34,11 @@ impl ShellState {
             home: ["/home/", std::env::var("USER").unwrap().as_str()].concat(),
             na: String::from("no args"),
             share_dir: [
-                ["/home/", std::env::var("USER").unwrap().as_str()]
-                    .concat()
-                        .as_str(),
-                        "/.local/share/crusty",
+                ["/home/", std::env::var("USER").unwrap().as_str()].concat().as_str(),
+                "/.local/share/crusty",
             ]
-                .concat(),
-                cd_prev_dir: None,
+            .concat(),
+            cd_prev_dir: None,
         };
         ShellState::ensure_directory(Path::new(&shell_state.share_dir));
         shell_state
@@ -69,11 +67,11 @@ impl ShellCommand {
     pub fn run(shell_state: &mut ShellState, command: ShellCommand) {
         match command.name.as_str() {
             "calc" => println!("{}", calc(command.args)),
-            "cd" => cd(shell_state, command),
+            "cd"   => cd(shell_state, command),
             "echo" => println!("{}", echo(command.args)),
             "help" => help(),
-            "ls" => print!("{}", ls(command.args)),
-            "pwd" => println!("{}", std::env::current_dir().unwrap().display()),
+            "ls"   => print!("{}", ls(command.args)),
+            "pwd"  => println!("{}", std::env::current_dir().unwrap().display()),
             _ => {
                 if command.args.contains(&String::from("|")) {
                     piped_cmd(PipedShellCommand::from(command));
@@ -182,7 +180,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
     match pipe.commands[0].name.as_str() {
         "echo" => output_prev = echo(pipe.commands[0].args.clone()),
         "calc" => output_prev = calc(pipe.commands[0].args.clone()),
-        "ls" => output_prev = ls(pipe.commands[0].args.clone()),
+        "ls"   => output_prev = ls(pipe.commands[0].args.clone()),
         _ => {
             let child = Command::new(pipe.commands[0].name.clone())
                 .args(&pipe.commands[0].args)
@@ -210,7 +208,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             match command.name.as_str() {
                 "echo" => output_prev = echo(command.args.clone()),
                 "calc" => output_prev = calc(command.args.clone()),
-                "ls" => output_prev = ls(command.args.clone()),
+                "ls"   => output_prev = ls(command.args.clone()),
                 _ => {
                     let child = Command::new(command.name.clone())
                         .args(&command.args)
@@ -239,10 +237,10 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             }
         }
     }
-    match pipe.commands[pipe.commands.len() -1].name.as_str() {
-        "echo" => print!("{}", echo(pipe.commands[pipe.commands.len() - 1].args.clone())),
-        "calc" => print!("{}", calc(pipe.commands[pipe.commands.len() - 1].args.clone())),
-        "ls" => print!("{}", ls(pipe.commands[pipe.commands.len() - 1].args.clone())),
+    match pipe.commands[pipe.commands.len() - 1].name.as_str() {
+        "echo" => print!("{}",echo(pipe.commands[pipe.commands.len() - 1].args.clone())),
+        "calc" => print!("{}",calc(pipe.commands[pipe.commands.len() - 1].args.clone())),
+        "ls"   => print!("{}",ls(pipe.commands[pipe.commands.len() - 1].args.clone())),
         _ => {
             let child = Command::new(pipe.commands[pipe.commands.len() - 1].name.clone())
                 .args(&pipe.commands[pipe.commands.len() - 1].args)
@@ -267,7 +265,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
                 Err(_) => println!(
                     "{} failed",
                     pipe.commands[pipe.commands.len() - 1].name.clone()
-                    ),
+                ),
             }
         }
     }

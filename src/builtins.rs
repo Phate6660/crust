@@ -1,5 +1,6 @@
 use crate::shared_functions::{
-    get_calc_vars, piped_cmd, PipedShellCommand, ShellCommand, ShellState,
+    get_calc_vars, piped_cmd, 
+    PipedShellCommand, ShellCommand, ShellState,
 };
 use colored::*;
 
@@ -20,7 +21,9 @@ pub fn calc(args: Vec<String>) -> String {
             "/" => output.push_str(format!("{}", first_number / second_number).as_str()),
             "+" => output.push_str(format!("{}", first_number + second_number).as_str()),
             "-" => output.push_str(format!("{}", first_number - second_number).as_str()),
-            _ => output.push_str(format!("Error, '{}' is an unsupported operation.", math_op).as_str()),
+            _ => output.push_str(
+                format!("Error, '{}' is an unsupported operation.", math_op
+            ).as_str()),
         }
     }
     output
