@@ -164,3 +164,30 @@ pub fn help() {
     "
     );
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::builtins::echo;
+
+    #[test]
+    fn basic_echo() {
+        let arg: Vec<String> = vec![String::from("Success")];
+        let output = echo(arg);
+        // TODO: Trim output from any function that outputs by default,
+        // unless the extra whitespace or newlines are needed. Currently
+        // trimming per test-basis right now to make tests succeed.
+        let output = output.trim();
+        assert_eq!(output, String::from("Success"));
+    }
+
+    #[test]
+    fn echo_with_args() {
+        let first = String::from("Still");
+        let second = String::from("a");
+        let third = String::from("success!");
+        let args: Vec<String> = vec![first, second, third];
+        let output = echo(args);
+        let output = output.trim();
+        assert_eq!(output, String::from("Still a success!"));
+    }
+}
