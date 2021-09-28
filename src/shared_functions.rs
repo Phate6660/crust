@@ -80,7 +80,7 @@ impl ShellCommand {
             "calc" => println!("{}", calc(command.args)),
             "cd"   => cd(shell_state, command),
             "echo" => println!("{}", echo(command.args)),
-            "help" => help(),
+            "help" => help(command.args),
             "ls"   => print!("{}", ls(command.args)),
             "pwd"  => println!("{}", std::env::current_dir().unwrap().display()),
             _ => {
