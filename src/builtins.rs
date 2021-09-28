@@ -4,6 +4,9 @@ use crate::shared_functions::{
 };
 use colored::*;
 
+/// The calc commands. Takes the `args` part of a ShellCommand struct and tries
+/// to evaluate the given mathematical expression, returning a String with the
+/// result.
 pub fn calc(args: Vec<String>) -> String {
     let mut output = String::new();
     if args.contains(&"|".to_string()) {
@@ -29,6 +32,7 @@ pub fn calc(args: Vec<String>) -> String {
     output
 }
 
+/// Helper for cd, to actually change the dirctory.
 fn cd_helper(dir: &str) {
     let path = std::path::Path::new(dir);
     match std::env::set_current_dir(&path) {
@@ -37,6 +41,10 @@ fn cd_helper(dir: &str) {
     }
 }
 
+/// Used to change directory.
+/// Takes a ShellState and ShellCommand.
+/// ShellState is used to realize `cd -` fuctionality, but can be used for
+/// other options in the future.
 pub fn cd(shell_state: &mut ShellState, command: ShellCommand) {
     if command.args.is_empty() {
         shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap());
@@ -64,6 +72,7 @@ pub fn cd(shell_state: &mut ShellState, command: ShellCommand) {
     }
 }
 
+/// Just like you know it. Takes the args part of ShellCommand and prints them.
 pub fn echo(args: Vec<String>) -> String {
     let mut output = String::new();
     if args.contains(&"|".to_string()) {
@@ -81,6 +90,7 @@ pub fn echo(args: Vec<String>) -> String {
     output
 }
 
+/// List dir entries. Take the args part of ShellCommand.
 pub fn ls(mut args: Vec<String>) -> String {
     let mut output = String::new();
     if args.is_empty() {
@@ -148,6 +158,7 @@ pub fn ls(mut args: Vec<String>) -> String {
     output
 }
 
+/// Prints a list of builtin commands.
 pub fn help() {
     println!(
         "\
