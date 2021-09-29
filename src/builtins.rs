@@ -3,7 +3,7 @@ use crate::shared_functions::{
 };
 use colored::*;
 
-/// The calc commands. Takes the `args` part of a ShellCommand struct and tries
+/// Takes the `args` part of a ShellCommand struct and tries
 /// to evaluate the given mathematical expression, returning a String with the
 /// result.
 pub fn calc(args: Vec<String>) -> String {
