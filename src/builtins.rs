@@ -1,9 +1,11 @@
 use crate::shared_functions::{
-    get_calc_vars, piped_cmd, 
-    PipedShellCommand, ShellCommand, ShellState,
+    get_calc_vars, piped_cmd, PipedShellCommand, ShellCommand, ShellState,
 };
 use colored::*;
 
+/// Takes the `args` part of a ShellCommand struct and tries
+/// to evaluate the given mathematical expression, returning a String with the
+/// result.
 pub fn calc(args: Vec<String>) -> String {
     let mut output = String::new();
     if args.contains(&"|".to_string()) {
@@ -21,14 +23,14 @@ pub fn calc(args: Vec<String>) -> String {
             "/" => output.push_str(format!("{}", first_number / second_number).as_str()),
             "+" => output.push_str(format!("{}", first_number + second_number).as_str()),
             "-" => output.push_str(format!("{}", first_number - second_number).as_str()),
-            _ => output.push_str(
-                format!("Error, '{}' is an unsupported operation.", math_op
-            ).as_str()),
+            _ => output
+                .push_str(format!("Error, '{}' is an unsupported operation.", math_op).as_str()),
         }
     }
     output
 }
 
+/// Helper for cd, to actually change the dirctory.
 fn cd_helper(dir: &str) {
     let path = std::path::Path::new(dir);
     match std::env::set_current_dir(&path) {
@@ -37,6 +39,10 @@ fn cd_helper(dir: &str) {
     }
 }
 
+/// Used to change directory.
+/// Takes a ShellState and ShellCommand.
+/// ShellState is used to realize `cd -` fuctionality, but can be used for
+/// other options in the future.
 pub fn cd(shell_state: &mut ShellState, command: ShellCommand) {
     if command.args.is_empty() {
         shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap());
@@ -64,6 +70,7 @@ pub fn cd(shell_state: &mut ShellState, command: ShellCommand) {
     }
 }
 
+/// Just like you know it. Takes the args part of ShellCommand and prints them.
 pub fn echo(args: Vec<String>) -> String {
     let mut output = String::new();
     if args.contains(&"|".to_string()) {
@@ -81,6 +88,7 @@ pub fn echo(args: Vec<String>) -> String {
     output
 }
 
+/// List dir entries. Take the args part of ShellCommand.
 pub fn ls(mut args: Vec<String>) -> String {
     let mut output = String::new();
     if args.is_empty() {
@@ -148,19 +156,96 @@ pub fn ls(mut args: Vec<String>) -> String {
     output
 }
 
-pub fn help() {
-    println!(
-        "\
-        cRUSTy [https://github.com/Phate6660/crusty]\n\
-        builtins:\n\
-        ---------\n\
-        calc\n\
-        cd\n\
-        echo\n\
-        exit\n\
-        help\n\
-        ls\n\
-        pwd\
-    "
-    );
+/// Prints a list of builtin commands.
+pub fn help(args: Vec<String>) {
+    if args.is_empty() {
+        println!(
+            "\
+            cRUSTy [https://github.com/Phate6660/crusty]\n\
+            builtins:\n\
+            ---------\n\
+            calc\n\
+            cd\n\
+            echo\n\
+            exit\n\
+            help\n\
+            ls\n\
+            pwd\
+            "
+        );
+        return;
+    }
+    if args.len() > 1 {
+        println!("Please specify only one command.");
+        return;
+    }
+    match args[0].as_str() {
+        "calc" => {
+            println!(
+                "\
+                Supports +, -, /, x for two numbers.\n\
+                E.g. 1+1, 4/2, 2x4, 2-1\
+                "
+            );
+        }
+        "cd" => {
+            println!(
+                "\
+                Takes a absolute or relative path and changes directory to it.\n\
+                `cd -` will take you to your previous dir.\
+                "
+            );
+        }
+        "echo" => {
+            println!(
+                "\
+                Takes n amount of arguments and prints them to stdout.\
+                "
+            );
+        }
+        "exit" => {
+            println!(
+                "\
+                Exits the shell with the given exit code.\
+                "
+            );
+        }
+        "help" => {
+            println!(
+                "\
+                Returns information about the builtin commands.\
+                "
+            );
+        }
+        "ls" => {
+            println!(
+                "\
+                Lists the content of a directory.\
+                "
+            );
+        }
+        "pwd" => {
+            println!(
+                "\
+                Prints the working directory.\
+                "
+            );
+        }
+        _ => {
+            println!(
+                "\
+                cRUSTy [https://github.com/Phate6660/crusty]\n\
+                builtins:\n\
+                ---------\n\
+                calc\n\
+                cd\n\
+                echo\n\
+                exit\n\
+                help\n\
+                ls\n\
+                pwd\
+                "
+            );
+        }
+    }
 }
