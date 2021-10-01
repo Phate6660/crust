@@ -36,8 +36,7 @@ impl ShellState {
             share_dir: [
                 ["/home/", std::env::var("USER").unwrap().as_str()].concat().as_str(),
                 "/.local/share/crusty",
-            ]
-            .concat(),
+            ].concat(),
             cd_prev_dir: None,
         };
         ShellState::ensure_directory(Path::new(&shell_state.share_dir));
