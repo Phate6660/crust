@@ -12,6 +12,15 @@ pub fn calc(args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "calc".to_string(),
             args,
+            redirect: false,
+        };
+        let pipe = PipedShellCommand::from(command);
+        piped_cmd(pipe);
+    } else if args.contains(&">".to_string()) {
+        let command = ShellCommand {
+            name: "calc".to_string(),
+            args,
+            redirect: true,
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -76,6 +85,15 @@ pub fn echo(args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "echo".to_string(),
             args,
+            redirect: false,
+        };
+        let pipe = PipedShellCommand::from(command);
+        piped_cmd(pipe);
+    } else if args.contains(&">".to_string()) {
+        let command = ShellCommand {
+            name: "echo".to_string(),
+            args,
+            redirect: true,
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -98,6 +116,15 @@ pub fn ls(mut args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "ls".to_string(),
             args,
+            redirect: false,
+        };
+        let pipe = PipedShellCommand::from(command);
+        piped_cmd(pipe);
+    } else if args.contains(&">".to_string()) {
+        let command = ShellCommand {
+            name: "ls".to_string(),
+            args,
+            redirect: true,
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);

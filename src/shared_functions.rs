@@ -14,14 +14,14 @@ pub struct ShellState {
     pub cd_prev_dir: Option<PathBuf>,
 }
 
-impl ShellState {
-    /// Ensures that a directory exists
-    fn ensure_directory(dir: &Path) {
-        if !dir.exists() {
-            std::fs::create_dir(dir).unwrap();
-        }
+/// Ensures that a directory exists
+fn ensure_directory(dir: &Path) {
+    if !dir.exists() {
+        std::fs::create_dir(dir).unwrap();
     }
+}
 
+impl ShellState {
     /// Initalizes the shell state with all the informations needed
     ///
     /// cd_prev_dir doesnt hold a value, because there is no previous
@@ -39,7 +39,7 @@ impl ShellState {
             ].concat(),
             cd_prev_dir: None,
         };
-        ShellState::ensure_directory(Path::new(&shell_state.share_dir));
+        ensure_directory(Path::new(&shell_state.share_dir));
         shell_state
     }
 }
@@ -53,6 +53,7 @@ impl ShellState {
 pub struct ShellCommand {
     pub name: String,
     pub args: Vec<String>,
+    pub redirect: bool,
 }
 
 impl ShellCommand {
@@ -67,6 +68,7 @@ impl ShellCommand {
         ShellCommand {
             name: split_input_string[0].clone(),
             args: split_input_string[1..].to_vec(),
+            redirect: false,
         }
     }
     /// Takes a ShellCommand, figures out what to do given the name,
@@ -83,7 +85,8 @@ impl ShellCommand {
             "ls"   => print!("{}", ls(command.args)),
             "pwd"  => println!("{}", std::env::current_dir().unwrap().display()),
             _ => {
-                if command.args.contains(&String::from("|")) {
+                if command.args.contains(&String::from("|")) 
+                || command.args.contains(&String::from(">")) {
                     piped_cmd(PipedShellCommand::from(command));
                 } else {
                     cmd(command);
@@ -104,19 +107,26 @@ impl PipedShellCommand {
     /// Constructs a PipedShellCommand from a given ShellCommand.
     /// Takes a ShellCommand containing a pipe.
     pub fn from(input: ShellCommand) -> PipedShellCommand {
-        let parts = input.args.split(|arg| arg == &String::from("|"));
+        let re = if input.args.contains(&String::from(">")) {
+            true
+        } else {
+            false
+        };
+        let parts = input.args.split(|arg| arg == &String::from("|") || arg == &String::from(">"));
         let mut commands: Vec<ShellCommand> = Vec::new();
         for (idx, part) in parts.enumerate() {
             if idx == 0 {
                 let command = ShellCommand {
                     name: input.name.clone(),
                     args: part[0..].to_vec(),
+                    redirect: re.clone(),
                 };
                 commands.push(command);
             } else {
                 let command = ShellCommand {
                     name: part[0].clone(),
                     args: part[1..].to_vec(),
+                    redirect: re.clone(),
                 };
                 commands.push(command);
             }
@@ -251,6 +261,12 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
                 }
             }
         }
+    }
+    if pipe.commands[pipe.commands.len() - 1].redirect {
+        let file_path = &Path::new(&pipe.commands[pipe.commands.len() -1].name);
+        let mut file = std::fs::File::create(file_path).unwrap();
+        file.write_all(output_prev.as_bytes()).unwrap();
+        return;
     }
     match pipe.commands[pipe.commands.len() - 1].name.as_str() {
         "echo" => print!("{}",echo(pipe.commands[pipe.commands.len() - 1].args.clone())),
