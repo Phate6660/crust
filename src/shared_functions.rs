@@ -54,12 +54,23 @@ pub struct ShellCommand {
     pub name: String,
     pub args: Vec<String>,
     pub redirect: bool,
+    pub append: bool,
 }
 
 impl ShellCommand {
     /// Constructs a new ShellCommand and returns it.
     /// Takes the input given by the user, unprocessed
     pub fn new(input: String) -> ShellCommand {
+        let re = if input.contains(&String::from(">")) {
+            true
+        } else {
+            false
+        };
+        let append = if input.contains(&String::from(">>")) {
+            true
+        } else {
+            false
+        };
         let split_input: Vec<&str> = input.split_whitespace().collect();
         let mut split_input_string: Vec<String> = Vec::new();
         for arg in split_input {
@@ -68,7 +79,8 @@ impl ShellCommand {
         ShellCommand {
             name: split_input_string[0].clone(),
             args: split_input_string[1..].to_vec(),
-            redirect: false,
+            redirect: re.clone(),
+            append: append.clone(),
         }
     }
     /// Takes a ShellCommand, figures out what to do given the name,
@@ -107,12 +119,23 @@ impl PipedShellCommand {
     /// Constructs a PipedShellCommand from a given ShellCommand.
     /// Takes a ShellCommand containing a pipe.
     pub fn from(input: ShellCommand) -> PipedShellCommand {
-        let re = if input.args.contains(&String::from(">")) {
+        let mut re = if input.args.contains(&String::from(">")) {
             true
         } else {
             false
         };
-        let parts = input.args.split(|arg| arg == &String::from("|") || arg == &String::from(">"));
+        let append = if input.args.contains(&String::from(">>")) {
+            re = true;
+            true
+        } else {
+            false
+        };
+        let parts = input.args.split(|arg| 
+            arg == &String::from("|")  ||
+            // Check for appending first because `>` would match both.
+            arg == &String::from(">>") ||
+            arg == &String::from(">")
+        );
         let mut commands: Vec<ShellCommand> = Vec::new();
         for (idx, part) in parts.enumerate() {
             if idx == 0 {
@@ -120,6 +143,7 @@ impl PipedShellCommand {
                     name: input.name.clone(),
                     args: part[0..].to_vec(),
                     redirect: re.clone(),
+                    append: append.clone(),
                 };
                 commands.push(command);
             } else {
@@ -127,6 +151,7 @@ impl PipedShellCommand {
                     name: part[0].clone(),
                     args: part[1..].to_vec(),
                     redirect: re.clone(),
+                    append: append.clone(),
                 };
                 commands.push(command);
             }
@@ -264,21 +289,33 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
     }
     if pipe.commands[pipe.commands.len() - 1].redirect {
         let file_string = &pipe.commands[pipe.commands.len() -1].name;
-        let file_vec: Vec<&str> = file_string.split('/').collect();
-        let mut parent_dir = String::new();
-        let mut n = 0;
-        for i in &file_vec {
-            if n == file_vec.len() - 1 {
-                break;
+        if file_string.contains('/') {
+            let file_vec: Vec<&str> = file_string.split('/').collect();
+            let mut parent_dir = String::new();
+            let mut n = 0;
+            for i in &file_vec {
+                if n == file_vec.len() - 1 {
+                    break;
+                }
+                let part = format!("{}/", i);
+                parent_dir.push_str(&part);
+                n += 1;
             }
-            let part = format!("{}/", i);
-            parent_dir.push_str(&part);
-            n += 1;
+            ensure_directory(&Path::new(&parent_dir));
         }
-        ensure_directory(&Path::new(&parent_dir));
         let file_path = &Path::new(file_string);
-        let mut file = std::fs::File::create(file_path).unwrap();
-        file.write_all(output_prev.as_bytes()).unwrap();
+        if pipe.commands[pipe.commands.len() - 1].append {
+            let mut file = std::fs::OpenOptions::new()
+                .write(true)
+                .append(true)
+                .create(true)
+                .open(file_path)
+                .unwrap();
+            writeln!(file, "{}", output_prev).unwrap();
+        } else {
+            let mut file = std::fs::File::create(file_path).unwrap();
+            file.write_all(output_prev.as_bytes()).unwrap();
+        }
         return;
     }
     match pipe.commands[pipe.commands.len() - 1].name.as_str() {
