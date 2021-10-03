@@ -263,7 +263,20 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
         }
     }
     if pipe.commands[pipe.commands.len() - 1].redirect {
-        let file_path = &Path::new(&pipe.commands[pipe.commands.len() -1].name);
+        let file_string = &pipe.commands[pipe.commands.len() -1].name;
+        let file_vec: Vec<&str> = file_string.split('/').collect();
+        let mut parent_dir = String::new();
+        let mut n = 0;
+        for i in &file_vec {
+            if n == file_vec.len() - 1 {
+                break;
+            }
+            let part = format!("{}/", i);
+            parent_dir.push_str(&part);
+            n += 1;
+        }
+        ensure_directory(&Path::new(&parent_dir));
+        let file_path = &Path::new(file_string);
         let mut file = std::fs::File::create(file_path).unwrap();
         file.write_all(output_prev.as_bytes()).unwrap();
         return;
