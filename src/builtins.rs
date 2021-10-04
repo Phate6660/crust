@@ -1,5 +1,5 @@
 use crate::shared_functions::{
-    get_calc_vars, piped_cmd, PipedShellCommand, ShellCommand, ShellState,
+    get_calc_vars, piped_cmd, PipedShellCommand, Redirection, ShellCommand, ShellState,
 };
 use colored::*;
 
@@ -12,8 +12,10 @@ pub fn calc(args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "calc".to_string(),
             args,
-            redirect: false,
-            append: false,
+            redirection: Redirection {
+                    redirect: false,
+                    append: false,
+                },
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -21,8 +23,10 @@ pub fn calc(args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "calc".to_string(),
             args,
-            redirect: true,
-            append: true,
+            redirection: Redirection {
+                redirect: true,
+                append: true,
+            },
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -30,8 +34,10 @@ pub fn calc(args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "calc".to_string(),
             args,
-            redirect: true,
-            append: false,
+            redirection: Redirection {
+                redirect: true,
+                append: false,
+            },
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -96,8 +102,10 @@ pub fn echo(args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "echo".to_string(),
             args,
-            redirect: false,
-            append: false,
+            redirection: Redirection {
+                redirect: false,
+                append: false,
+            },
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -105,8 +113,10 @@ pub fn echo(args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "echo".to_string(),
             args,
-            redirect: true,
-            append: true,
+            redirection: Redirection {
+                redirect: true,
+                append: true,
+            },
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -114,8 +124,10 @@ pub fn echo(args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "echo".to_string(),
             args,
-            redirect: true,
-            append: false,
+            redirection: Redirection {
+                redirect: true,
+                append: false,
+            },
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -138,8 +150,10 @@ pub fn ls(mut args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "ls".to_string(),
             args,
-            redirect: false,
-            append: false,
+            redirection: Redirection {
+                redirect: false,
+                append: false,
+            },
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -147,8 +161,10 @@ pub fn ls(mut args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "ls".to_string(),
             args,
-            redirect: true,
-            append: true,
+            redirection: Redirection {
+                redirect: true,
+                append: true,
+            },
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -156,8 +172,10 @@ pub fn ls(mut args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "ls".to_string(),
             args,
-            redirect: true,
-            append: false,
+            redirection: Redirection {
+                redirect: true,
+                append: false,
+            },
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);

@@ -45,6 +45,12 @@ impl ShellState {
     }
 }
 
+#[derive(Debug)]
+pub struct Redirection {
+    pub redirect: bool,
+    pub append: bool,
+}
+
 /// This struct is used to construct a shellcommand,
 /// be it a builtin or external command.
 /// The `name` String holds the actual command name, like `echo` or `cargo`.
@@ -54,8 +60,7 @@ impl ShellState {
 pub struct ShellCommand {
     pub name: String,
     pub args: Vec<String>,
-    pub redirect: bool,
-    pub append: bool,
+    pub redirection: Redirection,
 }
 
 impl ShellCommand {
@@ -82,8 +87,10 @@ impl ShellCommand {
         ShellCommand {
             name: split_input_string[0].clone(),
             args: split_input_string[1..].to_vec(),
-            redirect: re,
-            append,
+            redirection: Redirection {
+                redirect: re,
+                append,
+            },
         }
     }
     /// Takes a ShellCommand, figures out what to do given the name,
@@ -149,16 +156,20 @@ impl PipedShellCommand {
                 let command = ShellCommand {
                     name: input.name.clone(),
                     args: part[0..].to_vec(),
-                    redirect: re,
-                    append,
+                    redirection: Redirection {
+                        redirect: re,
+                        append,
+                    },
                 };
                 commands.push(command);
             } else {
                 let command = ShellCommand {
                     name: part[0].clone(),
                     args: part[1..].to_vec(),
-                    redirect: re,
-                    append,
+                    redirection: Redirection {
+                        redirect: re,
+                        append,
+                    },
                 };
                 commands.push(command);
             }
@@ -294,7 +305,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             }
         }
     }
-    if pipe.commands[pipe.commands.len() - 1].redirect {
+    if pipe.commands[pipe.commands.len() - 1].redirection.redirect {
         let file_string = &pipe.commands[pipe.commands.len() - 1].name;
         if file_string.contains('/') {
             let file_vec: Vec<&str> = file_string.split('/').collect();
@@ -309,7 +320,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             ensure_directory(&Path::new(&parent_dir));
         }
         let file_path = &Path::new(file_string);
-        if pipe.commands[pipe.commands.len() - 1].append {
+        if pipe.commands[pipe.commands.len() - 1].redirection.append {
             let mut file = std::fs::OpenOptions::new()
                 .write(true)
                 .append(true)
