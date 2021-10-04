@@ -6,8 +6,10 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rustyline = { version = "9.0.0", optional = true }
 colored = "2.0.0"
+rustyline = { version = "9.0.0", optional = true }
+serde = { version = "1.0", features = ["derive"]}
+serde-lexpr = "0.1.0"
 
 [features]
 default = ["readline"]

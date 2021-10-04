@@ -1,4 +1,7 @@
 use crate::builtins::{calc, cd, echo, help, ls};
+
+use serde::{Deserialize, Serialize};
+
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -10,8 +13,15 @@ pub struct ShellState {
     pub user: String,
     pub home: String,
     pub na: String,
+    pub config_dir: String,
+    pub config_file: String,
     pub share_dir: String,
     pub cd_prev_dir: Option<PathBuf>,
+}
+
+#[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
+pub struct ShellConfig {
+    pub mpd: String,
 }
 
 impl ShellState {
@@ -26,21 +36,37 @@ impl ShellState {
     ///
     /// cd_prev_dir doesnt hold a value, because there is no previous
     /// dir yet
-    pub fn init() -> ShellState {
+    pub fn init() -> (ShellState, ShellConfig) {
+        let default_config = "((mpd . \"true\"))";
+        let home = ["/home/", std::env::var("USER").unwrap().as_str()].concat();
+        let config_dir = [home.clone(), "/.config/crusty".to_string()].concat();
+        let config_file = [config_dir.clone(), "/config.lisp".to_string()].concat();
+        let config_file_path = Path::new(&config_file);
+        if !config_file_path.exists() {
+            let mut file = std::fs::File::create(&config_file_path).unwrap();
+            file.write_all(default_config.as_bytes()).unwrap();
+        }
+        let mut file_output = String::new();
+        let mut file = std::fs::File::open(&config_file).unwrap();
+        file.read_to_string(&mut file_output).unwrap();
+        let shell_config: ShellConfig = serde_lexpr::from_str(&file_output).unwrap();
         let shell_state = ShellState {
             args: std::env::args().collect(),
             prompt: std::env::var("PROMPT").unwrap_or_else(|_| String::from("[crusty]: ")),
             user: std::env::var("USER").unwrap(),
-            home: ["/home/", std::env::var("USER").unwrap().as_str()].concat(),
+            home: home.clone(),
             na: String::from("no args"),
+            config_dir: config_dir.clone(),
+            config_file: config_file.clone(),
             share_dir: [
-                ["/home/", std::env::var("USER").unwrap().as_str()].concat().as_str(),
-                "/.local/share/crusty",
+                home.clone(),
+                "/.local/share/crusty".to_string(),
             ].concat(),
             cd_prev_dir: None,
         };
+        ShellState::ensure_directory(Path::new(&shell_state.config_dir));
         ShellState::ensure_directory(Path::new(&shell_state.share_dir));
-        shell_state
+        (shell_state, shell_config)
     }
 }
 

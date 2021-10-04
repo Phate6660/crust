@@ -20,7 +20,8 @@ fn process_input(shell_state: &mut ShellState, input: String) {
 
 #[cfg(feature = "readline")]
 fn main() {
-    let mut shell_state = ShellState::init();
+    let (mut shell_state, shell_config) = ShellState::init();
+    println!("{:#?}", shell_config);
     non_interactive(&mut shell_state);
     let mut rl = Editor::<()>::new();
     let history_file = [shell_state.share_dir.as_str(), "/crusty.history"].concat();
