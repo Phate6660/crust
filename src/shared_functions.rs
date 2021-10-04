@@ -36,8 +36,7 @@ impl ShellState {
             share_dir: [
                 ["/home/", std::env::var("USER").unwrap().as_str()].concat().as_str(),
                 "/.local/share/crusty",
-            ]
-            .concat(),
+            ].concat(),
             cd_prev_dir: None,
         };
         ShellState::ensure_directory(Path::new(&shell_state.share_dir));
@@ -45,6 +44,11 @@ impl ShellState {
     }
 }
 
+/// This struct is used to construct a shellcommand,
+/// be it a builtin or external command.
+/// The `name` String holds the actual command name, like `echo` or `cargo`.
+/// The `args` vector hold all arguments. This includes the pipe char,
+/// which is later used to detect and construct a pipe.
 #[derive(Debug)]
 pub struct ShellCommand {
     pub name: String,
@@ -52,6 +56,8 @@ pub struct ShellCommand {
 }
 
 impl ShellCommand {
+    /// Constructs a new ShellCommand and returns it.
+    /// Takes the input given by the user, unprocessed
     pub fn new(input: String) -> ShellCommand {
         let split_input: Vec<&str> = input.split_whitespace().collect();
         let mut split_input_string: Vec<String> = Vec::new();
@@ -63,12 +69,17 @@ impl ShellCommand {
             args: split_input_string[1..].to_vec(),
         }
     }
+    /// Takes a ShellCommand, figures out what to do given the name,
+    /// then executes it.
+    /// All builtins have to be listed here and point to their given function.
+    /// It is prefered that they return a string, which gets printed here,
+    /// and not by the actual function, to make testing easier.
     pub fn run(shell_state: &mut ShellState, command: ShellCommand) {
         match command.name.as_str() {
             "calc" => println!("{}", calc(command.args)),
             "cd"   => cd(shell_state, command),
             "echo" => println!("{}", echo(command.args)),
-            "help" => help(),
+            "help" => help(command.args),
             "ls"   => print!("{}", ls(command.args)),
             "pwd"  => println!("{}", std::env::current_dir().unwrap().display()),
             _ => {
@@ -82,12 +93,16 @@ impl ShellCommand {
     }
 }
 
+/// This struct is a vector, containing all commands and their arguments
+/// in a pipeline. Every command is represented by a ShellCommand.
 #[derive(Debug)]
 pub struct PipedShellCommand {
     pub commands: Vec<ShellCommand>,
 }
 
 impl PipedShellCommand {
+    /// Constructs a PipedShellCommand from a given ShellCommand.
+    /// Takes a ShellCommand containing a pipe.
     pub fn from(input: ShellCommand) -> PipedShellCommand {
         let parts = input.args.split(|arg| arg == &String::from("|"));
         let mut commands: Vec<ShellCommand> = Vec::new();
@@ -172,7 +187,9 @@ pub fn parse_input(op: &str) -> String {
     }
 }
 
-/// A function to pipe the output of one command into another.
+/// Takes a PipedShellCommand, iterating over all ShellCommand structs
+/// contained by it, checking if it is the first or the last in the pipeline,
+/// and taking the appropriate meassurements to pipe stdout.
 pub fn piped_cmd(pipe: PipedShellCommand) {
     let mut output_prev = String::new();
     match pipe.commands[0].name.as_str() {
