@@ -251,7 +251,37 @@ pub fn help(args: Vec<String>) {
 
 #[cfg(test)]
 mod tests {
-    use crate::builtins::echo;
+    use crate::builtins::{calc, echo};
+
+    fn calc_run(problem: Vec<String>, solution: String) {
+        let output = calc(problem);
+        let output = output.trim();
+        assert_eq!(output, solution);
+    }
+
+    #[test]
+    fn basic_calc_add() {
+        let problem: Vec<String> = vec!("1+1".to_string());
+        calc_run(problem, "2".to_string());
+    }
+
+    #[test]
+    fn basic_calc_sub() {
+        let problem: Vec<String> = vec!("2-1".to_string());
+        calc_run(problem, "1".to_string());
+    }
+
+    #[test]
+    fn basic_calc_mul() {
+        let problem: Vec<String> = vec!("2x4".to_string());
+        calc_run(problem, "8".to_string());
+    }
+
+    #[test]
+    fn basic_calc_div() {
+        let problem: Vec<String> = vec!("6/3".to_string());
+        calc_run(problem, "2".to_string());
+    }
 
     #[test]
     fn basic_echo() {
