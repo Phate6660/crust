@@ -12,10 +12,7 @@ pub fn calc(args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "calc".to_string(),
             args,
-            redirection: Redirection {
-                    redirect: false,
-                    append: false,
-                },
+            redirection: Redirection::NoOp,
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -23,10 +20,7 @@ pub fn calc(args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "calc".to_string(),
             args,
-            redirection: Redirection {
-                redirect: true,
-                append: true,
-            },
+            redirection: Redirection::Append,
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -34,10 +28,7 @@ pub fn calc(args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "calc".to_string(),
             args,
-            redirection: Redirection {
-                redirect: true,
-                append: false,
-            },
+            redirection: Redirection::Overwrite,
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -102,10 +93,7 @@ pub fn echo(args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "echo".to_string(),
             args,
-            redirection: Redirection {
-                redirect: false,
-                append: false,
-            },
+            redirection: Redirection::NoOp,
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -113,10 +101,7 @@ pub fn echo(args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "echo".to_string(),
             args,
-            redirection: Redirection {
-                redirect: true,
-                append: true,
-            },
+            redirection: Redirection::Append,
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -124,10 +109,7 @@ pub fn echo(args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "echo".to_string(),
             args,
-            redirection: Redirection {
-                redirect: true,
-                append: false,
-            },
+            redirection: Redirection::Overwrite,
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -150,10 +132,7 @@ pub fn ls(mut args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "ls".to_string(),
             args,
-            redirection: Redirection {
-                redirect: false,
-                append: false,
-            },
+            redirection: Redirection::NoOp,
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -161,10 +140,7 @@ pub fn ls(mut args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "ls".to_string(),
             args,
-            redirection: Redirection {
-                redirect: true,
-                append: true,
-            },
+            redirection: Redirection::Append,
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
@@ -172,10 +148,7 @@ pub fn ls(mut args: Vec<String>) -> String {
         let command = ShellCommand {
             name: "ls".to_string(),
             args,
-            redirection: Redirection {
-                redirect: true,
-                append: false,
-            },
+            redirection: Redirection::Overwrite,
         };
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);

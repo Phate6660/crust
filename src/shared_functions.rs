@@ -21,6 +21,7 @@ fn ensure_directory(dir: &Path) {
     }
 }
 
+
 impl ShellState {
     /// Initalizes the shell state with all the informations needed
     ///
@@ -46,9 +47,10 @@ impl ShellState {
 }
 
 #[derive(Debug)]
-pub struct Redirection {
-    pub redirect: bool,
-    pub append: bool,
+pub enum Redirection {
+    Overwrite,
+    Append,
+    NoOp,
 }
 
 /// This struct is used to construct a shellcommand,
@@ -67,18 +69,15 @@ impl ShellCommand {
     /// Constructs a new ShellCommand and returns it.
     /// Takes the input given by the user, unprocessed
     pub fn new(input: String) -> ShellCommand {
-        #[allow(clippy::needless_bool)]
-        let re = if input.contains(&String::from(">")) {
-            true
-        } else {
-            false
-        };
-        #[allow(clippy::needless_bool)]
-        let append = if input.contains(&String::from(">>")) {
-            true
-        } else {
-            false
-        };
+        fn get_redirection_type(input: &String) -> Redirection {
+            if input.contains(&String::from(">>")) {
+                Redirection::Append
+            } else if input.contains(&String::from(">")) {
+                Redirection::Overwrite
+            } else {
+                Redirection::NoOp
+            }
+        }
         let split_input: Vec<&str> = input.split_whitespace().collect();
         let mut split_input_string: Vec<String> = Vec::new();
         for arg in split_input {
@@ -87,10 +86,7 @@ impl ShellCommand {
         ShellCommand {
             name: split_input_string[0].clone(),
             args: split_input_string[1..].to_vec(),
-            redirection: Redirection {
-                redirect: re,
-                append,
-            },
+            redirection: get_redirection_type(&input),
         }
     }
     /// Takes a ShellCommand, figures out what to do given the name,
@@ -130,20 +126,15 @@ impl PipedShellCommand {
     /// Constructs a PipedShellCommand from a given ShellCommand.
     /// Takes a ShellCommand containing a pipe.
     pub fn from(input: ShellCommand) -> PipedShellCommand {
-        #[allow(clippy::needless_bool)]
-        let mut re = if input.args.contains(&String::from(">")) {
-            true
-        } else {
-            false
-        };
-        #[allow(clippy::needless_bool)]
-        let append = if input.args.contains(&String::from(">>")) {
-            // Need to fix the above check for `re`.
-            re = true;
-            true
-        } else {
-            false
-        };
+        fn get_redirection_type(input: &ShellCommand) -> Redirection {
+            if input.args.contains(&String::from(">>")) {
+                Redirection::Append
+            } else if input.args.contains(&String::from(">")) {
+                Redirection::Overwrite
+            } else {
+                Redirection::NoOp
+            }
+        }
         let parts = input.args.split(|arg| {
             arg == &String::from("|")  ||
             // Check for appending first because `>` would match both.
@@ -156,20 +147,14 @@ impl PipedShellCommand {
                 let command = ShellCommand {
                     name: input.name.clone(),
                     args: part[0..].to_vec(),
-                    redirection: Redirection {
-                        redirect: re,
-                        append,
-                    },
+                    redirection: get_redirection_type(&input),
                 };
                 commands.push(command);
             } else {
                 let command = ShellCommand {
                     name: part[0].clone(),
                     args: part[1..].to_vec(),
-                    redirection: Redirection {
-                        redirect: re,
-                        append,
-                    },
+                    redirection: get_redirection_type(&input),
                 };
                 commands.push(command);
             }
@@ -305,22 +290,26 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             }
         }
     }
-    if pipe.commands[pipe.commands.len() - 1].redirection.redirect {
-        let file_string = &pipe.commands[pipe.commands.len() - 1].name;
-        if file_string.contains('/') {
-            let file_vec: Vec<&str> = file_string.split('/').collect();
-            let mut parent_dir = String::new();
-            for (id, chunk) in file_vec.iter().enumerate() {
-                if id == file_vec.len() - 1 {
-                    break;
-                }
-                let part = format!("{}/", chunk);
-                parent_dir.push_str(&part);
+    let file_string = &pipe.commands[pipe.commands.len() - 1].name;
+    if file_string.contains('/') {
+        let file_vec: Vec<&str> = file_string.split('/').collect();
+        let mut parent_dir = String::new();
+        for (id, chunk) in file_vec.iter().enumerate() {
+            if id == file_vec.len() - 1 {
+                break;
             }
-            ensure_directory(&Path::new(&parent_dir));
+            let part = format!("{}/", chunk);
+            parent_dir.push_str(&part);
         }
-        let file_path = &Path::new(file_string);
-        if pipe.commands[pipe.commands.len() - 1].redirection.append {
+        ensure_directory(&Path::new(&parent_dir));
+    }
+    let file_path = &Path::new(file_string);
+    match pipe.commands[pipe.commands.len() - 1].redirection {
+        Redirection::Overwrite => {
+            let mut file = std::fs::File::create(file_path).unwrap();
+            file.write_all(output_prev.as_bytes()).unwrap();
+        },
+        Redirection::Append => {
             let mut file = std::fs::OpenOptions::new()
                 .write(true)
                 .append(true)
@@ -328,11 +317,8 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
                 .open(file_path)
                 .unwrap();
             writeln!(file, "{}", output_prev).unwrap();
-        } else {
-            let mut file = std::fs::File::create(file_path).unwrap();
-            file.write_all(output_prev.as_bytes()).unwrap();
-        }
-        return;
+        },
+        _ => (),
     }
     match pipe.commands[pipe.commands.len() - 1].name.as_str() {
         "echo" => print!("{}", echo(pipe.commands[pipe.commands.len() - 1].args.clone())),
