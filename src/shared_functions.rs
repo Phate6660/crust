@@ -103,6 +103,7 @@ impl ShellCommand {
             "pwd" => println!("{}", std::env::current_dir().unwrap().display()),
             _ => {
                 if command.args.contains(&String::from("|"))
+                    || command.args.contains(&String::from(">>"))
                     || command.args.contains(&String::from(">"))
                 {
                     piped_cmd(PipedShellCommand::from(command));
