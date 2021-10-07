@@ -21,7 +21,6 @@ fn ensure_directory(dir: &Path) {
     }
 }
 
-
 impl ShellState {
     /// Initalizes the shell state with all the informations needed
     ///
@@ -308,7 +307,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
         Redirection::Overwrite => {
             let mut file = std::fs::File::create(file_path).unwrap();
             file.write_all(output_prev.as_bytes()).unwrap();
-        },
+        }
         Redirection::Append => {
             let mut file = std::fs::OpenOptions::new()
                 .write(true)
@@ -317,8 +316,8 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
                 .open(file_path)
                 .unwrap();
             writeln!(file, "{}", output_prev).unwrap();
-        },
-        _ => (),
+        }
+        Redirection::NoOp => (),
     }
     match pipe.commands[pipe.commands.len() - 1].name.as_str() {
         "echo" => print!("{}", echo(pipe.commands[pipe.commands.len() - 1].args.clone())),
