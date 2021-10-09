@@ -1,5 +1,6 @@
 mod builtins;
 mod shared_functions;
+mod tests;
 
 #[cfg(feature = "readline")]
 use rustyline::{error::ReadlineError, Editor};
