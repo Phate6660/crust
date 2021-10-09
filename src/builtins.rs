@@ -251,7 +251,7 @@ pub fn help(args: Vec<String>) {
 
 #[cfg(test)]
 mod tests {
-    use crate::builtins::{calc, echo};
+    use crate::builtins::{calc, echo, ls};
 
     fn calc_run(problem: Vec<String>, solution: String) {
         let output = calc(problem);
@@ -292,6 +292,17 @@ mod tests {
         // trimming per test-basis right now to make tests succeed.
         let output = output.trim();
         assert_eq!(output, String::from("Success"));
+    }
+
+    #[test]
+    fn basic_ls_test() {
+        let directory = vec![String::from("src/")];
+        let output = ls(directory);
+        let output = output.trim();
+        let expected = "\u{1b}[32msrc\u{1b}[0m/\u{1b}[37mmain.rs\u{1b}[0m\n\
+                        \u{1b}[32msrc\u{1b}[0m/\u{1b}[37mshared_functions.rs\u{1b}[0m\n\
+                        \u{1b}[32msrc\u{1b}[0m/\u{1b}[37mbuiltins.rs\u{1b}[0m";
+        assert_eq!(expected, output);
     }
 
     #[test]
