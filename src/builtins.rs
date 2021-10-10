@@ -220,7 +220,8 @@ pub fn help(args: Vec<String>) {
             exit\n\
             help\n\
             ls\n\
-            pwd\
+            pwd\n\
+            prompt\
             "
         );
         return;
@@ -281,6 +282,15 @@ pub fn help(args: Vec<String>) {
                 "
             );
         }
+        "prompt" => {
+            println!(
+                "\
+                Can be set to a static string, by just setting the string in the PROMPT env variable,\n\
+                or can be set to a dynamic prompt, by including a command to be executed, by delimiting it with %E, in the prompt string.\n\
+                e.G.: `%Ewhoami%E@%Ehostname%E> `. This will, for my case, produce `zeno@aether> `.\
+                "
+            );
+        }
         _ => {
             println!(
                 "\
@@ -293,7 +303,8 @@ pub fn help(args: Vec<String>) {
                 exit\n\
                 help\n\
                 ls\n\
-                pwd\
+                pwd\n\
+                prompt\
                 "
             );
         }
