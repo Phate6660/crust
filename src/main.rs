@@ -28,7 +28,7 @@ fn main() {
         println!("There was no previous history to load.");
     }
     loop {
-        let prompt = rl.readline(&shell_state.prompt);
+        let prompt = rl.readline(&ShellState::eval_prompt(&shell_state.prompt));
         match prompt {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());

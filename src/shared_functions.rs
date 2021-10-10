@@ -43,9 +43,64 @@ impl ShellState {
         ensure_directory(Path::new(&shell_state.share_dir));
         shell_state
     }
+    pub fn eval_prompt(prompt_string: &String) -> String {
+        let split_prompt = prompt_string.split("%E").collect::<Vec<&str>>();
+        let mut commands: Vec<ShellCommand> = Vec::new();
+        {
+            let mut maybe_sep: bool = false;
+            let mut start_record: bool = false;
+            let mut command: String = String::new();
+            for c in prompt_string.chars() {
+                if !start_record && c == '%' {
+                    maybe_sep = true;
+                    continue;
+                }
+                if !start_record && maybe_sep && c == 'E' {
+                    maybe_sep = false;
+                    start_record = true;
+                    continue;
+                }
+                if start_record {
+                    command.push(c);
+                }
+                if start_record && c == '%' {
+                    maybe_sep = true;
+                    continue;
+                }
+                if maybe_sep && c == 'E' {
+                    maybe_sep = false;
+                    start_record = false;
+                    command.pop();
+                    command.pop();
+                    commands.push(ShellCommand::new(command.clone()));
+                    command = String::from("");
+                    continue;
+                }
+            }
+        }
+        let mut evaled_prompt: String = String::new();
+        for (idx, split) in split_prompt.iter().enumerate() {
+            if idx % 2 == 0 {
+                evaled_prompt.push_str(split);
+                continue;
+            }
+            // The part in the index maps the index of the split_prompt vector to the right command in the
+            // commands vector.
+            // Every second index of the split_prompt vector is a command to be executed.
+            // So the value at index 1 of the split_prompt is the appropriate command at index 0 of
+            // the commands vector.
+            // We add 1 to the index, because otherwise the division wouldn't return a valid
+            // interger, from which 1 can be subtracted to get the according index in the commands
+            // vector
+            let command_output = cmd(commands[if idx == 1 { 0 } else { ((idx + 1) / 2) - 1 }].clone());
+            evaled_prompt.push_str(command_output.as_str());
+            evaled_prompt.pop();
+        }
+        evaled_prompt
+    }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Redirection {
     Overwrite,
     Append,
@@ -57,7 +112,7 @@ pub enum Redirection {
 /// The `name` String holds the actual command name, like `echo` or `cargo`.
 /// The `args` vector hold all arguments. This includes the pipe char,
 /// which is later used to detect and construct a pipe.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ShellCommand {
     pub name: String,
     pub args: Vec<String>,
@@ -164,16 +219,25 @@ impl PipedShellCommand {
 }
 
 /// Helper function to a command, optionally with args.
-pub fn cmd(command: ShellCommand) {
+pub fn cmd(command: ShellCommand) -> String {
+    let mut output = String::new();
     let child = Command::new(&command.name)
         .args(&command.args)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
         .spawn()
         .or(Err(()));
     if child.is_err() {
         println!("Sorry, '{}' was not found!", command.name);
     } else {
-        child.unwrap().wait().unwrap();
+        child
+            .unwrap()
+            .stdout
+            .unwrap()
+            .read_to_string(&mut output)
+            .unwrap();
     }
+    output
 }
 
 /// Get the calculator vars (math_op, first_number, second_number) for calc.
