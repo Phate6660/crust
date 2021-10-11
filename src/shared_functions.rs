@@ -1,9 +1,10 @@
 use crate::builtins::{calc, cd, echo, help, ls};
+use std::env::var;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-/// Holds all important informations for and about the shell
+/// Holds all important informations for and about the shell.
 pub struct ShellState {
     pub args: Vec<String>,
     pub prompt: String,
@@ -14,7 +15,7 @@ pub struct ShellState {
     pub cd_prev_dir: Option<PathBuf>,
 }
 
-/// Ensures that a directory exists
+/// Ensures that a directory exists.
 fn ensure_directory(dir: &Path) {
     if !dir.exists() {
         std::fs::create_dir(dir).unwrap();
@@ -22,19 +23,18 @@ fn ensure_directory(dir: &Path) {
 }
 
 impl ShellState {
-    /// Initalizes the shell state with all the informations needed
+    /// Initalizes the shell state with all the informations needed.
     ///
-    /// cd_prev_dir doesnt hold a value, because there is no previous
-    /// dir yet
+    /// cd_prev_dir doesnt hold a value, because there is no previous dir yet.
     pub fn init() -> ShellState {
         let shell_state = ShellState {
             args: std::env::args().collect(),
-            prompt: std::env::var("PROMPT").unwrap_or_else(|_| String::from("[crusty]: ")),
-            user: std::env::var("USER").unwrap(),
-            home: ["/home/", std::env::var("USER").unwrap().as_str()].concat(),
+            prompt: var("PROMPT").unwrap_or_else(|_| String::from("[crusty]: ")),
+            user: var("USER").unwrap(),
+            home: ["/home/", var("USER").unwrap().as_str()].concat(),
             na: String::from("no args"),
             share_dir: [
-                ["/home/", std::env::var("USER").unwrap().as_str()].concat().as_str(),
+                ["/home/", var("USER").unwrap().as_str()].concat().as_str(),
                 "/.local/share/crusty",
             ]
             .concat(),
@@ -44,38 +44,36 @@ impl ShellState {
         shell_state
     }
     pub fn eval_prompt(prompt_string: &String) -> String {
-        let split_prompt = prompt_string.split("%E").collect::<Vec<&str>>();
+        let split_prompt: Vec<&str> = prompt_string.split("%E").collect();
         let mut commands: Vec<ShellCommand> = Vec::new();
-        {
-            let mut maybe_sep: bool = false;
-            let mut start_record: bool = false;
-            let mut command: String = String::new();
-            for c in prompt_string.chars() {
-                if !start_record && c == '%' {
-                    maybe_sep = true;
-                    continue;
-                }
-                if !start_record && maybe_sep && c == 'E' {
-                    maybe_sep = false;
-                    start_record = true;
-                    continue;
-                }
-                if start_record {
-                    command.push(c);
-                }
-                if start_record && c == '%' {
-                    maybe_sep = true;
-                    continue;
-                }
-                if maybe_sep && c == 'E' {
-                    maybe_sep = false;
-                    start_record = false;
-                    command.pop();
-                    command.pop();
-                    commands.push(ShellCommand::new(command.clone()));
-                    command = String::from("");
-                    continue;
-                }
+        let mut maybe_sep: bool = false;
+        let mut start_record: bool = false;
+        let mut command: String = String::new();
+        for c in prompt_string.chars() {
+            if !start_record && c == '%' {
+                maybe_sep = true;
+                continue;
+            }
+            if !start_record && maybe_sep && c == 'E' {
+                maybe_sep = false;
+                start_record = true;
+                continue;
+            }
+            if start_record {
+                command.push(c);
+            }
+            if start_record && c == '%' {
+                maybe_sep = true;
+                continue;
+            }
+            if maybe_sep && c == 'E' {
+                maybe_sep = false;
+                start_record = false;
+                command.pop();
+                command.pop();
+                commands.push(ShellCommand::new(command.clone()));
+                command = String::from("");
+                continue;
             }
         }
         let mut evaled_prompt: String = String::new();
@@ -84,15 +82,26 @@ impl ShellState {
                 evaled_prompt.push_str(split);
                 continue;
             }
-            // The part in the index maps the index of the split_prompt vector to the right command in the
-            // commands vector.
+            // The part in the index maps the index of the split_prompt 
+            // vector to the right command in the commands vector.
+            //
             // Every second index of the split_prompt vector is a command to be executed.
-            // So the value at index 1 of the split_prompt is the appropriate command at index 0 of
-            // the commands vector.
-            // We add 1 to the index, because otherwise the division wouldn't return a valid
-            // interger, from which 1 can be subtracted to get the according index in the commands
-            // vector
-            let command_output = cmd(commands[if idx == 1 { 0 } else { ((idx + 1) / 2) - 1 }].clone());
+            //
+            // So the value at index 1 of the split_prompt is 
+            // the appropriate command at index 0 of the commands vector.
+            //
+            // We add 1 to the index, because otherwise the division 
+            // wouldn't return a valid interger, from which 1 can be 
+            // subtracted to get the according index in the commands vector.
+            let command_output = cmd(
+                commands[
+                    if idx == 1 { 
+                        0 
+                    } else { 
+                        ((idx + 1) / 2) - 1
+                    }
+                ].clone()
+            );
             evaled_prompt.push_str(command_output.as_str());
             evaled_prompt.pop();
         }
@@ -121,7 +130,7 @@ pub struct ShellCommand {
 
 impl ShellCommand {
     /// Constructs a new ShellCommand and returns it.
-    /// Takes the input given by the user, unprocessed
+    /// Takes the input given by the user, unprocessed.
     pub fn new(input: String) -> ShellCommand {
         fn get_redirection_type(input: &String) -> Redirection {
             if input.contains(&String::from(">>")) {

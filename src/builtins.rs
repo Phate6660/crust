@@ -2,10 +2,11 @@ use crate::shared_functions::{
     get_calc_vars, piped_cmd, PipedShellCommand, Redirection, ShellCommand, ShellState,
 };
 use colored::*;
+use std::env::current_dir;
 
 /// Takes the `args` part of a ShellCommand struct and tries
-/// to evaluate the given mathematical expression, returning a String with the
-/// result.
+/// to evaluate the given mathematical expression, 
+/// returning a String with the result.
 pub fn calc(args: Vec<String>) -> String {
     let mut output = String::new();
     if args.contains(&"|".to_string()) {
@@ -57,11 +58,11 @@ fn cd_helper(dir: &str) {
 
 /// Used to change directory.
 /// Takes a ShellState and ShellCommand.
-/// ShellState is used to realize `cd -` fuctionality, but can be used for
-/// other options in the future.
+/// ShellState is used to realize `cd -` fuctionality, 
+/// but can be used for other options in the future.
 pub fn cd(shell_state: &mut ShellState, command: ShellCommand) {
     if command.args.is_empty() {
-        shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap());
+        shell_state.cd_prev_dir = Some(current_dir().unwrap());
         let user = std::env::var("USER").unwrap();
         let home = ["/home/", user.as_str()].concat();
         cd_helper(&home);
@@ -79,9 +80,9 @@ pub fn cd(shell_state: &mut ShellState, command: ShellCommand) {
                 shell_state.cd_prev_dir = None;
             }
         }
-        shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap());
+        shell_state.cd_prev_dir = Some(current_dir().unwrap());
     } else {
-        shell_state.cd_prev_dir = Some(std::env::current_dir().unwrap());
+        shell_state.cd_prev_dir = Some(current_dir().unwrap());
         cd_helper(&command.args[0]);
     }
 }
