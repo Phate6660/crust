@@ -12,6 +12,8 @@
 
 {{https://user-images.githubusercontent.com/44369810/136675409-34ebf5b6-16a1-4720-9a07-f0dd0fa0c650.png|crusty mascot}}
 
+^ //Say hello to cRUSTy's mascot :D// ^
+
 cRUSTy is a WIP shell written in Rust by [[https://github.com/Phate6660|Phate6660]] and [[https://github.com/TheOnAndOnlyZenomat|Zenomat]].
 
 == Running ==
