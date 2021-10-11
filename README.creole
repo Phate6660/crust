@@ -29,7 +29,7 @@ To run a non-interactive shell with a command:\\
 
 == Roadmap ==
 === Shell ===
-| =Feature       | =TODO | =WIP | =DONE |
+| FEATURE        | TODO  | WIP  | DONE  |
 | Basic commands |       |      | X     |
 | CMDs with args |       |      | X     |
 | Piping         |       |      | X     |
@@ -41,7 +41,7 @@ To run a non-interactive shell with a command:\\
 | Scripting      | X     |      |       |
 
 ==== Prompt ====
-| =Feature              | =TODO | =WIP | =DONE |
+| FEATURE               | TODO  | WIP  | DONE  |
 | Set via env var       |       |      | X     |
 | Command output        |       | X    |       |
 | Colors                | X     |      |       |
@@ -49,7 +49,7 @@ To run a non-interactive shell with a command:\\
 | Replaceable variables | X     |      |       |
 
 ==== Rustyline ====
-| =Feature               | =TODO | =WIP | =DONE |
+| FEATURE                | TODO  | WIP  | DONE  |
 | Basic line editing     |       |      | X     |
 | Command history        |       |      | X     |
 | Completions            | X     |      |       |
@@ -58,30 +58,30 @@ To run a non-interactive shell with a command:\\
 
 === Builtins ===
 ==== calc ====
-| =Feature   | =TODO | =WIP | =DONE |
+| FEATURE    | TODO  | WIP  | DONE  |
 | Basic math |       |      | X     |
 | Equations  | X     |      |       |
 | PEMDAS     | X     |      |       |
 
 ==== cd ====
-| =Feature       | =TODO | =WIP | =DONE |
+| FEATURE        | TODO  | WIP  | DONE  |
 | Exact paths    |       |      | X     |
 | Relative paths |       |      | X     |
 | Previous dir   |       |      | X     |
 
 ==== echo ====
-| =Feature         | =TODO | =WIP | =DONE |
+| FEATURE          | TODO  | WIP  | DONE  |
 | Basic output     |       |      | X     |
 | Escape sequences | X     |      |       |
 
 ==== help ====
-| =Feature                    | =TODO | =WIP | =DONE |
+| FEATURE                     | TODO  | WIP  | DONE  |
 | Invidual helps for builtins |       |      | X     |
 | List builtins               |       |      | X     |
 | Quick start / tutorial      | X     |      |       |
 
 ==== ls ====
-| =Feature             | =TODO | =WIP | =DONE |
+| FEATURE              | TODO  | WIP  | DONE  |
 | Basic colored output |       |      | X     |
 | Cross-platform       |       |      | X     |
 | List files           |       |      | X     |
