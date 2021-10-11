@@ -1,0 +1,88 @@
+{{{
+ ▄████████    ▄████████ ███    █▄     ▄████████     ███     ▄██   ▄   
+███    ███   ███    ███ ███    ███   ███    ███ ▀█████████▄ ███   ██▄ 
+███    █▀    ███    ███ ███    ███   ███    █▀     ▀███▀▀██ ███▄▄▄███ 
+███         ▄███▄▄▄▄██▀ ███    ███   ███            ███   ▀ ▀▀▀▀▀▀███ 
+███        ▀▀███▀▀▀▀▀   ███    ███ ▀███████████     ███     ▄██   ███ 
+███    █▄  ▀███████████ ███    ███          ███     ███     ███   ███ 
+███    ███   ███    ███ ███    ███    ▄█    ███     ███     ███   ███ 
+████████▀    ███    ███ ████████▀   ▄████████▀     ▄████▀    ▀█████▀  
+             ███    ███
+}}}
+
+{{https://user-images.githubusercontent.com/44369810/136675409-34ebf5b6-16a1-4720-9a07-f0dd0fa0c650.png|crusty mascot}}
+
+^ //Say hello to cRUSTy's mascot :D// ^
+
+cRUSTy is a WIP shell written in Rust by [[https://github.com/Phate6660|Phate6660]] and [[https://github.com/TheOnAndOnlyZenomat|Zenomat]].
+
+Note: The CI is a little broken right now, not sure why it's failing.\\
+However, I do test before pushing/merging so everything should work.\\
+Once testing via //cargo test// is finished, I'll fix the CI.
+
+== Running ==
+To run an interactive shell:\\
+//cargo run --release//
+
+To run a non-interactive shell with a command:\\
+//cargo run --release -- -c "echo test | sed s/test/success/g"//
+
+== Roadmap ==
+=== Shell ===
+| FEATURE        | TODO  | WIP  | DONE  |
+| Basic commands |       |      | X     |
+| CMDs with args |       |      | X     |
+| Piping         |       |      | X     |
+| Redirection    |       |      | X     |
+| Builtins       |       | X    |       |
+| Line editor    |       | X    |       |
+| Prompt         |       | X    |       |
+| Job control    | X     |      |       |
+| Scripting      | X     |      |       |
+
+==== Prompt ====
+| FEATURE               | TODO  | WIP  | DONE  |
+| Set via env var       |       |      | X     |
+| Command output        |       | X    |       |
+| Colors                | X     |      |       |
+| File content          | X     |      |       |
+| Replaceable variables | X     |      |       |
+
+==== Rustyline ====
+| FEATURE                | TODO  | WIP  | DONE  |
+| Basic line editing     |       |      | X     |
+| Command history        |       |      | X     |
+| Completions            | X     |      |       |
+| Modifiable keybindings | X     |      |       |
+| Syntax highlighting    | X     |      |       |
+
+=== Builtins ===
+==== calc ====
+| FEATURE    | TODO  | WIP  | DONE  |
+| Basic math |       |      | X     |
+| Equations  | X     |      |       |
+| PEMDAS     | X     |      |       |
+
+==== cd ====
+| FEATURE        | TODO  | WIP  | DONE  |
+| Exact paths    |       |      | X     |
+| Relative paths |       |      | X     |
+| Previous dir   |       |      | X     |
+
+==== echo ====
+| FEATURE          | TODO  | WIP  | DONE  |
+| Basic output     |       |      | X     |
+| Escape sequences | X     |      |       |
+
+==== help ====
+| FEATURE                     | TODO  | WIP  | DONE  |
+| Invidual helps for builtins |       |      | X     |
+| List builtins               |       |      | X     |
+| Quick start / tutorial      | X     |      |       |
+
+==== ls ====
+| FEATURE              | TODO  | WIP  | DONE  |
+| Basic colored output |       |      | X     |
+| Cross-platform       |       |      | X     |
+| List files           |       |      | X     |
+| Additional details   | X     |      |       |
