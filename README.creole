@@ -1,4 +1,3 @@
-{{{
  ▄▀▄▄▄▄   ▄▀▀▄▀▀▀▄  ▄▀▀▄ ▄▀▀▄  ▄▀▀▀▀▄  ▄▀▀▀█▀▀▄  ▄▀▀▄ ▀▀▄ 
 █ █    ▌ █   █   █ █   █    █ █ █   ▐ █    █  ▐ █   ▀▄ ▄▀ 
 ▐ █      ▐  █▀▀█▀  ▐  █    █     ▀▄   ▐   █     ▐     █   
@@ -6,22 +5,20 @@
  ▄▀▄▄▄▄▀ █     █      ▀▄▄▄▄▀   █▀▀▀    ▄▀           ▄▀    
 █     ▐  ▐     ▐               ▐      █             █     
 ▐                                     ▐             ▐
-}}}
 
 {{https://user-images.githubusercontent.com/44369810/136675409-34ebf5b6-16a1-4720-9a07-f0dd0fa0c650.png|crusty mascot}}
 
 cRUSTy is a shell written in Rust by [[Phate6660|https://github.com/Phate6660]] and [[https://github.com/TheOnAndOnlyZenomat|Zenomat]].
 
-## Running ##
-To run an interactive shell:
-//cargo run --release//
+== Running ==
+To run an interactive shell:\\
+cargo run --release
 
-To run a non-interactive shell with a command:
-//cargo run --release -- -c "echo test | sed s/test/success/g"//
+To run a non-interactive shell with a command:\\
+cargo run --release -- -c "echo test | sed s/test/success/g"
 
-## Roadmap ##
-
-### Shell ###
+== Roadmap ==
+=== Shell ===
 | =Feature       | =TODO | =WIP | =DONE |
 | Basic commands |       |      | X     |
 | CMDs with args |       |      | X     |
@@ -33,7 +30,7 @@ To run a non-interactive shell with a command:
 | Job control    | X     |      |       |
 | Scripting      | X     |      |       |
 
-#### Prompt ####
+==== Prompt ====
 | =Feature              | =TODO | =WIP | =DONE |
 | Set via env var       |       |      | X     |
 | Colors                | X     |      |       |
@@ -41,7 +38,7 @@ To run a non-interactive shell with a command:
 | Command output        |       | X    |       |
 | File content          | X     |      |       |
 
-#### Rustyline ####
+==== Rustyline ====
 | =Feature               | =TODO | =WIP | =DONE |
 | Basic line editing     |       |      | X     |
 | Command history        |       |      | X     |
@@ -49,32 +46,31 @@ To run a non-interactive shell with a command:
 | Modifiable keybindings | X     |      |       |
 | Syntax highlighting    | X     |      |       |
 
-### Builtins ###
-
-#### calc ####
+=== Builtins ===
+==== calc ====
 | =Feature   | =TODO | =WIP | =DONE |
 | Basic math |       |      | X     |
 | PEMDAS     | X     |      |       |
 | Equations  | X     |      |       |
 
-#### cd ####
+==== cd ====
 | =Feature       | =TODO | =WIP | =DONE |
 | Exact paths    |       |      | X     |
 | Relative paths |       |      | X     |
 | Previous dir   |       |      | X     |
 
-#### echo ####
+==== echo ====
 | =Feature         | =TODO | =WIP | =DONE |
 | Basic output     |       |      | X     |
 | Escape sequences | X     |      |       |
 
-#### help ####
+==== help ====
 | =Feature                    | =TODO | =WIP | =DONE |
 | List builtins               |       |      | X     |
 | Invidual helps for builtins |       |      | X     |
 | Quick start / tutorial      | X     |      |       |
 
-#### ls ####
+==== ls ====
 | =Feature             | =TODO | =WIP | =DONE |
 | List files           |       |      | X     |
 | Basic colored output |       |      | X     |
