@@ -14,7 +14,8 @@
 
 ^ //Say hello to cRUSTy's mascot :D// ^
 
-cRUSTy is a WIP shell written in Rust by [[https://github.com/Phate6660|Phate6660]] and [[https://github.com/TheOnAndOnlyZenomat|Zenomat]].\\
+cRUSTy is a WIP shell written in Rust by [[https://github.com/Phate6660|Phate6660]] and [[https://github.com/TheOnAndOnlyZenomat|Zenomat]].
+
 Note: The CI is a little broken right now, not sure why it's failing.\\
 However, I do test before pushing/merging so everything should work.\\
 Once testing via //cargo test// is finished, I'll fix the CI.
