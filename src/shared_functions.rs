@@ -1,4 +1,4 @@
-use crate::builtins::{calc, cd, echo, help, ls};
+use crate::builtins::{calc::calc, cd::cd, echo::echo, help::help, ls::ls};
 use std::env::var;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
