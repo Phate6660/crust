@@ -129,11 +129,7 @@ pub struct ShellCommand {
     pub redirection: Redirection
 }
 
-pub fn return_shellcommand(
-    name: String, 
-    args: Vec<String>, 
-    redirection: Redirection
-) -> ShellCommand {
+pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirection) -> ShellCommand {
     ShellCommand {
         name,
         args,
@@ -173,11 +169,11 @@ impl ShellCommand {
     pub fn run(shell_state: &mut ShellState, command: ShellCommand) {
         match command.name.as_str() {
             | "calc" => println!("{}", calc(command.args)),
-            | "cd"   => cd(shell_state, command),
+            | "cd" => cd(shell_state, command),
             | "echo" => println!("{}", echo(command.args)),
             | "help" => help(command.args),
-            | "ls"   => print!("{}", ls(command.args)),
-            | "pwd"  => println!("{}", std::env::current_dir().unwrap().display()),
+            | "ls" => print!("{}", ls(command.args)),
+            | "pwd" => println!("{}", std::env::current_dir().unwrap().display()),
             | _ => {
                 if command.args.contains(&String::from("|"))
                     || command.args.contains(&String::from(">>"))
@@ -388,7 +384,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
     match pipe.commands[pipe.commands.len() - 1].name.as_str() {
         | "echo" => print!("{}", echo(pipe.commands[pipe.commands.len() - 1].args.clone())),
         | "calc" => print!("{}", calc(pipe.commands[pipe.commands.len() - 1].args.clone())),
-        | "ls"   => print!("{}", ls(pipe.commands[pipe.commands.len() - 1].args.clone())),
+        | "ls" => print!("{}", ls(pipe.commands[pipe.commands.len() - 1].args.clone())),
         | _ => {
             let child = Command::new(pipe.commands[pipe.commands.len() - 1].name.clone())
                 .args(&pipe.commands[pipe.commands.len() - 1].args)
