@@ -180,7 +180,7 @@ impl ShellCommand {
                 {
                     piped_cmd(PipedShellCommand::from(command));
                 } else {
-                    cmd(command);
+                    print!("{}", cmd(command));
                 }
             }
         }
