@@ -151,8 +151,34 @@ impl ShellCommand {
         }
         let split_input: Vec<&str> = input.split_whitespace().collect();
         let mut split_input_string: Vec<String> = Vec::new();
+        let mut col_quoted_args: bool = false;
+        let mut quoted_args = String::new();
         for arg in split_input {
-            split_input_string.push(arg.to_string());
+            if !col_quoted_args {
+                if arg.starts_with("\"") {
+                    if arg.ends_with("\"") {
+                        split_input_string.push((&arg[1..arg.len() - 1]).to_string());
+                        continue;
+                    }
+                    col_quoted_args = true;
+                    // strip the leading `"` from the arg
+                    quoted_args.push_str(&arg[1..]);
+                    quoted_args.push_str(" ");
+                } else {
+                    split_input_string.push(arg.to_string());
+                }
+            } else {
+                quoted_args.push_str(arg);
+                if !arg.ends_with("\"") {
+                    quoted_args.push_str(" ");
+                    continue;
+                }
+                // remove the trailing `"` from the arg
+                quoted_args.pop();
+                col_quoted_args = false;
+                split_input_string.push(quoted_args);
+                quoted_args = String::from("");
+            }
         }
         ShellCommand {
             name: split_input_string[0].clone(),
@@ -180,7 +206,7 @@ impl ShellCommand {
                 {
                     piped_cmd(PipedShellCommand::from(command));
                 } else {
-                    cmd(command);
+                    print!("{}", cmd(command));
                 }
             }
         }
