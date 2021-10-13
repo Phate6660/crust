@@ -128,6 +128,14 @@ pub struct ShellCommand {
     pub redirection: Redirection,
 }
 
+pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirection) -> ShellCommand {
+    ShellCommand {
+        name,
+        args,
+        redirection
+    }
+}
+
 impl ShellCommand {
     /// Constructs a new ShellCommand and returns it.
     /// Takes the input given by the user, unprocessed.

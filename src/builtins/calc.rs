@@ -1,5 +1,5 @@
 use crate::shared_functions::{
-    get_calc_vars, piped_cmd, PipedShellCommand, Redirection, ShellCommand
+    get_calc_vars, piped_cmd, return_shellcommand, PipedShellCommand, Redirection
 };
 
 /// Takes the `args` part of a ShellCommand struct and tries
@@ -8,27 +8,15 @@ use crate::shared_functions::{
 pub fn calc(args: Vec<String>) -> String {
     let mut output = String::new();
     if args.contains(&"|".to_string()) {
-        let command = ShellCommand {
-            name: "calc".to_string(),
-            args,
-            redirection: Redirection::NoOp,
-        };
+        let command = return_shellcommand("calc".to_string(), args, Redirection::NoOp);
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
     } else if args.contains(&">>".to_string()) {
-        let command = ShellCommand {
-            name: "calc".to_string(),
-            args,
-            redirection: Redirection::Append,
-        };
+        let command = return_shellcommand("calc".to_string(), args, Redirection::Append);
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
     } else if args.contains(&">".to_string()) {
-        let command = ShellCommand {
-            name: "calc".to_string(),
-            args,
-            redirection: Redirection::Overwrite,
-        };
+        let command = return_shellcommand("calc".to_string(), args, Redirection::Overwrite);
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
     } else {

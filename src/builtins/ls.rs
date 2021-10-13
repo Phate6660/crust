@@ -1,5 +1,5 @@
 use crate::shared_functions::{
-    piped_cmd, PipedShellCommand, Redirection, ShellCommand
+    piped_cmd, return_shellcommand, PipedShellCommand, Redirection
 };
 use colored::*;
 
@@ -9,29 +9,16 @@ pub fn ls(mut args: Vec<String>) -> String {
     if args.is_empty() {
         args.push(".".to_string());
     }
-
     if args.contains(&"|".to_string()) {
-        let command = ShellCommand {
-            name: "ls".to_string(),
-            args,
-            redirection: Redirection::NoOp,
-        };
+        let command = return_shellcommand("ls".to_string(), args, Redirection::NoOp);
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
     } else if args.contains(&">>".to_string()) {
-        let command = ShellCommand {
-            name: "ls".to_string(),
-            args,
-            redirection: Redirection::Append,
-        };
+        let command = return_shellcommand("ls".to_string(), args, Redirection::Append);
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
     } else if args.contains(&">".to_string()) {
-        let command = ShellCommand {
-            name: "ls".to_string(),
-            args,
-            redirection: Redirection::Overwrite,
-        };
+        let command = return_shellcommand("ls".to_string(), args, Redirection::Overwrite);
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
     } else {
