@@ -1,0 +1,28 @@
+chain_width                = 80
+# Don't combine control expressions with function calls.
+combine_control_expr       = false
+# Replace multiple `_` with a single `..` in tuple patterns.
+condense_wildcard_suffixes = true
+# Flatten any single-line expressions.
+fn_single_line             = true
+# Format string literals if they are too long.
+format_strings             = true
+# Set the layout of imports in a block.
+imports_layout             = "HorizontalVertical"
+# Include leading pipes in match statements for easier visuals.
+match_arm_leading_pipes    = "Always"
+# Put a trailing comma after a block-based match arm.
+match_block_trailing_comma = true
+# Set the max code with to 120.
+# This will automatically set the margins of a lot of other options.
+max_width                  = 120
+# When structs, slices, arrays, and block/array-like macros are 
+# used as the last argument in an expression list, allow them to overflow 
+# (like blocks/closures) instead of being indented on a new line.
+overflow_delimited_expr    = true
+# Reports TODOs in the code.
+report_todo                = "Always"
+# Removes commas from the last element.
+trailing_comma             = "Never"
+unstable_features          = true
+wrap_comments              = true
