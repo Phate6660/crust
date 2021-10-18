@@ -1,6 +1,4 @@
-use crate::shared_functions::{
-    piped_cmd, return_shellcommand, PipedShellCommand, Redirection
-};
+use crate::shared_functions::{piped_cmd, return_shellcommand, PipedShellCommand, Redirection};
 
 /// Just like you know it. Takes the args part of ShellCommand and prints them.
 pub fn echo(args: Vec<String>) -> String {

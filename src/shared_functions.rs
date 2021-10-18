@@ -12,7 +12,7 @@ pub struct ShellState {
     pub home: String,
     pub na: String,
     pub share_dir: String,
-    pub cd_prev_dir: Option<PathBuf>,
+    pub cd_prev_dir: Option<PathBuf>
 }
 
 /// Ensures that a directory exists.
@@ -27,6 +27,7 @@ impl ShellState {
     ///
     /// cd_prev_dir doesnt hold a value, because there is no previous dir yet.
     pub fn init() -> ShellState {
+        #[rustfmt::skip]
         let shell_state = ShellState {
             args: std::env::args().collect(),
             prompt: var("PROMPT").unwrap_or_else(|_| String::from("[crusty]: ")),
@@ -36,8 +37,7 @@ impl ShellState {
             share_dir: [
                 ["/home/", var("USER").unwrap().as_str()].concat().as_str(),
                 "/.local/share/crusty",
-            ]
-            .concat(),
+            ].concat(),
             cd_prev_dir: None,
         };
         ensure_directory(Path::new(&shell_state.share_dir));
@@ -82,22 +82,23 @@ impl ShellState {
                 evaled_prompt.push_str(split);
                 continue;
             }
-            // The part in the index maps the index of the split_prompt 
+            // The part in the index maps the index of the split_prompt
             // vector to the right command in the commands vector.
             //
             // Every second index of the split_prompt vector is a command to be executed.
             //
-            // So the value at index 1 of the split_prompt is 
+            // So the value at index 1 of the split_prompt is
             // the appropriate command at index 0 of the commands vector.
             //
-            // We add 1 to the index, because otherwise the division 
-            // wouldn't return a valid interger, from which 1 can be 
+            // We add 1 to the index, because otherwise the division
+            // wouldn't return a valid interger, from which 1 can be
             // subtracted to get the according index in the commands vector.
+            #[rustfmt::skip]
             let command_output = cmd(
                 commands[
-                    if idx == 1 { 
-                        0 
-                    } else { 
+                    if idx == 1 {
+                        0
+                    } else {
                         ((idx + 1) / 2) - 1
                     }
                 ].clone()
@@ -113,7 +114,7 @@ impl ShellState {
 pub enum Redirection {
     Overwrite,
     Append,
-    NoOp,
+    NoOp
 }
 
 /// This struct is used to construct a shellcommand,
@@ -125,7 +126,7 @@ pub enum Redirection {
 pub struct ShellCommand {
     pub name: String,
     pub args: Vec<String>,
-    pub redirection: Redirection,
+    pub redirection: Redirection
 }
 
 pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirection) -> ShellCommand {
@@ -183,7 +184,7 @@ impl ShellCommand {
         ShellCommand {
             name: split_input_string[0].clone(),
             args: split_input_string[1..].to_vec(),
-            redirection: get_redirection_type(&input),
+            redirection: get_redirection_type(&input)
         }
     }
     /// Takes a ShellCommand, figures out what to do given the name,
@@ -217,7 +218,7 @@ impl ShellCommand {
 /// in a pipeline. Every command is represented by a ShellCommand.
 #[derive(Debug)]
 pub struct PipedShellCommand {
-    pub commands: Vec<ShellCommand>,
+    pub commands: Vec<ShellCommand>
 }
 
 impl PipedShellCommand {
@@ -245,14 +246,14 @@ impl PipedShellCommand {
                 let command = ShellCommand {
                     name: input.name.clone(),
                     args: part[0..].to_vec(),
-                    redirection: get_redirection_type(&input),
+                    redirection: get_redirection_type(&input)
                 };
                 commands.push(command);
             } else {
                 let command = ShellCommand {
                     name: part[0].clone(),
                     args: part[1..].to_vec(),
-                    redirection: get_redirection_type(&input),
+                    redirection: get_redirection_type(&input)
                 };
                 commands.push(command);
             }
@@ -273,12 +274,7 @@ pub fn cmd(command: ShellCommand) -> String {
     if child.is_err() {
         println!("Sorry, '{}' was not found!", command.name);
     } else {
-        child
-            .unwrap()
-            .stdout
-            .unwrap()
-            .read_to_string(&mut output)
-            .unwrap();
+        child.unwrap().stdout.unwrap().read_to_string(&mut output).unwrap();
     }
     output
 }
@@ -317,9 +313,7 @@ pub fn non_interactive(shell_state: &mut ShellState) {
 pub fn parse_input(op: &str) -> String {
     if op == "interactive" {
         let mut input = String::new();
-        std::io::stdin()
-            .read_line(&mut input)
-            .expect("failed to read user input");
+        std::io::stdin().read_line(&mut input).expect("failed to read user input");
         input.trim().to_string()
     } else {
         std::env::args()
@@ -351,12 +345,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             if child.is_err() {
                 println!("{} failed", pipe.commands[0].name.clone());
             }
-            child
-                .unwrap()
-                .stdout
-                .unwrap()
-                .read_to_string(&mut output_prev)
-                .unwrap();
+            child.unwrap().stdout.unwrap().read_to_string(&mut output_prev).unwrap();
         }
     }
     for (idx, command) in pipe.commands.iter().enumerate() {
@@ -378,20 +367,11 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
                         .or(Err(()));
                     match child {
                         Ok(mut child) => {
-                            child
-                                .stdin
-                                .take()
-                                .unwrap()
-                                .write_all(output_prev.as_bytes())
-                                .unwrap();
+                            child.stdin.take().unwrap().write_all(output_prev.as_bytes()).unwrap();
                             output_prev = "".to_string();
-                            child
-                                .stdout
-                                .unwrap()
-                                .read_to_string(&mut output_prev)
-                                .unwrap();
-                        }
-                        Err(_) => println!("{} failed", command.name.clone()),
+                            child.stdout.unwrap().read_to_string(&mut output_prev).unwrap();
+                        },
+                        Err(_) => println!("{} failed", command.name.clone())
                     }
                 }
             }
@@ -415,7 +395,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
         Redirection::Overwrite => {
             let mut file = std::fs::File::create(file_path).unwrap();
             file.write_all(output_prev.as_bytes()).unwrap();
-        }
+        },
         Redirection::Append => {
             let mut file = std::fs::OpenOptions::new()
                 .write(true)
@@ -424,8 +404,8 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
                 .open(file_path)
                 .unwrap();
             writeln!(file, "{}", output_prev).unwrap();
-        }
-        Redirection::NoOp => (),
+        },
+        Redirection::NoOp => ()
     }
     match pipe.commands[pipe.commands.len() - 1].name.as_str() {
         "echo" => print!("{}", echo(pipe.commands[pipe.commands.len() - 1].args.clone())),
@@ -440,19 +420,14 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
                 .or(Err(()));
             match child {
                 Ok(mut child) => {
-                    child
-                        .stdin
-                        .take()
-                        .unwrap()
-                        .write_all(output_prev.as_bytes())
-                        .unwrap();
+                    child.stdin.take().unwrap().write_all(output_prev.as_bytes()).unwrap();
                     let mut output = String::new();
                     match child.stdout.take().unwrap().read_to_string(&mut output) {
                         Err(why) => println!("ERROR: could not read cmd2 stdout: {}", why),
-                        Ok(_) => println!("{}", output),
+                        Ok(_) => println!("{}", output)
                     }
-                }
-                Err(_) => println!("{} failed", pipe.commands[pipe.commands.len() - 1].name.clone()),
+                },
+                Err(_) => println!("{} failed", pipe.commands[pipe.commands.len() - 1].name.clone())
             }
         }
     }

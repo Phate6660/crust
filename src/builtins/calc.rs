@@ -1,9 +1,7 @@
-use crate::shared_functions::{
-    get_calc_vars, piped_cmd, return_shellcommand, PipedShellCommand, Redirection
-};
+use crate::shared_functions::{get_calc_vars, piped_cmd, return_shellcommand, PipedShellCommand, Redirection};
 
 /// Takes the `args` part of a ShellCommand struct and tries
-/// to evaluate the given mathematical expression, 
+/// to evaluate the given mathematical expression,
 /// returning a String with the result.
 pub fn calc(args: Vec<String>) -> String {
     let mut output = String::new();
@@ -27,7 +25,7 @@ pub fn calc(args: Vec<String>) -> String {
             "/" => output.push_str(format!("{}", first_number / second_number).as_str()),
             "+" => output.push_str(format!("{}", first_number + second_number).as_str()),
             "-" => output.push_str(format!("{}", first_number - second_number).as_str()),
-            _ => output.push_str(format!("Error, '{}' is an unsupported operation.", math_op).as_str()),
+            _ => output.push_str(format!("Error, '{}' is an unsupported operation.", math_op).as_str())
         }
     }
     output
