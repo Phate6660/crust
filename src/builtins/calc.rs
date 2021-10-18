@@ -21,11 +21,11 @@ pub fn calc(args: Vec<String>) -> String {
         let problem = args.concat();
         let (math_op, first_number, second_number) = get_calc_vars(&problem);
         match math_op {
-            | "x" => output.push_str(format!("{}", first_number * second_number).as_str()),
-            | "/" => output.push_str(format!("{}", first_number / second_number).as_str()),
-            | "+" => output.push_str(format!("{}", first_number + second_number).as_str()),
-            | "-" => output.push_str(format!("{}", first_number - second_number).as_str()),
-            | _ => output.push_str(format!("Error, '{}' is an unsupported operation.", math_op).as_str())
+            "x" => output.push_str(format!("{}", first_number * second_number).as_str()),
+            "/" => output.push_str(format!("{}", first_number / second_number).as_str()),
+            "+" => output.push_str(format!("{}", first_number + second_number).as_str()),
+            "-" => output.push_str(format!("{}", first_number - second_number).as_str()),
+            _ => output.push_str(format!("Error, '{}' is an unsupported operation.", math_op).as_str())
         }
     }
     output

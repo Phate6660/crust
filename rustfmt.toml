@@ -9,8 +9,6 @@ fn_single_line             = true
 format_strings             = true
 # Set the layout of imports in a block.
 imports_layout             = "HorizontalVertical"
-# Include leading pipes in match statements for easier visuals.
-match_arm_leading_pipes    = "Always"
 # Put a trailing comma after a block-based match arm.
 match_block_trailing_comma = true
 # Set the max code with to 120.

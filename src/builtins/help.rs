@@ -23,50 +23,50 @@ pub fn help(args: Vec<String>) {
         return;
     }
     match args[0].as_str() {
-        | "calc" => {
+        "calc" => {
             println!(
                 "\
                 Supports +, -, /, x for two numbers.\nE.g. 1+1, 4/2, 2x4, 2-1"
             );
         },
-        | "cd" => {
+        "cd" => {
             println!(
                 "\
                 Takes a absolute or relative path and changes directory to it.\n`cd -` will take you to your previous \
                  dir."
             );
         },
-        | "echo" => {
+        "echo" => {
             println!(
                 "\
                 Takes n amount of arguments and prints them to stdout."
             );
         },
-        | "exit" => {
+        "exit" => {
             println!(
                 "\
                 Exits the shell with the given exit code."
             );
         },
-        | "help" => {
+        "help" => {
             println!(
                 "\
                 Returns information about the builtin commands."
             );
         },
-        | "ls" => {
+        "ls" => {
             println!(
                 "\
                 Lists the content of a directory."
             );
         },
-        | "pwd" => {
+        "pwd" => {
             println!(
                 "\
                 Prints the working directory."
             );
         },
-        | "prompt" => {
+        "prompt" => {
             println!(
                 "\
                 Can be set to a static string, by just setting the string in the PROMPT env variable,\nor can be set \
@@ -74,7 +74,7 @@ pub fn help(args: Vec<String>) {
                  string.\ne.G.: `%Ewhoami%E@%Ehostname%E> `. This will, for my case, produce `zeno@aether> `."
             );
         },
-        | _ => {
+        _ => {
             println!(
                 "\
                 cRUSTy [https://github.com/Phate6660/crusty]\n\

@@ -168,13 +168,13 @@ impl ShellCommand {
     /// and not by the actual function, to make testing easier.
     pub fn run(shell_state: &mut ShellState, command: ShellCommand) {
         match command.name.as_str() {
-            | "calc" => println!("{}", calc(command.args)),
-            | "cd" => cd(shell_state, command),
-            | "echo" => println!("{}", echo(command.args)),
-            | "help" => help(command.args),
-            | "ls" => print!("{}", ls(command.args)),
-            | "pwd" => println!("{}", std::env::current_dir().unwrap().display()),
-            | _ => {
+            "calc" => println!("{}", calc(command.args)),
+            "cd" => cd(shell_state, command),
+            "echo" => println!("{}", echo(command.args)),
+            "help" => help(command.args),
+            "ls" => print!("{}", ls(command.args)),
+            "pwd" => println!("{}", std::env::current_dir().unwrap().display()),
+            _ => {
                 if command.args.contains(&String::from("|"))
                     || command.args.contains(&String::from(">>"))
                     || command.args.contains(&String::from(">"))
@@ -306,10 +306,10 @@ pub fn parse_input(op: &str) -> String {
 pub fn piped_cmd(pipe: PipedShellCommand) {
     let mut output_prev = String::new();
     match pipe.commands[0].name.as_str() {
-        | "echo" => output_prev = echo(pipe.commands[0].args.clone()),
-        | "calc" => output_prev = calc(pipe.commands[0].args.clone()),
-        | "ls" => output_prev = ls(pipe.commands[0].args.clone()),
-        | _ => {
+        "echo" => output_prev = echo(pipe.commands[0].args.clone()),
+        "calc" => output_prev = calc(pipe.commands[0].args.clone()),
+        "ls" => output_prev = ls(pipe.commands[0].args.clone()),
+        _ => {
             let child = Command::new(pipe.commands[0].name.clone())
                 .args(&pipe.commands[0].args)
                 .stdin(Stdio::piped())
@@ -329,10 +329,10 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             break;
         } else {
             match command.name.as_str() {
-                | "echo" => output_prev = echo(command.args.clone()),
-                | "calc" => output_prev = calc(command.args.clone()),
-                | "ls" => output_prev = ls(command.args.clone()),
-                | _ => {
+                "echo" => output_prev = echo(command.args.clone()),
+                "calc" => output_prev = calc(command.args.clone()),
+                "ls" => output_prev = ls(command.args.clone()),
+                _ => {
                     let child = Command::new(command.name.clone())
                         .args(&command.args)
                         .stdout(Stdio::piped())
@@ -340,12 +340,12 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
                         .spawn()
                         .or(Err(()));
                     match child {
-                        | Ok(mut child) => {
+                        Ok(mut child) => {
                             child.stdin.take().unwrap().write_all(output_prev.as_bytes()).unwrap();
                             output_prev = "".to_string();
                             child.stdout.unwrap().read_to_string(&mut output_prev).unwrap();
                         },
-                        | Err(_) => println!("{} failed", command.name.clone())
+                        Err(_) => println!("{} failed", command.name.clone())
                     }
                 }
             }
@@ -366,11 +366,11 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
     }
     let file_path = &Path::new(file_string);
     match pipe.commands[pipe.commands.len() - 1].redirection {
-        | Redirection::Overwrite => {
+        Redirection::Overwrite => {
             let mut file = std::fs::File::create(file_path).unwrap();
             file.write_all(output_prev.as_bytes()).unwrap();
         },
-        | Redirection::Append => {
+        Redirection::Append => {
             let mut file = std::fs::OpenOptions::new()
                 .write(true)
                 .append(true)
@@ -379,13 +379,13 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
                 .unwrap();
             writeln!(file, "{}", output_prev).unwrap();
         },
-        | Redirection::NoOp => ()
+        Redirection::NoOp => ()
     }
     match pipe.commands[pipe.commands.len() - 1].name.as_str() {
-        | "echo" => print!("{}", echo(pipe.commands[pipe.commands.len() - 1].args.clone())),
-        | "calc" => print!("{}", calc(pipe.commands[pipe.commands.len() - 1].args.clone())),
-        | "ls" => print!("{}", ls(pipe.commands[pipe.commands.len() - 1].args.clone())),
-        | _ => {
+        "echo" => print!("{}", echo(pipe.commands[pipe.commands.len() - 1].args.clone())),
+        "calc" => print!("{}", calc(pipe.commands[pipe.commands.len() - 1].args.clone())),
+        "ls" => print!("{}", ls(pipe.commands[pipe.commands.len() - 1].args.clone())),
+        _ => {
             let child = Command::new(pipe.commands[pipe.commands.len() - 1].name.clone())
                 .args(&pipe.commands[pipe.commands.len() - 1].args)
                 .stdout(Stdio::piped())
@@ -393,15 +393,15 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
                 .spawn()
                 .or(Err(()));
             match child {
-                | Ok(mut child) => {
+                Ok(mut child) => {
                     child.stdin.take().unwrap().write_all(output_prev.as_bytes()).unwrap();
                     let mut output = String::new();
                     match child.stdout.take().unwrap().read_to_string(&mut output) {
-                        | Err(why) => println!("ERROR: could not read cmd2 stdout: {}", why),
-                        | Ok(_) => println!("{}", output)
+                        Err(why) => println!("ERROR: could not read cmd2 stdout: {}", why),
+                        Ok(_) => println!("{}", output)
                     }
                 },
-                | Err(_) => println!("{} failed", pipe.commands[pipe.commands.len() - 1].name.clone())
+                Err(_) => println!("{} failed", pipe.commands[pipe.commands.len() - 1].name.clone())
             }
         }
     }

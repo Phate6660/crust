@@ -30,7 +30,7 @@ fn main() {
     loop {
         let prompt = rl.readline(&ShellState::eval_prompt(&shell_state.prompt));
         match prompt {
-            | Ok(line) => {
+            Ok(line) => {
                 rl.add_history_entry(line.as_str());
                 if line.starts_with("exit") {
                     if line.contains(' ') {
@@ -44,15 +44,15 @@ fn main() {
                 }
                 process_input(&mut shell_state, line);
             },
-            | Err(ReadlineError::Interrupted) => {
+            Err(ReadlineError::Interrupted) => {
                 println!("CTRL-C");
                 break;
             },
-            | Err(ReadlineError::Eof) => {
+            Err(ReadlineError::Eof) => {
                 println!("CTRL-D");
                 break;
             },
-            | Err(err) => {
+            Err(err) => {
                 println!("Error: {:?}", err);
                 break;
             }
