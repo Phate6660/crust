@@ -137,6 +137,83 @@ pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirec
     }
 }
 
+/// Tokenizes the input, returning a vector of every character in `input`.
+fn tokenize(input: &str) -> Vec<&str> {
+    let mut tokenized_vec: Vec<&str> = input.split("").collect();
+    // The first and last elements are blank and need to be removed.
+    tokenized_vec.remove(0);
+    tokenized_vec.remove(tokenized_vec.len() - 1);
+    tokenized_vec
+}
+
+/// Creates a lexified vector from a tokenized one.
+/// Example, if the tokenized vec was:
+/// `["e", "c", "h", "o", 
+///   " ", 
+///   "\"", "a", "r", "g", " ", "1" "\"", 
+///   " ", 
+///   "\"", "a", "r", "g", " ", "2" "\""]`
+/// It would return:
+/// `["echo", "arg 1", "arg 2"]`
+fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
+    fn push_to_vec(from_vec: &mut Vec<String>, to_vec: &mut Vec<String>) {
+        let element = from_vec.concat();
+        if element == "" {
+            return;
+        }
+        println!("pushing '{}'", element);
+        to_vec.push(element.to_string());
+        from_vec.clear();
+    }
+    let mut lexed_vec: Vec<String> = Vec::new();
+    let mut tmp_vec: Vec<String> = Vec::new();
+    let mut quoted_vec: Vec<String> = Vec::new();
+    let mut quoted = false;
+    let mut quotes_ran = false;
+    for character in tokenized_vec {
+        match character.clone() {
+            "a" | "b" | "c" | "d" | "e" | 
+            "f" | "g" | "h" | "i" | "j" | 
+            "k" | "l" | "m" | "n" | "o" | 
+            "p" | "q" | "r" | "s" | "t" | 
+            "u" | "v" | "w" | "x" | "y" | 
+            "z" | "0" | "1" | "2" | "3" |
+            "4" | "5" | "6" | "7" | "8" | "9" => {
+                if quoted {
+                    println!("pushing '{}' to quoted_vec", character);
+                    quoted_vec.push(character.to_string());
+                } else {
+                    println!("pushing '{}' to tmp_vec", character);
+                    tmp_vec.push(character.to_string());
+                }
+            },
+            r##"""## | "'" => {
+                if quoted { quotes_ran = true; }
+                if quotes_ran {
+                    println!("pushing quoted_vec to tmp_vec:");
+                    push_to_vec(&mut quoted_vec, &mut lexed_vec);
+                    quoted = false;
+                    quotes_ran = false;
+                } else {
+                    println!("quote found. start pushing to quoted_vec!");
+                    quoted = true;
+                }
+            },
+            " " => { 
+                println!("space found.");
+                if quoted {
+                    quoted_vec.push(character.to_string());
+                } else {
+                    println!("pushing tmp_vec to lexed_vec:");
+                    push_to_vec(&mut tmp_vec, &mut lexed_vec);
+                }
+            },
+            _ => println!("'{}' is an unsupported character.", character),
+        }
+    }
+    lexed_vec
+}
+
 impl ShellCommand {
     /// Constructs a new ShellCommand and returns it.
     /// Takes the input given by the user, unprocessed.
@@ -150,11 +227,14 @@ impl ShellCommand {
                 Redirection::NoOp
             }
         }
-        let split_input: Vec<&str> = input.split_whitespace().collect();
+        let tokenized_vec = tokenize(&input);
+        println!("tokenized_vec = {:#?}", tokenized_vec);
+        let lexed_vec = lex_tokenized_input(&tokenized_vec);
+        println!("lexed_vec = {:#?}", lexed_vec);
         let mut split_input_string: Vec<String> = Vec::new();
         let mut col_quoted_args: bool = false;
         let mut quoted_args = String::new();
-        for arg in split_input {
+        for arg in lexed_vec {
             if !col_quoted_args {
                 if arg.starts_with("\"") {
                     if arg.ends_with("\"") {
@@ -169,7 +249,7 @@ impl ShellCommand {
                     split_input_string.push(arg.to_string());
                 }
             } else {
-                quoted_args.push_str(arg);
+                quoted_args.push_str(&arg);
                 if !arg.ends_with("\"") {
                     quoted_args.push_str(" ");
                     continue;
