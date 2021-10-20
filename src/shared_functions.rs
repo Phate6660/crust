@@ -159,10 +159,10 @@ fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
     fn push_to_vec(from_vec: &mut Vec<String>, to_vec: &mut Vec<String>) {
         let element = from_vec.concat();
         // Don't push to the vector if element is empty.
-        if element == "" {
+        if element.is_empty() {
             return;
         }
-        to_vec.push(element.to_string());
+        to_vec.push(element);
         from_vec.clear();
     }
     // This is the final vector that will be returned.
@@ -177,6 +177,7 @@ fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
     let mut quotes_ran = false;
     for (idx, character) in tokenized_vec.iter().enumerate() {
         // Keep the clone, it makes life much easier type-wise.
+        #[allow(clippy::clone_double_ref)]
         match character.clone() {
             // TODO: Figure out a more efficient way for this.
             // Ranges only work with chars and numbers.
