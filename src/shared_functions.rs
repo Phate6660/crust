@@ -158,6 +158,7 @@ fn tokenize(input: &str) -> Vec<&str> {
 fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
     fn push_to_vec(from_vec: &mut Vec<String>, to_vec: &mut Vec<String>) {
         let element = from_vec.concat();
+        // Don't push to the vector if element is empty.
         if element == "" {
             return;
         }
@@ -165,12 +166,18 @@ fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
         to_vec.push(element.to_string());
         from_vec.clear();
     }
+    // This is the final vector that will be returned.
     let mut lexed_vec: Vec<String> = Vec::new();
+    // This is a temporary vec that gets pushed to lexed_vec.
     let mut tmp_vec: Vec<String> = Vec::new();
+    // Same as tmp_vec except this is for anything in quotes.
     let mut quoted_vec: Vec<String> = Vec::new();
+    // These two bools are used for checking if the character is in quotes,
+    // and if the quotes part of the match statement was ran.
     let mut quoted = false;
     let mut quotes_ran = false;
     for (idx, character) in tokenized_vec.iter().enumerate() {
+        // Keep the clone, it makes life much easier type-wise.
         match character.clone() {
             // TODO: Figure out a more efficient way for this.
             // Ranges only work with chars and numbers.
@@ -196,7 +203,7 @@ fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
             },
             r##"""## | "'" => {
                 if quotes_ran {
-                    println!("pushing quoted_vec to tmp_vec:");
+                    println!("pushing quoted_vec to lexed_vec:");
                     push_to_vec(&mut quoted_vec, &mut lexed_vec);
                     quoted = false;
                     quotes_ran = false;
