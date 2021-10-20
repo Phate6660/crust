@@ -170,7 +170,7 @@ fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
     let mut quoted_vec: Vec<String> = Vec::new();
     let mut quoted = false;
     let mut quotes_ran = false;
-    for character in tokenized_vec {
+    for (idx, character) in tokenized_vec.iter().enumerate() {
         match character.clone() {
             // TODO: Figure out a more efficient way for this.
             // Ranges only work with chars and numbers.
@@ -180,13 +180,18 @@ fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
             "p" | "q" | "r" | "s" | "t" | 
             "u" | "v" | "w" | "x" | "y" | 
             "z" | "0" | "1" | "2" | "3" |
-            "4" | "5" | "6" | "7" | "8" | "9" => {
+            "4" | "5" | "6" | "7" | "8" | 
+            "9" | "." | "/" | "(" | ")" => {
                 if quoted {
                     println!("pushing '{}' to quoted_vec", character);
                     quoted_vec.push(character.to_string());
                 } else {
                     println!("pushing '{}' to tmp_vec", character);
                     tmp_vec.push(character.to_string());
+                    // Needed to push the last element to lexed_vec.
+                    if idx == tokenized_vec.len() - 1 {
+                        push_to_vec(&mut tmp_vec, &mut lexed_vec);
+                    }
                 }
             },
             r##"""## | "'" => {
