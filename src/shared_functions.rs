@@ -172,6 +172,8 @@ fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
     let mut quotes_ran = false;
     for character in tokenized_vec {
         match character.clone() {
+            // TODO: Figure out a more efficient way for this.
+            // Ranges only work with chars and numbers.
             "a" | "b" | "c" | "d" | "e" | 
             "f" | "g" | "h" | "i" | "j" | 
             "k" | "l" | "m" | "n" | "o" | 
