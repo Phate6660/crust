@@ -162,7 +162,6 @@ fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
         if element == "" {
             return;
         }
-        println!("pushing '{}'", element);
         to_vec.push(element.to_string());
         from_vec.clear();
     }
@@ -190,10 +189,8 @@ fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
             "4" | "5" | "6" | "7" | "8" | 
             "9" | "." | "/" | "(" | ")" => {
                 if quoted {
-                    println!("pushing '{}' to quoted_vec", character);
                     quoted_vec.push(character.to_string());
                 } else {
-                    println!("pushing '{}' to tmp_vec", character);
                     tmp_vec.push(character.to_string());
                     // Needed to push the last element to lexed_vec.
                     if idx == tokenized_vec.len() - 1 {
@@ -203,22 +200,18 @@ fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
             },
             r##"""## | "'" => {
                 if quotes_ran {
-                    println!("pushing quoted_vec to lexed_vec:");
                     push_to_vec(&mut quoted_vec, &mut lexed_vec);
                     quoted = false;
                     quotes_ran = false;
                 } else {
-                    println!("quote found. start pushing to quoted_vec!");
                     quoted = true;
                     quotes_ran = true;
                 }
             },
             " " => { 
-                println!("space found.");
                 if quoted {
                     quoted_vec.push(character.to_string());
                 } else {
-                    println!("pushing tmp_vec to lexed_vec:");
                     push_to_vec(&mut tmp_vec, &mut lexed_vec);
                 }
             },
@@ -242,9 +235,7 @@ impl ShellCommand {
             }
         }
         let tokenized_vec = tokenize(&input);
-        println!("tokenized_vec = {:#?}", tokenized_vec);
         let lexed_vec = lex_tokenized_input(&tokenized_vec);
-        println!("lexed_vec = {:#?}", lexed_vec);
         ShellCommand {
             name: lexed_vec[0].clone(),
             args: lexed_vec[1..].to_vec(),
