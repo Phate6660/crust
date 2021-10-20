@@ -190,7 +190,6 @@ fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
                 }
             },
             r##"""## | "'" => {
-                if quoted { quotes_ran = true; }
                 if quotes_ran {
                     println!("pushing quoted_vec to tmp_vec:");
                     push_to_vec(&mut quoted_vec, &mut lexed_vec);
@@ -199,6 +198,7 @@ fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
                 } else {
                     println!("quote found. start pushing to quoted_vec!");
                     quoted = true;
+                    quotes_ran = true;
                 }
             },
             " " => { 
