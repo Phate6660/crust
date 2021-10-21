@@ -148,11 +148,13 @@ fn tokenize(input: &str) -> Vec<&str> {
 
 /// Creates a lexified vector from a tokenized one.
 /// Example, if the tokenized vec was:
-/// `["e", "c", "h", "o", 
-///   " ", 
-///   "\"", "a", "r", "g", " ", "1" "\"", 
-///   " ", 
-///   "\"", "a", "r", "g", " ", "2" "\""]`
+/// ```
+/// ["e", "c", "h", "o",
+///  " ",
+///  "\"", "a", "r", "g", " ", "1" "\"",
+///  " ",
+///  "\"", "a", "r", "g", " ", "2" "\""]
+/// ```
 /// It would return:
 /// `["echo", "arg 1", "arg 2"]`
 fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
