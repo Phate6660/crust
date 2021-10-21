@@ -12,7 +12,7 @@ pub struct ShellState {
     pub home: String,
     pub na: String,
     pub share_dir: String,
-    pub cd_prev_dir: Option<PathBuf>,
+    pub cd_prev_dir: Option<PathBuf>
 }
 
 /// Ensures that a directory exists.
@@ -27,6 +27,7 @@ impl ShellState {
     ///
     /// cd_prev_dir doesnt hold a value, because there is no previous dir yet.
     pub fn init() -> ShellState {
+        #[rustfmt::skip]
         let shell_state = ShellState {
             args: std::env::args().collect(),
             prompt: var("PROMPT").unwrap_or_else(|_| String::from("[crusty]: ")),
@@ -36,14 +37,13 @@ impl ShellState {
             share_dir: [
                 ["/home/", var("USER").unwrap().as_str()].concat().as_str(),
                 "/.local/share/crusty",
-            ]
-            .concat(),
+            ].concat(),
             cd_prev_dir: None,
         };
         ensure_directory(Path::new(&shell_state.share_dir));
         shell_state
     }
-    pub fn eval_prompt(prompt_string: &String) -> String {
+    pub fn eval_prompt(prompt_string: &str) -> String {
         let split_prompt: Vec<&str> = prompt_string.split("%E").collect();
         let mut commands: Vec<ShellCommand> = Vec::new();
         let mut maybe_sep: bool = false;
@@ -82,22 +82,23 @@ impl ShellState {
                 evaled_prompt.push_str(split);
                 continue;
             }
-            // The part in the index maps the index of the split_prompt 
+            // The part in the index maps the index of the split_prompt
             // vector to the right command in the commands vector.
             //
             // Every second index of the split_prompt vector is a command to be executed.
             //
-            // So the value at index 1 of the split_prompt is 
+            // So the value at index 1 of the split_prompt is
             // the appropriate command at index 0 of the commands vector.
             //
-            // We add 1 to the index, because otherwise the division 
-            // wouldn't return a valid interger, from which 1 can be 
+            // We add 1 to the index, because otherwise the division
+            // wouldn't return a valid interger, from which 1 can be
             // subtracted to get the according index in the commands vector.
+            #[rustfmt::skip]
             let command_output = cmd(
                 commands[
-                    if idx == 1 { 
-                        0 
-                    } else { 
+                    if idx == 1 {
+                        0
+                    } else {
                         ((idx + 1) / 2) - 1
                     }
                 ].clone()
@@ -113,7 +114,7 @@ impl ShellState {
 pub enum Redirection {
     Overwrite,
     Append,
-    NoOp,
+    NoOp
 }
 
 /// This struct is used to construct a shellcommand,
@@ -125,7 +126,7 @@ pub enum Redirection {
 pub struct ShellCommand {
     pub name: String,
     pub args: Vec<String>,
-    pub redirection: Redirection,
+    pub redirection: Redirection
 }
 
 pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirection) -> ShellCommand {
@@ -136,54 +137,111 @@ pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirec
     }
 }
 
+/// Tokenizes the input, returning a vector of every character in `input`.
+fn tokenize(input: &str) -> Vec<String> {
+    let mut tokenized_vec: Vec<&str> = input.split("").collect();
+    // The first and last elements are blank and need to be removed.
+    tokenized_vec.remove(0);
+    tokenized_vec.remove(tokenized_vec.len() - 1);
+    tokenized_vec.iter().map(|t| t.to_string()).collect()
+}
+
+/// Creates a lexified vector from a tokenized one.
+/// Example, if the tokenized vec was:
+/// ```
+/// ["e", "c", "h", "o",
+///  " ",
+///  "\"", "a", "r", "g", " ", "1" "\"",
+///  " ",
+///  "\"", "a", "r", "g", " ", "2" "\""]
+/// ```
+/// It would return:
+/// `["echo", "arg 1", "arg 2"]`
+fn lex_tokenized_input(tokenized_vec: &[String]) -> Vec<String> {
+    fn push_to_vec(from_vec: &mut Vec<String>, to_vec: &mut Vec<String>) {
+        let element = from_vec.concat();
+        // Don't push to the vector if element is empty.
+        if element.is_empty() {
+            return;
+        }
+        to_vec.push(element);
+        from_vec.clear();
+    }
+    // This is the final vector that will be returned.
+    let mut lexed_vec: Vec<String> = Vec::new();
+    // This is a temporary vec that gets pushed to lexed_vec.
+    let mut tmp_vec: Vec<String> = Vec::new();
+    // Same as tmp_vec except this is for anything in quotes.
+    let mut quoted_vec: Vec<String> = Vec::new();
+    // These two bools are used for checking if the character is in quotes,
+    // and if the quotes part of the match statement was ran.
+    let mut quoted = false;
+    let mut quotes_ran = false;
+    for (idx, character) in tokenized_vec.iter().enumerate() {
+        match character.as_str() {
+            // TODO: Figure out a more efficient way for this.
+            // Ranges only work with chars and numbers.
+            "a" | "b" | "c" | "d" | "e" | 
+            "f" | "g" | "h" | "i" | "j" | 
+            "k" | "l" | "m" | "n" | "o" | 
+            "p" | "q" | "r" | "s" | "t" | 
+            "u" | "v" | "w" | "x" | "y" | 
+            "z" | "0" | "1" | "2" | "3" |
+            "4" | "5" | "6" | "7" | "8" | 
+            "9" | "." | "/" | "(" | ")" |
+            ">" | "|" => {
+                if quoted {
+                    quoted_vec.push(character.to_string());
+                } else {
+                    tmp_vec.push(character.to_string());
+                    // Needed to push the last element to lexed_vec.
+                    if idx == tokenized_vec.len() - 1 {
+                        push_to_vec(&mut tmp_vec, &mut lexed_vec);
+                    }
+                }
+            },
+            "\"" | "'" => {
+                if quotes_ran {
+                    push_to_vec(&mut quoted_vec, &mut lexed_vec);
+                    quoted = false;
+                    quotes_ran = false;
+                } else {
+                    quoted = true;
+                    quotes_ran = true;
+                }
+            },
+            " " => { 
+                if quoted {
+                    quoted_vec.push(character.to_string());
+                } else {
+                    push_to_vec(&mut tmp_vec, &mut lexed_vec);
+                }
+            },
+            _ => println!("'{}' is an unsupported character.", character),
+        }
+    }
+    lexed_vec
+}
+
 impl ShellCommand {
     /// Constructs a new ShellCommand and returns it.
     /// Takes the input given by the user, unprocessed.
     pub fn new(input: String) -> ShellCommand {
-        fn get_redirection_type(input: &String) -> Redirection {
-            if input.contains(&String::from(">>")) {
+        fn get_redirection_type(input: &str) -> Redirection {
+            if input.contains(">>") {
                 Redirection::Append
-            } else if input.contains(&String::from(">")) {
+            } else if input.contains('>') {
                 Redirection::Overwrite
             } else {
                 Redirection::NoOp
             }
         }
-        let split_input: Vec<&str> = input.split_whitespace().collect();
-        let mut split_input_string: Vec<String> = Vec::new();
-        let mut col_quoted_args: bool = false;
-        let mut quoted_args = String::new();
-        for arg in split_input {
-            if !col_quoted_args {
-                if arg.starts_with("\"") {
-                    if arg.ends_with("\"") {
-                        split_input_string.push((&arg[1..arg.len() - 1]).to_string());
-                        continue;
-                    }
-                    col_quoted_args = true;
-                    // strip the leading `"` from the arg
-                    quoted_args.push_str(&arg[1..]);
-                    quoted_args.push_str(" ");
-                } else {
-                    split_input_string.push(arg.to_string());
-                }
-            } else {
-                quoted_args.push_str(arg);
-                if !arg.ends_with("\"") {
-                    quoted_args.push_str(" ");
-                    continue;
-                }
-                // remove the trailing `"` from the arg
-                quoted_args.pop();
-                col_quoted_args = false;
-                split_input_string.push(quoted_args);
-                quoted_args = String::from("");
-            }
-        }
+        let tokenized_vec = tokenize(&input);
+        let lexed_vec = lex_tokenized_input(&tokenized_vec);
         ShellCommand {
-            name: split_input_string[0].clone(),
-            args: split_input_string[1..].to_vec(),
-            redirection: get_redirection_type(&input),
+            name: lexed_vec[0].clone(),
+            args: lexed_vec[1..].to_vec(),
+            redirection: get_redirection_type(&input)
         }
     }
     /// Takes a ShellCommand, figures out what to do given the name,
@@ -217,7 +275,7 @@ impl ShellCommand {
 /// in a pipeline. Every command is represented by a ShellCommand.
 #[derive(Debug)]
 pub struct PipedShellCommand {
-    pub commands: Vec<ShellCommand>,
+    pub commands: Vec<ShellCommand>
 }
 
 impl PipedShellCommand {
@@ -245,14 +303,14 @@ impl PipedShellCommand {
                 let command = ShellCommand {
                     name: input.name.clone(),
                     args: part[0..].to_vec(),
-                    redirection: get_redirection_type(&input),
+                    redirection: get_redirection_type(&input)
                 };
                 commands.push(command);
             } else {
                 let command = ShellCommand {
                     name: part[0].clone(),
                     args: part[1..].to_vec(),
-                    redirection: get_redirection_type(&input),
+                    redirection: get_redirection_type(&input)
                 };
                 commands.push(command);
             }
@@ -268,17 +326,11 @@ pub fn cmd(command: ShellCommand) -> String {
         .args(&command.args)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
-        .spawn()
-        .or(Err(()));
-    if child.is_err() {
-        println!("Sorry, '{}' was not found!", command.name);
+        .spawn();
+    if let Ok(..) = child {
+        child.unwrap().stdout.unwrap().read_to_string(&mut output).unwrap();
     } else {
-        child
-            .unwrap()
-            .stdout
-            .unwrap()
-            .read_to_string(&mut output)
-            .unwrap();
+        println!("Sorry, '{}' was not found!", command.name);
     }
     output
 }
@@ -317,9 +369,7 @@ pub fn non_interactive(shell_state: &mut ShellState) {
 pub fn parse_input(op: &str) -> String {
     if op == "interactive" {
         let mut input = String::new();
-        std::io::stdin()
-            .read_line(&mut input)
-            .expect("failed to read user input");
+        std::io::stdin().read_line(&mut input).expect("failed to read user input");
         input.trim().to_string()
     } else {
         std::env::args()
@@ -351,12 +401,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             if child.is_err() {
                 println!("{} failed", pipe.commands[0].name.clone());
             }
-            child
-                .unwrap()
-                .stdout
-                .unwrap()
-                .read_to_string(&mut output_prev)
-                .unwrap();
+            child.unwrap().stdout.unwrap().read_to_string(&mut output_prev).unwrap();
         }
     }
     for (idx, command) in pipe.commands.iter().enumerate() {
@@ -378,20 +423,11 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
                         .or(Err(()));
                     match child {
                         Ok(mut child) => {
-                            child
-                                .stdin
-                                .take()
-                                .unwrap()
-                                .write_all(output_prev.as_bytes())
-                                .unwrap();
+                            child.stdin.take().unwrap().write_all(output_prev.as_bytes()).unwrap();
                             output_prev = "".to_string();
-                            child
-                                .stdout
-                                .unwrap()
-                                .read_to_string(&mut output_prev)
-                                .unwrap();
-                        }
-                        Err(_) => println!("{} failed", command.name.clone()),
+                            child.stdout.unwrap().read_to_string(&mut output_prev).unwrap();
+                        },
+                        Err(_) => println!("{} failed", command.name.clone())
                     }
                 }
             }
@@ -408,14 +444,14 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             let part = format!("{}/", chunk);
             parent_dir.push_str(&part);
         }
-        ensure_directory(&Path::new(&parent_dir));
+        ensure_directory(Path::new(&parent_dir));
     }
     let file_path = &Path::new(file_string);
     match pipe.commands[pipe.commands.len() - 1].redirection {
         Redirection::Overwrite => {
             let mut file = std::fs::File::create(file_path).unwrap();
             file.write_all(output_prev.as_bytes()).unwrap();
-        }
+        },
         Redirection::Append => {
             let mut file = std::fs::OpenOptions::new()
                 .write(true)
@@ -424,8 +460,8 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
                 .open(file_path)
                 .unwrap();
             writeln!(file, "{}", output_prev).unwrap();
-        }
-        Redirection::NoOp => (),
+        },
+        Redirection::NoOp => ()
     }
     match pipe.commands[pipe.commands.len() - 1].name.as_str() {
         "echo" => print!("{}", echo(pipe.commands[pipe.commands.len() - 1].args.clone())),
@@ -440,19 +476,14 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
                 .or(Err(()));
             match child {
                 Ok(mut child) => {
-                    child
-                        .stdin
-                        .take()
-                        .unwrap()
-                        .write_all(output_prev.as_bytes())
-                        .unwrap();
+                    child.stdin.take().unwrap().write_all(output_prev.as_bytes()).unwrap();
                     let mut output = String::new();
                     match child.stdout.take().unwrap().read_to_string(&mut output) {
                         Err(why) => println!("ERROR: could not read cmd2 stdout: {}", why),
-                        Ok(_) => println!("{}", output),
+                        Ok(_) => println!("{}", output)
                     }
-                }
-                Err(_) => println!("{} failed", pipe.commands[pipe.commands.len() - 1].name.clone()),
+                },
+                Err(_) => println!("{} failed", pipe.commands[pipe.commands.len() - 1].name.clone())
             }
         }
     }

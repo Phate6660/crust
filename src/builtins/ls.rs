@@ -1,6 +1,4 @@
-use crate::shared_functions::{
-    piped_cmd, return_shellcommand, PipedShellCommand, Redirection
-};
+use crate::shared_functions::{piped_cmd, return_shellcommand, PipedShellCommand, Redirection};
 use colored::*;
 
 /// List dir entries. Take the args part of ShellCommand.

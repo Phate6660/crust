@@ -1,6 +1,4 @@
-use crate::shared_functions::{
-    ShellCommand, ShellState,
-};
+use crate::shared_functions::{ShellCommand, ShellState};
 use std::env::current_dir;
 
 /// Helper for cd, to actually change the dirctory.
@@ -8,13 +6,13 @@ fn cd_helper(dir: &str) {
     let path = std::path::Path::new(dir);
     match std::env::set_current_dir(&path) {
         Ok(()) => (),
-        Err(_) => println!("Failed to change directory to '{}'", path.display()),
+        Err(_) => println!("Failed to change directory to '{}'", path.display())
     }
 }
 
 /// Used to change directory.
 /// Takes a ShellState and ShellCommand.
-/// ShellState is used to realize `cd -` fuctionality, 
+/// ShellState is used to realize `cd -` fuctionality,
 /// but can be used for other options in the future.
 pub fn cd(shell_state: &mut ShellState, command: ShellCommand) {
     if command.args.is_empty() {
