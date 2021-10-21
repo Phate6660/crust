@@ -2,7 +2,7 @@
 mod tests {
     use std::env;
     use crate::builtins::{calc::calc, echo::echo, ls::ls};
-    use crate::{ShellState, ShellComand};
+    use crate::ShellState;
 
     fn calc_run(problem: Vec<String>, solution: String) {
         let output = calc(problem);
