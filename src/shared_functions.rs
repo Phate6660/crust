@@ -138,12 +138,12 @@ pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirec
 }
 
 /// Tokenizes the input, returning a vector of every character in `input`.
-fn tokenize(input: &str) -> Vec<&str> {
+fn tokenize(input: &str) -> Vec<String> {
     let mut tokenized_vec: Vec<&str> = input.split("").collect();
     // The first and last elements are blank and need to be removed.
     tokenized_vec.remove(0);
     tokenized_vec.remove(tokenized_vec.len() - 1);
-    tokenized_vec
+    tokenized_vec.iter().map(|t| t.to_string()).collect()
 }
 
 /// Creates a lexified vector from a tokenized one.
@@ -157,7 +157,7 @@ fn tokenize(input: &str) -> Vec<&str> {
 /// ```
 /// It would return:
 /// `["echo", "arg 1", "arg 2"]`
-fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
+fn lex_tokenized_input(tokenized_vec: &[String]) -> Vec<String> {
     fn push_to_vec(from_vec: &mut Vec<String>, to_vec: &mut Vec<String>) {
         let element = from_vec.concat();
         // Don't push to the vector if element is empty.
@@ -178,9 +178,7 @@ fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
     let mut quoted = false;
     let mut quotes_ran = false;
     for (idx, character) in tokenized_vec.iter().enumerate() {
-        // Keep the clone, it makes life much easier type-wise.
-        #[allow(clippy::clone_double_ref)]
-        match character.clone() {
+        match character.as_str() {
             // TODO: Figure out a more efficient way for this.
             // Ranges only work with chars and numbers.
             "a" | "b" | "c" | "d" | "e" | 
