@@ -201,7 +201,7 @@ fn lex_tokenized_input(tokenized_vec: &[&str]) -> Vec<String> {
                     }
                 }
             },
-            r##"""## | "'" => {
+            "\"" | "'" => {
                 if quotes_ran {
                     push_to_vec(&mut quoted_vec, &mut lexed_vec);
                     quoted = false;
