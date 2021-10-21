@@ -43,7 +43,7 @@ impl ShellState {
         ensure_directory(Path::new(&shell_state.share_dir));
         shell_state
     }
-    pub fn eval_prompt(prompt_string: &String) -> String {
+    pub fn eval_prompt(prompt_string: &str) -> String {
         let split_prompt: Vec<&str> = prompt_string.split("%E").collect();
         let mut commands: Vec<ShellCommand> = Vec::new();
         let mut maybe_sep: bool = false;
@@ -137,53 +137,110 @@ pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirec
     }
 }
 
+/// Tokenizes the input, returning a vector of every character in `input`.
+fn tokenize(input: &str) -> Vec<String> {
+    let mut tokenized_vec: Vec<&str> = input.split("").collect();
+    // The first and last elements are blank and need to be removed.
+    tokenized_vec.remove(0);
+    tokenized_vec.remove(tokenized_vec.len() - 1);
+    tokenized_vec.iter().map(|t| t.to_string()).collect()
+}
+
+/// Creates a lexified vector from a tokenized one.
+/// Example, if the tokenized vec was:
+/// ```
+/// ["e", "c", "h", "o",
+///  " ",
+///  "\"", "a", "r", "g", " ", "1" "\"",
+///  " ",
+///  "\"", "a", "r", "g", " ", "2" "\""]
+/// ```
+/// It would return:
+/// `["echo", "arg 1", "arg 2"]`
+fn lex_tokenized_input(tokenized_vec: &[String]) -> Vec<String> {
+    fn push_to_vec(from_vec: &mut Vec<String>, to_vec: &mut Vec<String>) {
+        let element = from_vec.concat();
+        // Don't push to the vector if element is empty.
+        if element.is_empty() {
+            return;
+        }
+        to_vec.push(element);
+        from_vec.clear();
+    }
+    // This is the final vector that will be returned.
+    let mut lexed_vec: Vec<String> = Vec::new();
+    // This is a temporary vec that gets pushed to lexed_vec.
+    let mut tmp_vec: Vec<String> = Vec::new();
+    // Same as tmp_vec except this is for anything in quotes.
+    let mut quoted_vec: Vec<String> = Vec::new();
+    // These two bools are used for checking if the character is in quotes,
+    // and if the quotes part of the match statement was ran.
+    let mut quoted = false;
+    let mut quotes_ran = false;
+    for (idx, character) in tokenized_vec.iter().enumerate() {
+        match character.as_str() {
+            // TODO: Figure out a more efficient way for this.
+            // Ranges only work with chars and numbers.
+            "a" | "b" | "c" | "d" | "e" | 
+            "f" | "g" | "h" | "i" | "j" | 
+            "k" | "l" | "m" | "n" | "o" | 
+            "p" | "q" | "r" | "s" | "t" | 
+            "u" | "v" | "w" | "x" | "y" | 
+            "z" | "0" | "1" | "2" | "3" |
+            "4" | "5" | "6" | "7" | "8" | 
+            "9" | "." | "/" | "(" | ")" |
+            ">" | "|" => {
+                if quoted {
+                    quoted_vec.push(character.to_string());
+                } else {
+                    tmp_vec.push(character.to_string());
+                    // Needed to push the last element to lexed_vec.
+                    if idx == tokenized_vec.len() - 1 {
+                        push_to_vec(&mut tmp_vec, &mut lexed_vec);
+                    }
+                }
+            },
+            "\"" | "'" => {
+                if quotes_ran {
+                    push_to_vec(&mut quoted_vec, &mut lexed_vec);
+                    quoted = false;
+                    quotes_ran = false;
+                } else {
+                    quoted = true;
+                    quotes_ran = true;
+                }
+            },
+            " " => { 
+                if quoted {
+                    quoted_vec.push(character.to_string());
+                } else {
+                    push_to_vec(&mut tmp_vec, &mut lexed_vec);
+                }
+            },
+            _ => println!("'{}' is an unsupported character.", character),
+        }
+    }
+    lexed_vec
+}
+
 impl ShellCommand {
     /// Constructs a new ShellCommand and returns it.
     /// Takes the input given by the user, unprocessed.
     pub fn new(input: String) -> ShellCommand {
-        fn get_redirection_type(input: &String) -> Redirection {
-            if input.contains(&String::from(">>")) {
+        fn get_redirection_type(input: &str) -> Redirection {
+            if input.contains(">>") {
                 Redirection::Append
-            } else if input.contains(&String::from(">")) {
+            } else if input.contains('>') {
                 Redirection::Overwrite
             } else {
                 Redirection::NoOp
             }
         }
-        let split_input: Vec<&str> = input.split_whitespace().collect();
-        let mut split_input_string: Vec<String> = Vec::new();
-        let mut col_quoted_args: bool = false;
-        let mut quoted_args = String::new();
-        for arg in split_input {
-            if !col_quoted_args {
-                if arg.starts_with("\"") {
-                    if arg.ends_with("\"") {
-                        split_input_string.push((&arg[1..arg.len() - 1]).to_string());
-                        continue;
-                    }
-                    col_quoted_args = true;
-                    // strip the leading `"` from the arg
-                    quoted_args.push_str(&arg[1..]);
-                    quoted_args.push_str(" ");
-                } else {
-                    split_input_string.push(arg.to_string());
-                }
-            } else {
-                quoted_args.push_str(arg);
-                if !arg.ends_with("\"") {
-                    quoted_args.push_str(" ");
-                    continue;
-                }
-                // remove the trailing `"` from the arg
-                quoted_args.pop();
-                col_quoted_args = false;
-                split_input_string.push(quoted_args);
-                quoted_args = String::from("");
-            }
-        }
+        let tokenized_vec = tokenize(&input);
+        let lexed_vec = lex_tokenized_input(&tokenized_vec);
         ShellCommand {
-            name: split_input_string[0].clone(),
-            args: split_input_string[1..].to_vec(),
+            name: lexed_vec[0].clone(),
+            args: lexed_vec[1..].to_vec(),
             redirection: get_redirection_type(&input)
         }
     }
@@ -269,12 +326,11 @@ pub fn cmd(command: ShellCommand) -> String {
         .args(&command.args)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
-        .spawn()
-        .or(Err(()));
-    if child.is_err() {
-        println!("Sorry, '{}' was not found!", command.name);
-    } else {
+        .spawn();
+    if let Ok(..) = child {
         child.unwrap().stdout.unwrap().read_to_string(&mut output).unwrap();
+    } else {
+        println!("Sorry, '{}' was not found!", command.name);
     }
     output
 }
@@ -388,7 +444,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             let part = format!("{}/", chunk);
             parent_dir.push_str(&part);
         }
-        ensure_directory(&Path::new(&parent_dir));
+        ensure_directory(Path::new(&parent_dir));
     }
     let file_path = &Path::new(file_string);
     match pipe.commands[pipe.commands.len() - 1].redirection {
