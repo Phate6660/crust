@@ -43,7 +43,7 @@ impl ShellState {
         ensure_directory(Path::new(&shell_state.share_dir));
         shell_state
     }
-    pub fn eval_prompt(prompt_string: &String) -> String {
+    pub fn eval_prompt(prompt_string: &str) -> String {
         let split_prompt: Vec<&str> = prompt_string.split("%E").collect();
         let mut commands: Vec<ShellCommand> = Vec::new();
         let mut maybe_sep: bool = false;
@@ -226,10 +226,10 @@ impl ShellCommand {
     /// Constructs a new ShellCommand and returns it.
     /// Takes the input given by the user, unprocessed.
     pub fn new(input: String) -> ShellCommand {
-        fn get_redirection_type(input: &String) -> Redirection {
-            if input.contains(&String::from(">>")) {
+        fn get_redirection_type(input: &str) -> Redirection {
+            if input.contains(">>") {
                 Redirection::Append
-            } else if input.contains(&String::from(">")) {
+            } else if input.contains('>') {
                 Redirection::Overwrite
             } else {
                 Redirection::NoOp
@@ -327,10 +327,10 @@ pub fn cmd(command: ShellCommand) -> String {
         .stdout(Stdio::piped())
         .spawn()
         .or(Err(()));
-    if child.is_err() {
-        println!("Sorry, '{}' was not found!", command.name);
-    } else {
+    if let Ok(..) = child {
         child.unwrap().stdout.unwrap().read_to_string(&mut output).unwrap();
+    } else {
+        println!("Sorry, '{}' was not found!", command.name);
     }
     output
 }
@@ -444,7 +444,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             let part = format!("{}/", chunk);
             parent_dir.push_str(&part);
         }
-        ensure_directory(&Path::new(&parent_dir));
+        ensure_directory(Path::new(&parent_dir));
     }
     let file_path = &Path::new(file_string);
     match pipe.commands[pipe.commands.len() - 1].redirection {
