@@ -1,5 +1,5 @@
 use crate::builtins::{calc::calc, cd::cd, echo::echo, help::help, ls::ls};
-use std::env::var;
+use std::env::var as env_var;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -27,19 +27,19 @@ impl ShellState {
     ///
     /// cd_prev_dir doesnt hold a value, because there is no previous dir yet.
     pub fn init() -> ShellState {
-        #[rustfmt::skip]
-        let shell_state = ShellState {
-            args: std::env::args().collect(),
-            prompt: var("PROMPT").unwrap_or_else(|_| String::from("[crusty]: ")),
-            user: var("USER").unwrap(),
-            home: ["/home/", var("USER").unwrap().as_str()].concat(),
-            na: String::from("no args"),
-            share_dir: [
-                ["/home/", var("USER").unwrap().as_str()].concat().as_str(),
-                "/.local/share/crusty",
-            ].concat(),
-            cd_prev_dir: None,
-        };
+        let args = std::env::args().collect();
+        let prompt = env_var("PROMPT").unwrap_or_else(|_| String::from("[crusty]: "));
+        let user_command = return_shellcommand(
+            String::from("whoami"),
+            Vec::new(),
+            Redirection::NoOp
+        );
+        let user = env_var("USER").unwrap_or_else(|_| cmd(user_command));
+        let home = env_var("HOME").unwrap_or_else(|_| ["/home/", user.as_str()].concat());
+        let na = String::from("no args");
+        let share_dir = [&home, "/.local/share/crusty"].concat();
+        let cd_prev_dir = None;
+        let shell_state = ShellState { args, prompt, user, home, na, share_dir, cd_prev_dir };
         ensure_directory(Path::new(&shell_state.share_dir));
         shell_state
     }
