@@ -188,7 +188,8 @@ fn lex_tokenized_input(tokenized_vec: &[String]) -> Vec<String> {
             "u" | "v" | "w" | "x" | "y" | 
             "z" | "0" | "1" | "2" | "3" |
             "4" | "5" | "6" | "7" | "8" | 
-            "9" | "." | "/" | "(" | ")" => {
+            "9" | "." | "/" | "(" | ")" |
+            ">" | "|" => {
                 if quoted {
                     quoted_vec.push(character.to_string());
                 } else {
@@ -325,8 +326,7 @@ pub fn cmd(command: ShellCommand) -> String {
         .args(&command.args)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
-        .spawn()
-        .or(Err(()));
+        .spawn();
     if let Ok(..) = child {
         child.unwrap().stdout.unwrap().read_to_string(&mut output).unwrap();
     } else {
