@@ -194,7 +194,8 @@ fn lex_tokenized_input(tokenized_vec: &[String]) -> Vec<String> {
             "y" | "z" | "0" | "1" | "2" |
             "3" | "4" | "5" | "6" | "7" |
             "8" | "9" | "." | "/" | "(" |
-            ")" | ">" | "|" | "-" | "+" => {
+            ")" | ">" | "|" | "-" | "+" |
+            "!" => {
                 if quoted {
                     quoted_vec.push(character.to_string());
                 } else {
