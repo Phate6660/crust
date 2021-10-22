@@ -15,10 +15,10 @@ pub struct ShellState {
     pub cd_prev_dir: Option<PathBuf>
 }
 
-/// Ensures that a directory exists.
+/// Ensures that a directory and it's parents exist.
 fn ensure_directory(dir: &Path) {
     if !dir.exists() {
-        std::fs::create_dir(dir).unwrap();
+        std::fs::create_dir_all(dir).unwrap();
     }
 }
 
