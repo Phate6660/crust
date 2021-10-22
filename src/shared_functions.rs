@@ -1,4 +1,4 @@
-use crate::builtins::{calc::calc, cd::cd, echo::echo, help::help, ls::ls};
+use crate::builtins::{calc::calc, cat::cat, cd::cd, echo::echo, help::help, ls::ls};
 use std::env::var as env_var;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
@@ -15,10 +15,10 @@ pub struct ShellState {
     pub cd_prev_dir: Option<PathBuf>
 }
 
-/// Ensures that a directory exists.
+/// Ensures that a directory and it's parents exist.
 fn ensure_directory(dir: &Path) {
     if !dir.exists() {
-        std::fs::create_dir(dir).unwrap();
+        std::fs::create_dir_all(dir).unwrap();
     }
 }
 
@@ -181,15 +181,20 @@ fn lex_tokenized_input(tokenized_vec: &[String]) -> Vec<String> {
         match character.as_str() {
             // TODO: Figure out a more efficient way for this.
             // Ranges only work with chars and numbers.
-            "a" | "b" | "c" | "d" | "e" | 
-            "f" | "g" | "h" | "i" | "j" | 
-            "k" | "l" | "m" | "n" | "o" | 
-            "p" | "q" | "r" | "s" | "t" | 
-            "u" | "v" | "w" | "x" | "y" | 
-            "z" | "0" | "1" | "2" | "3" |
-            "4" | "5" | "6" | "7" | "8" | 
-            "9" | "." | "/" | "(" | ")" |
-            ">" | "|" => {
+            "A" | "B" | "C" | "D" | "E" | 
+            "F" | "G" | "H" | "I" | "J" | 
+            "K" | "L" | "M" | "N" | "O" | 
+            "P" | "Q" | "R" | "S" | "T" | 
+            "U" | "V" | "W" | "X" | "Y" | 
+            "Z" | "a" | "b" | "c" | "d" |
+            "e" | "f" | "g" | "h" | "i" |
+            "j" | "k" | "l" | "m" | "n" |
+            "o" | "p" | "q" | "r" | "s" |
+            "t" | "u" | "v" | "w" | "x" |
+            "y" | "z" | "0" | "1" | "2" |
+            "3" | "4" | "5" | "6" | "7" |
+            "8" | "9" | "." | "/" | "(" |
+            ")" | ">" | "|" | "-" => {
                 if quoted {
                     quoted_vec.push(character.to_string());
                 } else {
@@ -252,6 +257,7 @@ impl ShellCommand {
     pub fn run(shell_state: &mut ShellState, command: ShellCommand) {
         match command.name.as_str() {
             "calc" => println!("{}", calc(command.args)),
+            "cat" => println!("{}", cat(command.args)),
             "cd" => cd(shell_state, command),
             "echo" => println!("{}", echo(command.args)),
             "help" => help(command.args),
@@ -382,12 +388,33 @@ pub fn parse_input(op: &str) -> String {
     }
 }
 
+/// This is a function for checking if the command is piped.
+/// Used to remove a lot of duplicate code.
+pub fn is_piped(args: &Vec<String>, cmd: &str) {
+    if args.contains(&"|".to_string()) {
+        let command = return_shellcommand(cmd.to_string(), args.to_vec(), Redirection::NoOp);
+        let pipe = PipedShellCommand::from(command);
+        piped_cmd(pipe);
+    } else if args.contains(&">>".to_string()) {
+        let command = return_shellcommand(cmd.to_string(), args.to_vec(), Redirection::Append);
+        let pipe = PipedShellCommand::from(command);
+        piped_cmd(pipe);
+    } else if args.contains(&">".to_string()) {
+        let command = return_shellcommand(cmd.to_string(), args.to_vec(), Redirection::Overwrite);
+        let pipe = PipedShellCommand::from(command);
+        piped_cmd(pipe);
+    } else {
+        return;
+    }
+}
+
 /// Takes a PipedShellCommand, iterating over all ShellCommand structs
 /// contained by it, checking if it is the first or the last in the pipeline,
 /// and taking the appropriate meassurements to pipe stdout.
 pub fn piped_cmd(pipe: PipedShellCommand) {
     let mut output_prev = String::new();
     match pipe.commands[0].name.as_str() {
+        "cat" => output_prev = cat(pipe.commands[0].args.clone()),
         "echo" => output_prev = echo(pipe.commands[0].args.clone()),
         "calc" => output_prev = calc(pipe.commands[0].args.clone()),
         "ls" => output_prev = ls(pipe.commands[0].args.clone()),
@@ -411,6 +438,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             break;
         } else {
             match command.name.as_str() {
+                "cat" => output_prev = cat(command.args.clone()),
                 "echo" => output_prev = echo(command.args.clone()),
                 "calc" => output_prev = calc(command.args.clone()),
                 "ls" => output_prev = ls(command.args.clone()),
@@ -464,6 +492,7 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
         Redirection::NoOp => ()
     }
     match pipe.commands[pipe.commands.len() - 1].name.as_str() {
+        "cat" => println!("{}", cat(pipe.commands[pipe.commands.len() - 1].args.clone())),
         "echo" => print!("{}", echo(pipe.commands[pipe.commands.len() - 1].args.clone())),
         "calc" => print!("{}", calc(pipe.commands[pipe.commands.len() - 1].args.clone())),
         "ls" => print!("{}", ls(pipe.commands[pipe.commands.len() - 1].args.clone())),

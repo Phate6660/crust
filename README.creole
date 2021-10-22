@@ -38,6 +38,7 @@ To run a non-interactive shell with a command:\\
 | Line editor    |       | X    |       |
 | Prompt         |       | X    |       |
 | Job control    | X     |      |       |
+| Paging         | X     |      |       |
 | Scripting      | X     |      |       |
 
 ==== Prompt ====
@@ -62,6 +63,13 @@ To run a non-interactive shell with a command:\\
 | Basic math |       |      | X     |
 | Equations  | X     |      |       |
 | PEMDAS     | X     |      |       |
+
+==== cat ====
+| FEATURE             | TODO | WIP | DONE |
+| Read file           |      |     | X    |
+| Print line numbers  |      |     | X    |
+| Paging support      | X    |     |      |
+| Syntax highlighting | X    |     |      |
 
 ==== cd ====
 | FEATURE        | TODO  | WIP  | DONE  |
