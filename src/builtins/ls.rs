@@ -25,18 +25,18 @@ pub fn ls(mut args: Vec<String>) -> String {
 
     for file in path {
         let raw_entry = file.unwrap().path();
-        #[cfg(target_os = "linux")]
+        #[cfg(any(target_os = "android", target_os = "linux"))]
         let still_raw_entry = raw_entry.to_str().unwrap().replace("./", "");
         #[cfg(target_os = "windows")]
         let still_raw_entry = raw_entry.to_str().unwrap().replace(".\\", "");
         let paths = still_raw_entry.split('\n');
         for line in paths {
-            #[cfg(target_os = "linux")]
+            #[cfg(any(target_os = "android", target_os = "linux"))]
             let parts = line.split('/');
             #[cfg(target_os = "windows")]
             let parts = line.split('\\');
             let mut n = 0;
-            #[cfg(target_os = "linux")]
+            #[cfg(any(target_os = "android", target_os = "linux"))]
             let parts_count = line.split('/').count();
             #[cfg(target_os = "windows")]
             let parts_count = line.split('\\').count();
