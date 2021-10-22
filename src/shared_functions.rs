@@ -179,33 +179,6 @@ fn lex_tokenized_input(tokenized_vec: &[String]) -> Vec<String> {
     let mut quotes_ran = false;
     for (idx, character) in tokenized_vec.iter().enumerate() {
         match character.as_str() {
-            // TODO: Figure out a more efficient way for this.
-            // Ranges only work with chars and numbers.
-            "A" | "B" | "C" | "D" | "E" | 
-            "F" | "G" | "H" | "I" | "J" | 
-            "K" | "L" | "M" | "N" | "O" | 
-            "P" | "Q" | "R" | "S" | "T" | 
-            "U" | "V" | "W" | "X" | "Y" | 
-            "Z" | "a" | "b" | "c" | "d" |
-            "e" | "f" | "g" | "h" | "i" |
-            "j" | "k" | "l" | "m" | "n" |
-            "o" | "p" | "q" | "r" | "s" |
-            "t" | "u" | "v" | "w" | "x" |
-            "y" | "z" | "0" | "1" | "2" |
-            "3" | "4" | "5" | "6" | "7" |
-            "8" | "9" | "." | "/" | "(" |
-            ")" | ">" | "|" | "-" | "+" |
-            "!" => {
-                if quoted {
-                    quoted_vec.push(character.to_string());
-                } else {
-                    tmp_vec.push(character.to_string());
-                    // Needed to push the last element to lexed_vec.
-                    if idx == tokenized_vec.len() - 1 {
-                        push_to_vec(&mut tmp_vec, &mut lexed_vec);
-                    }
-                }
-            },
             "\"" | "'" => {
                 if quotes_ran {
                     push_to_vec(&mut quoted_vec, &mut lexed_vec);
@@ -223,7 +196,20 @@ fn lex_tokenized_input(tokenized_vec: &[String]) -> Vec<String> {
                     push_to_vec(&mut tmp_vec, &mut lexed_vec);
                 }
             },
-            _ => println!("'{}' is an unsupported character.", character),
+            // Instead of explicitely checking for everything,
+            // don't we just append any character that doesn't
+            // require extra work, such as quotations.
+            _ => {
+                if quoted {
+                    quoted_vec.push(character.to_string());
+                } else {
+                    tmp_vec.push(character.to_string());
+                    // Needed to push the last element to lexed_vec.
+                    if idx == tokenized_vec.len() - 1 {
+                        push_to_vec(&mut tmp_vec, &mut lexed_vec);
+                    }
+                }
+            }
         }
     }
     lexed_vec
