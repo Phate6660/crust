@@ -388,6 +388,26 @@ pub fn parse_input(op: &str) -> String {
     }
 }
 
+/// This is a function for checking if the command is piped.
+/// Used to remove a lot of duplicate code.
+pub fn is_piped(args: &Vec<String>, cmd: &str) {
+    if args.contains(&"|".to_string()) {
+        let command = return_shellcommand(cmd.to_string(), args.to_vec(), Redirection::NoOp);
+        let pipe = PipedShellCommand::from(command);
+        piped_cmd(pipe);
+    } else if args.contains(&">>".to_string()) {
+        let command = return_shellcommand(cmd.to_string(), args.to_vec(), Redirection::Append);
+        let pipe = PipedShellCommand::from(command);
+        piped_cmd(pipe);
+    } else if args.contains(&">".to_string()) {
+        let command = return_shellcommand(cmd.to_string(), args.to_vec(), Redirection::Overwrite);
+        let pipe = PipedShellCommand::from(command);
+        piped_cmd(pipe);
+    } else {
+        return;
+    }
+}
+
 /// Takes a PipedShellCommand, iterating over all ShellCommand structs
 /// contained by it, checking if it is the first or the last in the pipeline,
 /// and taking the appropriate meassurements to pipe stdout.
