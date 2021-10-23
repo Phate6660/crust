@@ -377,7 +377,7 @@ pub fn parse_input(op: &str) -> String {
 
 /// This is a function for checking if the command is piped.
 /// Used to remove a lot of duplicate code.
-pub fn is_piped(args: &Vec<String>, cmd: &str) {
+pub fn is_piped(args: &[String], cmd: &str) {
     if args.contains(&"|".to_string()) {
         let command = return_shellcommand(cmd.to_string(), args.to_vec(), Redirection::NoOp);
         let pipe = PipedShellCommand::from(command);
@@ -391,7 +391,7 @@ pub fn is_piped(args: &Vec<String>, cmd: &str) {
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
     } else {
-        return;
+        // Do nothing.
     }
 }
 

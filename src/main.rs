@@ -45,11 +45,9 @@ fn main() {
                 process_input(&mut shell_state, line);
             },
             Err(ReadlineError::Interrupted) => {
-                println!("CTRL-C");
-                break;
+                continue;
             },
             Err(ReadlineError::Eof) => {
-                println!("CTRL-D");
                 break;
             },
             Err(err) => {
