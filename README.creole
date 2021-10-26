@@ -1,20 +1,20 @@
 {{{
- ▄████████    ▄████████ ███    █▄     ▄████████     ███     ▄██   ▄   
-███    ███   ███    ███ ███    ███   ███    ███ ▀█████████▄ ███   ██▄ 
-███    █▀    ███    ███ ███    ███   ███    █▀     ▀███▀▀██ ███▄▄▄███ 
-███         ▄███▄▄▄▄██▀ ███    ███   ███            ███   ▀ ▀▀▀▀▀▀███ 
-███        ▀▀███▀▀▀▀▀   ███    ███ ▀███████████     ███     ▄██   ███ 
-███    █▄  ▀███████████ ███    ███          ███     ███     ███   ███ 
-███    ███   ███    ███ ███    ███    ▄█    ███     ███     ███   ███ 
-████████▀    ███    ███ ████████▀   ▄████████▀     ▄████▀    ▀█████▀  
+ ▄████████    ▄████████ ███    █▄     ▄████████     ███
+███    ███   ███    ███ ███    ███   ███    ███ ▀█████████▄
+███    █▀    ███    ███ ███    ███   ███    █▀     ▀███▀▀██
+███         ▄███▄▄▄▄██▀ ███    ███   ███            ███   ▀
+███        ▀▀███▀▀▀▀▀   ███    ███ ▀███████████     ███    
+███    █▄  ▀███████████ ███    ███          ███     ███    
+███    ███   ███    ███ ███    ███    ▄█    ███     ███    
+████████▀    ███    ███ ████████▀   ▄████████▀     ▄████▀  
              ███    ███
 }}}
 
 {{https://user-images.githubusercontent.com/44369810/136675409-34ebf5b6-16a1-4720-9a07-f0dd0fa0c650.png|crusty mascot}}
 
-^ //Say hello to cRUSTy's mascot :D// ^
+^ //Say hello to crust's mascot :D// ^
 
-cRUSTy is a WIP shell written in Rust by [[https://github.com/Phate6660|Phate6660]] and [[https://github.com/TheOnAndOnlyZenomat|Zenomat]].
+crust is a WIP shell written in Rust by [[https://github.com/Phate6660|Phate6660]] and [[https://github.com/TheOnAndOnlyZenomat|Zenomat]].
 
 Note: The CI is a little broken right now, not sure why it's failing.\\
 However, I do test before pushing/merging so everything should work.\\

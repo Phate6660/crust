@@ -3,7 +3,7 @@ pub fn help(args: Vec<String>) {
     if args.is_empty() {
         println!(
             "\
-            cRUSTy [https://github.com/Phate6660/crusty]\n\
+            crust [https://github.com/Phate6660/crust]\n\
             builtins:\n\
             ---------\n\
             calc\n\
@@ -50,7 +50,7 @@ pub fn help(args: Vec<String>) {
         },
         _ => {
             println!("\
-                cRUSTy [https://github.com/Phate6660/crusty]\n\
+                cRUSTy [https://github.com/Phate6660/crust]\n\
                 builtins:\n\
                 ---------\n\
                 calc\n\

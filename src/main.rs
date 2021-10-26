@@ -23,7 +23,7 @@ fn main() {
     let mut shell_state = ShellState::init();
     non_interactive(&mut shell_state);
     let mut rl = Editor::<()>::new();
-    let history_file = [shell_state.share_dir.as_str(), "/crusty.history"].concat();
+    let history_file = [shell_state.share_dir.as_str(), "/crust.history"].concat();
     if rl.load_history(&history_file).is_err() {
         println!("There was no previous history to load.");
     }

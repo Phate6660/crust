@@ -28,7 +28,7 @@ impl ShellState {
     /// cd_prev_dir doesnt hold a value, because there is no previous dir yet.
     pub fn init() -> ShellState {
         let args = std::env::args().collect();
-        let prompt = env_var("PROMPT").unwrap_or_else(|_| String::from("[crusty]: "));
+        let prompt = env_var("PROMPT").unwrap_or_else(|_| String::from("[crust]: "));
         let user_command = return_shellcommand(
             String::from("whoami"),
             Vec::new(),
@@ -37,7 +37,7 @@ impl ShellState {
         let user = env_var("USER").unwrap_or_else(|_| cmd(user_command));
         let home = env_var("HOME").unwrap_or_else(|_| ["/home/", user.as_str()].concat());
         let na = String::from("no args");
-        let share_dir = [&home, "/.local/share/crusty"].concat();
+        let share_dir = [&home, "/.local/share/crust"].concat();
         let cd_prev_dir = None;
         let shell_state = ShellState { args, prompt, user, home, na, share_dir, cd_prev_dir };
         ensure_directory(Path::new(&shell_state.share_dir));
