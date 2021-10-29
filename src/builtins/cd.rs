@@ -11,10 +11,10 @@ fn cd_helper(dir: &str) {
 }
 
 /// Used to change directory.
-/// Takes a ShellState and ShellCommand.
-/// ShellState is used to realize `cd -` fuctionality,
+/// Takes a `ShellState` and `ShellCommand`.
+/// `ShellState` is used to realize `cd -` fuctionality,
 /// but can be used for other options in the future.
-pub fn cd(shell_state: &mut ShellState, command: ShellCommand) {
+pub fn cd(shell_state: &mut ShellState, command: &ShellCommand) {
     if command.args.is_empty() {
         shell_state.cd_prev_dir = Some(current_dir().unwrap());
         let user = std::env::var("USER").unwrap();

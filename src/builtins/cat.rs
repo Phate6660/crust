@@ -9,8 +9,8 @@ fn read_file(file: File) -> String {
     contents
 }
 
-pub fn cat(args: Vec<String>) -> String {
-    is_piped(&args, "cat");
+pub fn cat(args: &[String]) -> String {
+    is_piped(args, "cat");
     match args[0].as_str() {
         "-n" => {
             let mut final_output = String::new();

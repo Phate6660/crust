@@ -10,7 +10,7 @@ use std::process::exit;
 use shared_functions::parse_input;
 
 // Process the input to run the appropriate builtin or external command.
-fn process_input(shell_state: &mut ShellState, input: String) {
+fn process_input(shell_state: &mut ShellState, input: &str) {
     if input.is_empty() {
         return;
     }
@@ -42,7 +42,7 @@ fn main() {
                         exit(0);
                     }
                 }
-                process_input(&mut shell_state, line);
+                process_input(&mut shell_state, &line);
             },
             Err(ReadlineError::Interrupted) => {
                 continue;
