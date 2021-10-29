@@ -7,7 +7,9 @@ pub fn ls(mut args: Vec<String>) -> String {
     if args.is_empty() {
         args.push(".".to_string());
     }
-    is_piped(&args, "ls");
+    if is_piped(&args, "ls") {
+        return String::new();
+    }
     let mut path_idx = 0;
     for (idx, arg) in args.iter().enumerate() {
         if !arg.starts_with("--") || !arg.starts_with('-') {
