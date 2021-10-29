@@ -139,11 +139,7 @@ pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirec
 
 /// Tokenizes the input, returning a vector of every character in `input`.
 fn tokenize(input: &str) -> Vec<String> {
-    let mut tokenized_vec: Vec<&str> = input.split("").collect();
-    // The first and last elements are blank and need to be removed.
-    tokenized_vec.remove(0);
-    tokenized_vec.remove(tokenized_vec.len() - 1);
-    tokenized_vec.iter().map(|t| t.to_string()).collect()
+    input.chars().map(|t| t.to_string()).collect::<Vec<String>>()
 }
 
 /// Creates a lexified vector from a tokenized one.
