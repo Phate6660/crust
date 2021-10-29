@@ -139,11 +139,7 @@ pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirec
 
 /// Tokenizes the input, returning a vector of every character in `input`.
 fn tokenize(input: &str) -> Vec<String> {
-    let mut tokenized_vec: Vec<&str> = input.split("").collect();
-    // The first and last elements are blank and need to be removed.
-    tokenized_vec.remove(0);
-    tokenized_vec.remove(tokenized_vec.len() - 1);
-    tokenized_vec.iter().map(|t| t.to_string()).collect()
+    input.chars().map(|t| t.to_string()).collect::<Vec<String>>()
 }
 
 /// Creates a lexified vector from a tokenized one.
@@ -157,7 +153,8 @@ fn tokenize(input: &str) -> Vec<String> {
 /// ```
 /// It would return:
 /// `["echo", "arg 1", "arg 2"]`
-fn lex_tokenized_input(tokenized_vec: &[String]) -> Vec<String> {
+fn lex_tokenized_input(input: &str) -> Vec<String> {
+    let tokenized_vec = tokenize(input);
     fn push_to_vec(from_vec: &mut Vec<String>, to_vec: &mut Vec<String>) {
         let element = from_vec.concat();
         // Don't push to the vector if element is empty.
@@ -228,8 +225,7 @@ impl ShellCommand {
                 Redirection::NoOp
             }
         }
-        let tokenized_vec = tokenize(&input);
-        let lexed_vec = lex_tokenized_input(&tokenized_vec);
+        let lexed_vec = lex_tokenized_input(&input);
         ShellCommand {
             name: lexed_vec[0].clone(),
             args: lexed_vec[1..].to_vec(),
