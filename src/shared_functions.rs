@@ -25,7 +25,7 @@ fn ensure_directory(dir: &Path) {
 impl ShellState {
     /// Initalizes the shell state with all the informations needed.
     ///
-    /// cd_prev_dir doesnt hold a value, because there is no previous dir yet.
+    /// `cd_prev_dir` doesnt hold a value, because there is no previous dir yet.
     pub fn init() -> ShellState {
         let args = std::env::args().collect();
         let prompt = env_var("PROMPT").unwrap_or_else(|_| String::from("[crust]: "));
@@ -34,7 +34,7 @@ impl ShellState {
             Vec::new(),
             Redirection::NoOp
         );
-        let user = env_var("USER").unwrap_or_else(|_| cmd(user_command));
+        let user = env_var("USER").unwrap_or_else(|_| cmd(&user_command));
         let home = env_var("HOME").unwrap_or_else(|_| ["/home/", user.as_str()].concat());
         let na = String::from("no args");
         let share_dir = [&home, "/.local/share/crust"].concat();
@@ -71,7 +71,7 @@ impl ShellState {
                 start_record = false;
                 command.pop();
                 command.pop();
-                commands.push(ShellCommand::new(command.clone()));
+                commands.push(ShellCommand::new(&command.clone()));
                 command = String::from("");
                 continue;
             }
@@ -95,7 +95,7 @@ impl ShellState {
             // subtracted to get the according index in the commands vector.
             #[rustfmt::skip]
             let command_output = cmd(
-                commands[
+                &commands[
                     if idx == 1 {
                         0
                     } else {
@@ -139,11 +139,7 @@ pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirec
 
 /// Tokenizes the input, returning a vector of every character in `input`.
 fn tokenize(input: &str) -> Vec<String> {
-    let mut tokenized_vec: Vec<&str> = input.split("").collect();
-    // The first and last elements are blank and need to be removed.
-    tokenized_vec.remove(0);
-    tokenized_vec.remove(tokenized_vec.len() - 1);
-    tokenized_vec.iter().map(|t| t.to_string()).collect()
+    input.chars().map(|t| t.to_string()).collect::<Vec<String>>()
 }
 
 /// Creates a lexified vector from a tokenized one.
@@ -157,7 +153,8 @@ fn tokenize(input: &str) -> Vec<String> {
 /// ```
 /// It would return:
 /// `["echo", "arg 1", "arg 2"]`
-fn lex_tokenized_input(tokenized_vec: &[String]) -> Vec<String> {
+fn lex_tokenized_input(input: &str) -> Vec<String> {
+    let tokenized_vec = tokenize(input);
     fn push_to_vec(from_vec: &mut Vec<String>, to_vec: &mut Vec<String>) {
         let element = from_vec.concat();
         // Don't push to the vector if element is empty.
@@ -216,9 +213,9 @@ fn lex_tokenized_input(tokenized_vec: &[String]) -> Vec<String> {
 }
 
 impl ShellCommand {
-    /// Constructs a new ShellCommand and returns it.
+    /// Constructs a new `ShellCommand` and returns it.
     /// Takes the input given by the user, unprocessed.
-    pub fn new(input: String) -> ShellCommand {
+    pub fn new(input: &str) -> ShellCommand {
         fn get_redirection_type(input: &str) -> Redirection {
             if input.contains(">>") {
                 Redirection::Append
@@ -228,15 +225,14 @@ impl ShellCommand {
                 Redirection::NoOp
             }
         }
-        let tokenized_vec = tokenize(&input);
-        let lexed_vec = lex_tokenized_input(&tokenized_vec);
+        let lexed_vec = lex_tokenized_input(input);
         ShellCommand {
             name: lexed_vec[0].clone(),
             args: lexed_vec[1..].to_vec(),
-            redirection: get_redirection_type(&input)
+            redirection: get_redirection_type(input)
         }
     }
-    /// Takes a ShellCommand, figures out what to do given the name,
+    /// Takes a `ShellCommand`, figures out what to do given the name,
     /// then executes it.
     /// All builtins have to be listed here and point to their given function.
     /// It is prefered that they return a string, which gets printed here,
@@ -267,16 +263,16 @@ impl ShellCommand {
 }
 
 /// This struct is a vector, containing all commands and their arguments
-/// in a pipeline. Every command is represented by a ShellCommand.
+/// in a pipeline. Every command is represented by a `ShellCommand`.
 #[derive(Debug)]
 pub struct PipedShellCommand {
     pub commands: Vec<ShellCommand>
 }
 
 impl PipedShellCommand {
-    /// Constructs a PipedShellCommand from a given ShellCommand.
-    /// Takes a ShellCommand containing a pipe.
-    pub fn from(input: ShellCommand) -> PipedShellCommand {
+    /// Constructs a `PipedShellCommand` from a given `ShellCommand`.
+    /// Takes a `ShellCommand` containing a pipe.
+    pub fn from(input: &ShellCommand) -> PipedShellCommand {
         fn get_redirection_type(input: &ShellCommand) -> Redirection {
             if input.args.contains(&String::from(">>")) {
                 Redirection::Append
@@ -298,14 +294,14 @@ impl PipedShellCommand {
                 let command = ShellCommand {
                     name: input.name.clone(),
                     args: part[0..].to_vec(),
-                    redirection: get_redirection_type(&input)
+                    redirection: get_redirection_type(input)
                 };
                 commands.push(command);
             } else {
                 let command = ShellCommand {
                     name: part[0].clone(),
                     args: part[1..].to_vec(),
-                    redirection: get_redirection_type(&input)
+                    redirection: get_redirection_type(input)
                 };
                 commands.push(command);
             }
@@ -315,7 +311,7 @@ impl PipedShellCommand {
 }
 
 /// Helper function to a command, optionally with args.
-pub fn cmd(command: ShellCommand) -> String {
+pub fn cmd(command: &ShellCommand) -> String {
     let mut output = String::new();
     let child = Command::new(&command.name)
         .args(&command.args)
@@ -330,7 +326,7 @@ pub fn cmd(command: ShellCommand) -> String {
     output
 }
 
-/// Get the calculator vars (math_op, first_number, second_number) for calc.
+/// Get the calculator vars (`math_op`, `first_number`, `second_number`) for calc.
 pub fn get_calc_vars(problem: &str) -> (&str, i32, i32) {
     let math_op = if problem.contains('x') {
         "x"
@@ -355,7 +351,7 @@ pub fn get_calc_vars(problem: &str) -> (&str, i32, i32) {
 pub fn non_interactive(shell_state: &mut ShellState) {
     if shell_state.args.get(1).unwrap_or(&shell_state.na) == "-c" {
         let input = parse_input("non-interactive");
-        crate::process_input(shell_state, input);
+        crate::process_input(shell_state, &input);
         std::process::exit(0);
     }
 }
@@ -397,15 +393,15 @@ pub fn is_piped(args: &[String], cmd: &str) {
     }
 }
 
-/// Takes a PipedShellCommand, iterating over all ShellCommand structs
+/// Takes a `PipedShellCommand`, iterating over all `ShellCommand` structs
 /// contained by it, checking if it is the first or the last in the pipeline,
 /// and taking the appropriate meassurements to pipe stdout.
-pub fn piped_cmd(pipe: PipedShellCommand) {
+pub fn piped_cmd(pipe: &PipedShellCommand) {
     let mut output_prev = String::new();
     match pipe.commands[0].name.as_str() {
-        "cat" => output_prev = cat(pipe.commands[0].args.clone()),
-        "echo" => output_prev = echo(pipe.commands[0].args.clone()),
-        "calc" => output_prev = calc(pipe.commands[0].args.clone()),
+        "cat" => output_prev = cat(&pipe.commands[0].args.clone()),
+        "echo" => output_prev = echo(&pipe.commands[0].args.clone()),
+        "calc" => output_prev = calc(&pipe.commands[0].args.clone()),
         "ls" => output_prev = ls(pipe.commands[0].args.clone()),
         _ => {
             let child = Command::new(pipe.commands[0].name.clone())
@@ -427,9 +423,9 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
             break;
         } else {
             match command.name.as_str() {
-                "cat" => output_prev = cat(command.args.clone()),
-                "echo" => output_prev = echo(command.args.clone()),
-                "calc" => output_prev = calc(command.args.clone()),
+                "cat" => output_prev = cat(&command.args.clone()),
+                "echo" => output_prev = echo(&command.args.clone()),
+                "calc" => output_prev = calc(&command.args.clone()),
                 "ls" => output_prev = ls(command.args.clone()),
                 _ => {
                     let child = Command::new(command.name.clone())
@@ -481,9 +477,9 @@ pub fn piped_cmd(pipe: PipedShellCommand) {
         Redirection::NoOp => ()
     }
     match pipe.commands[pipe.commands.len() - 1].name.as_str() {
-        "cat" => println!("{}", cat(pipe.commands[pipe.commands.len() - 1].args.clone())),
-        "echo" => print!("{}", echo(pipe.commands[pipe.commands.len() - 1].args.clone())),
-        "calc" => print!("{}", calc(pipe.commands[pipe.commands.len() - 1].args.clone())),
+        "cat" => println!("{}", cat(&pipe.commands[pipe.commands.len() - 1].args.clone())),
+        "echo" => print!("{}", echo(&pipe.commands[pipe.commands.len() - 1].args.clone())),
+        "calc" => print!("{}", calc(&pipe.commands[pipe.commands.len() - 1].args.clone())),
         "ls" => print!("{}", ls(pipe.commands[pipe.commands.len() - 1].args.clone())),
         _ => {
             let child = Command::new(pipe.commands[pipe.commands.len() - 1].name.clone())

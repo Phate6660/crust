@@ -1,9 +1,9 @@
 use crate::shared_functions::{get_calc_vars, is_piped};
 
-/// Takes the `args` part of a ShellCommand struct and tries
+/// Takes the `args` part of a `ShellCommand` struct and tries
 /// to evaluate the given mathematical expression,
 /// returning a String with the result.
-pub fn calc(args: Vec<String>) -> String {
+pub fn calc(args: &[String]) -> String {
     let mut output = String::new();
     is_piped(&args, "calc");
     let problem = args.concat();

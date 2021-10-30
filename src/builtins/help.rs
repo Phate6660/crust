@@ -1,5 +1,5 @@
 /// Prints a list of builtin commands.
-pub fn help(args: Vec<String>) {
+pub fn help(args: &[String]) {
     if args.is_empty() {
         println!(
             "\

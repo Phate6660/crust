@@ -1,7 +1,7 @@
 use crate::shared_functions::is_piped;
-use colored::*;
+use colored::Colorize;
 
-/// List dir entries. Take the args part of ShellCommand.
+/// List dir entries. Take the args part of `ShellCommand`.
 pub fn ls(mut args: Vec<String>) -> String {
     let mut output = String::new();
     if args.is_empty() {
@@ -17,7 +17,7 @@ pub fn ls(mut args: Vec<String>) -> String {
     let input = &args[path_idx];
     let path;
     if std::path::Path::new(input).exists() {
-        path = std::fs::read_dir(input).unwrap()
+        path = std::fs::read_dir(input).unwrap();
     } else {
         println!("ERROR: '{}' is not a valid file or directory.", input);
         return String::from("");
