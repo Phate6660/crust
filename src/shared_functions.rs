@@ -238,21 +238,23 @@ impl ShellCommand {
     /// It is prefered that they return a string, which gets printed here,
     /// and not by the actual function, to make testing easier.
     pub fn run(shell_state: &mut ShellState, command: ShellCommand) {
-        match command.name.as_str() {
-            "calc" => println!("{}", calc(&command.args)),
-            "cat" => println!("{}", cat(&command.args)),
-            "cd" => cd(shell_state, &command),
-            "echo" => println!("{}", echo(&command.args)),
-            "help" => help(&command.args),
-            "ls" => print!("{}", ls(command.args)),
-            "pwd" => println!("{}", std::env::current_dir().unwrap().display()),
-            _ => {
-                if command.args.contains(&String::from("|"))
-                    || command.args.contains(&String::from(">>"))
-                    || command.args.contains(&String::from(">"))
-                {
-                    piped_cmd(&PipedShellCommand::from(&command));
-                } else {
+        // check for piping first, because otherwise redirecting builtins
+        // would match the builtin and piping
+        if command.args.contains(&String::from("|"))
+            || command.args.contains(&String::from(">>"))
+            || command.args.contains(&String::from(">"))
+        {
+            piped_cmd(&PipedShellCommand::from(&command));
+        } else {
+            match command.name.as_str() {
+                "calc" => println!("{}", calc(&command.args)),
+                "cat" => println!("{}", cat(&command.args)),
+                "cd" => cd(shell_state, &command),
+                "echo" => println!("{}", echo(&command.args)),
+                "help" => help(&command.args),
+                "ls" => print!("{}", ls(command.args)),
+                "pwd" => println!("{}", std::env::current_dir().unwrap().display()),
+                _ => {
                     print!("{}", cmd(&command));
                 }
             }
@@ -373,24 +375,20 @@ pub fn parse_input(op: &str) -> String {
 
 /// This is a function for checking if the command is piped.
 /// Used to remove a lot of duplicate code.
-pub fn is_piped(args: &[String], cmd: &str) -> bool {
+pub fn is_piped(args: &[String], cmd: &str) {
+    fn run_pipe(cmd: &str, args: &[String], redirection: Redirection) {
+        let command = return_shellcommand(cmd.to_string(), args.to_vec(), redirection);
+        let pipe = PipedShellCommand::from(&command);
+        piped_cmd(&pipe);
+    }
     if args.contains(&"|".to_string()) {
-        let command = return_shellcommand(cmd.to_string(), args.to_vec(), Redirection::NoOp);
-        let pipe = PipedShellCommand::from(&command);
-        piped_cmd(&pipe);
-        true
+        run_pipe(cmd, args, Redirection::NoOp);
     } else if args.contains(&">>".to_string()) {
-        let command = return_shellcommand(cmd.to_string(), args.to_vec(), Redirection::Append);
-        let pipe = PipedShellCommand::from(&command);
-        piped_cmd(&pipe);
-        true
+        run_pipe(cmd, args, Redirection::Append);
     } else if args.contains(&">".to_string()) {
-        let command = return_shellcommand(cmd.to_string(), args.to_vec(), Redirection::Overwrite);
-        let pipe = PipedShellCommand::from(&command);
-        piped_cmd(&pipe);
-        true
+        run_pipe(cmd, args, Redirection::Overwrite);
     } else {
-        false
+        // Do nothing.
     }
 }
 
