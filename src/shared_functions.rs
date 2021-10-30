@@ -379,24 +379,21 @@ pub fn parse_input(op: &str) -> String {
 
 /// This is a function for checking if the command is piped.
 /// Used to remove a lot of duplicate code.
-pub fn is_piped(args: &[String], cmd: &str) -> bool {
+pub fn is_piped(args: &[String], cmd: &str) {
     if args.contains(&"|".to_string()) {
         let command = return_shellcommand(cmd.to_string(), args.to_vec(), Redirection::NoOp);
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
-        true
     } else if args.contains(&">>".to_string()) {
         let command = return_shellcommand(cmd.to_string(), args.to_vec(), Redirection::Append);
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
-        true
     } else if args.contains(&">".to_string()) {
         let command = return_shellcommand(cmd.to_string(), args.to_vec(), Redirection::Overwrite);
         let pipe = PipedShellCommand::from(command);
         piped_cmd(pipe);
-        true
     } else {
-        false
+        // Do nothing.
     }
 }
 
