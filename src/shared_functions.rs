@@ -242,21 +242,23 @@ impl ShellCommand {
     /// It is prefered that they return a string, which gets printed here,
     /// and not by the actual function, to make testing easier.
     pub fn run(shell_state: &mut ShellState, command: ShellCommand) {
-        match command.name.as_str() {
-            "calc" => println!("{}", calc(command.args)),
-            "cat" => println!("{}", cat(command.args)),
-            "cd" => cd(shell_state, command),
-            "echo" => println!("{}", echo(command.args)),
-            "help" => help(command.args),
-            "ls" => print!("{}", ls(command.args)),
-            "pwd" => println!("{}", std::env::current_dir().unwrap().display()),
-            _ => {
-                if command.args.contains(&String::from("|"))
-                    || command.args.contains(&String::from(">>"))
-                    || command.args.contains(&String::from(">"))
-                {
-                    piped_cmd(PipedShellCommand::from(command));
-                } else {
+        // check for piping first, because otherwise redirecting builtins
+        // would match the builtin and piping
+        if command.args.contains(&String::from("|"))
+            || command.args.contains(&String::from(">>"))
+            || command.args.contains(&String::from(">"))
+        {
+            piped_cmd(PipedShellCommand::from(command));
+        } else {
+            match command.name.as_str() {
+                "calc" => println!("{}", calc(command.args)),
+                "cat" => println!("{}", cat(command.args)),
+                "cd" => cd(shell_state, command),
+                "echo" => println!("{}", echo(command.args)),
+                "help" => help(command.args),
+                "ls" => print!("{}", ls(command.args)),
+                "pwd" => println!("{}", std::env::current_dir().unwrap().display()),
+                _ => {
                     print!("{}", cmd(command));
                 }
             }
