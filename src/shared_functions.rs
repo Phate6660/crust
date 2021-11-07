@@ -463,6 +463,7 @@ pub fn piped_cmd(pipe: &PipedShellCommand) {
         Redirection::Overwrite => {
             let mut file = std::fs::File::create(file_path).unwrap();
             file.write_all(output_prev.as_bytes()).unwrap();
+            return
         },
         Redirection::Append => {
             let mut file = std::fs::OpenOptions::new()
@@ -472,6 +473,7 @@ pub fn piped_cmd(pipe: &PipedShellCommand) {
                 .open(file_path)
                 .unwrap();
             writeln!(file, "{}", output_prev).unwrap();
+            return
         },
         Redirection::NoOp => ()
     }
@@ -496,7 +498,7 @@ pub fn piped_cmd(pipe: &PipedShellCommand) {
                         Ok(_) => println!("{}", output)
                     }
                 },
-                Err(_) => println!("{} failed", pipe.commands[pipe.commands.len() - 1].name.clone())
+                Err(_) => println!("{} failed", pipe.commands[pipe.commands.len() - 1].name.clone()),
             }
         }
     }
