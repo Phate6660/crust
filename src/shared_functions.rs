@@ -70,21 +70,29 @@ impl ShellState {
         let commands = prompt_lex_tokenized_input(&self.prompt);
         let mut command_output: String;
         for command in commands {
-            if command.args.contains(&String::from("|"))
-            {
+            if command.args.contains(&String::from("|")) {
                 command_output = piped_cmd(&PipedShellCommand::from(&command));
             } else {
                 command_output = cmd(&command);
             }
             evaled_prompt = evaled_prompt.replace(format!("%E{}%E", command.to_string()).as_str(), command_output.trim());
         }
-        let substitutions = vec!["%U", "%P"];
+        let substitutions = vec!["%C", "%D12", "%D24", "%H", "%U"];
         for to_subst in substitutions {
             let mut subst = String::new();
             match to_subst {
+                "%C" => subst = std::env::current_dir().unwrap().display().to_string(),
+                "%D12" => {
+                    let date = chrono::Local::now();
+                    subst = date.format("%I:%M %p").to_string();
+                },
+                "%D24" => {
+                    let date = chrono::Local::now();
+                    subst = date.format("%H:%M").to_string();
+                },
+                "%H" => subst = self.home.clone(),
                 "%U" => subst = self.user.clone(),
-                "%P" => subst = std::env::current_dir().unwrap().display().to_string(),
-                _ => (),
+                _ => ()
             }
             evaled_prompt = evaled_prompt.replace(to_subst, &subst);
         }
