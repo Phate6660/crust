@@ -43,7 +43,7 @@ pub fn help(args: &[String]) {
                 Can be set to a static string, by just setting the string in the PROMPT env variable,\n\
                 or can be set to a dynamic prompt, by including a command to be executed, by delimiting it with %(),\
                 in the prompt string.\n\
-                Variables are also supported, such as %U for user, %C for CWD, etc.\n\
+                Variables are also supported, such as %{{U}} for user, %{{C}} for CWD, etc.\n\
                 e.G.: `%(whoami)E@%(hostname)> `. This will, for my case, produce `zeno@aether> `."
             );
         },
