@@ -477,10 +477,10 @@ pub fn piped_cmd(pipe: &PipedShellCommand) -> String {
         Redirection::NoOp => ()
     }
     match pipe.commands[pipe.commands.len() - 1].name.as_str() {
-        "cat" => return format!("{}", cat(&pipe.commands[pipe.commands.len() - 1].args.clone())),
-        "echo" => return format!("{}", echo(&pipe.commands[pipe.commands.len() - 1].args.clone())),
-        "calc" => return format!("{}", calc(&pipe.commands[pipe.commands.len() - 1].args.clone())),
-        "ls" => return format!("{}", ls(pipe.commands[pipe.commands.len() - 1].args.clone())),
+        "cat" => cat(&pipe.commands[pipe.commands.len() - 1].args.clone()),
+        "echo" => echo(&pipe.commands[pipe.commands.len() - 1].args.clone()),
+        "calc" => calc(&pipe.commands[pipe.commands.len() - 1].args.clone()),
+        "ls" => ls(pipe.commands[pipe.commands.len() - 1].args.clone()),
         _ => {
             let child = Command::new(pipe.commands[pipe.commands.len() - 1].name.clone())
                 .args(&pipe.commands[pipe.commands.len() - 1].args)
@@ -494,10 +494,10 @@ pub fn piped_cmd(pipe: &PipedShellCommand) -> String {
                     let mut output = String::new();
                     match child.stdout.take().unwrap().read_to_string(&mut output) {
                         Err(why) => return format!("ERROR: could not read cmd2 stdout: {}", why),
-                        Ok(_) => return output,
+                        Ok(_) => output,
                     }
                 },
-                Err(_) => return format!("{} failed", pipe.commands[pipe.commands.len() - 1].name.clone()),
+                Err(_) => pipe.commands[pipe.commands.len() - 1].name.clone(),
             }
         }
     }
