@@ -53,7 +53,7 @@ impl ShellState {
             let mut tok_iter = tokenized_vec.iter().peekable();
             while tok_iter.peek() != None {
                 let tok_iter_char = tok_iter.next().unwrap().as_str();
-                if tok_iter_char == "%" && tok_iter.peek().unwrap().as_str() == "E" {
+                if tok_iter_char == "$" && tok_iter.peek().unwrap().as_str() == "(" {
                     if command {
                         command = false;
                         command_vec.push(ShellCommand::new(tmp_vec.as_str()));
@@ -61,7 +61,7 @@ impl ShellState {
                         continue;
                     }
                     command = true;
-                } else if tok_iter_char != "E" && command {
+                } else if tok_iter_char != "(" && command {
                     tmp_vec.push_str(tok_iter_char);
                 }
             }
@@ -75,23 +75,23 @@ impl ShellState {
             } else {
                 command_output = cmd(&command);
             }
-            evaled_prompt = evaled_prompt.replace(format!("%E{}%E", command.to_string()).as_str(), command_output.trim());
+            evaled_prompt = evaled_prompt.replace(format!("$({})", command.to_string()).as_str(), command_output.trim());
         }
-        let substitutions = vec!["%C", "%D12", "%D24", "%H", "%U"];
+        let substitutions = vec!["%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}"];
         for to_subst in substitutions {
             let mut subst = String::new();
             match to_subst {
-                "%C" => subst = std::env::current_dir().unwrap().display().to_string(),
-                "%D12" => {
+                "%{C}" => subst = std::env::current_dir().unwrap().display().to_string(),
+                "%{D12}" => {
                     let date = chrono::Local::now();
                     subst = date.format("%I:%M %p").to_string();
                 },
-                "%D24" => {
+                "%{D24}" => {
                     let date = chrono::Local::now();
                     subst = date.format("%H:%M").to_string();
                 },
-                "%H" => subst = self.home.clone(),
-                "%U" => subst = self.user.clone(),
+                "%{H}" => subst = self.home.clone(),
+                "%{U}" => subst = self.user.clone(),
                 _ => ()
             }
             evaled_prompt = evaled_prompt.replace(to_subst, &subst);
