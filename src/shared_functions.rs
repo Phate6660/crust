@@ -119,17 +119,6 @@ pub struct ShellCommand {
     pub redirection: Redirection
 }
 
-impl ShellCommand {
-    pub fn to_string(&self) -> String {
-        let mut arg_string = self.name.clone();
-        if !self.args.is_empty() {
-            arg_string.push(' ');
-            arg_string.push_str(&self.args.join(" "));
-        }
-        arg_string
-    }
-}
-
 pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirection) -> ShellCommand {
     ShellCommand {
         name,
@@ -232,6 +221,15 @@ impl ShellCommand {
             args: lexed_vec[1..].to_vec(),
             redirection: get_redirection_type(input)
         }
+    }
+    /// Converts a `ShellCommand` to a `String`.
+    pub fn to_string(&self) -> String {
+        let mut arg_string = self.name.clone();
+        if !self.args.is_empty() {
+            arg_string.push(' ');
+            arg_string.push_str(&self.args.join(" "));
+        }
+        arg_string
     }
     /// Takes a `ShellCommand`, figures out what to do given the name,
     /// then executes it.
