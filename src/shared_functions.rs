@@ -29,17 +29,13 @@ impl ShellState {
     pub fn init() -> ShellState {
         let args = std::env::args().collect();
         let prompt = env_var("PROMPT").unwrap_or_else(|_| String::from("[crust]: "));
-        let user_command = return_shellcommand(
-            String::from("whoami"),
-            Vec::new(),
-            Redirection::NoOp
-        );
+        let user_command = return_shellcommand(String::from("whoami"), Vec::new(), Redirection::NoOp);
         let user = env_var("USER").unwrap_or_else(|_| cmd(&user_command));
         let home = env_var("HOME").unwrap_or_else(|_| ["/home/", user.as_str()].concat());
         let na = String::from("no args");
         let share_dir = [&home, "/.local/share/crust"].concat();
         let cd_prev_dir = None;
-        let shell_state = ShellState { args, prompt, user, home, na, share_dir, cd_prev_dir };
+        let shell_state = ShellState {args, prompt, user, home, na, share_dir, cd_prev_dir};
         ensure_directory(Path::new(&shell_state.share_dir));
         shell_state
     }
@@ -50,19 +46,28 @@ impl ShellState {
             let mut tmp_vec: String = String::new();
             let mut command_vec: Vec<ShellCommand> = Vec::new();
             let mut command = false;
+            let mut command_end = false;
             let mut tok_iter = tokenized_vec.iter().peekable();
             while tok_iter.peek() != None {
                 let tok_iter_char = tok_iter.next().unwrap().as_str();
-                if tok_iter_char == "$" && tok_iter.peek().unwrap().as_str() == "(" {
-                    if command {
-                        command = false;
-                        command_vec.push(ShellCommand::new(tmp_vec.as_str()));
-                        tmp_vec.clear();
+                if command_end {
+                    command_vec.push(ShellCommand::new(tmp_vec.as_str()));
+                    tmp_vec.clear();
+                    command = false;
+                    command_end = false;
+                    continue;
+                }
+                if tok_iter_char == "%" && tok_iter.peek().unwrap().as_str() == "(" {
+                    command = true;
+                } else if command {
+                    if tok_iter_char == "(" {
+                        continue;
+                    } else if tok_iter_char != ")" {
+                        tmp_vec.push_str(tok_iter_char);
+                    } else if tok_iter_char == ")" {
+                        command_end = true;
                         continue;
                     }
-                    command = true;
-                } else if tok_iter_char != "(" && command {
-                    tmp_vec.push_str(tok_iter_char);
                 }
             }
             command_vec
@@ -75,7 +80,9 @@ impl ShellState {
             } else {
                 command_output = cmd(&command);
             }
-            evaled_prompt = evaled_prompt.replace(format!("$({})", command.to_string()).as_str(), command_output.trim());
+            evaled_prompt = evaled_prompt.replace(
+                format!("%({})", command.to_string()).as_str(), command_output.trim()
+            );
         }
         let substitutions = vec!["%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}"];
         for to_subst in substitutions {
@@ -128,9 +135,7 @@ pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirec
 }
 
 /// Tokenizes the input, returning a vector of every character in `input`.
-fn tokenize(input: &str) -> Vec<String> {
-    input.chars().map(|t| t.to_string()).collect::<Vec<String>>()
-}
+fn tokenize(input: &str) -> Vec<String> { input.chars().map(|t| t.to_string()).collect::<Vec<String>>() }
 
 /// Creates a lexified vector from a tokenized one.
 /// Example, if the tokenized vec was:
@@ -176,7 +181,7 @@ fn lex_tokenized_input(input: &str) -> Vec<String> {
                     quotes_ran = true;
                 }
             },
-            " " => { 
+            " " => {
                 if quoted {
                     quoted_vec.push(character.to_string());
                 } else {
@@ -325,7 +330,8 @@ pub fn cmd(command: &ShellCommand) -> String {
     output
 }
 
-/// Get the calculator vars (`math_op`, `first_number`, `second_number`) for calc.
+/// Get the calculator vars (`math_op`, `first_number`, `second_number`) for
+/// calc.
 pub fn get_calc_vars(problem: &str) -> (&str, i32, i32) {
     let math_op = if problem.contains('x') {
         "x"
@@ -494,10 +500,10 @@ pub fn piped_cmd(pipe: &PipedShellCommand) -> String {
                     let mut output = String::new();
                     match child.stdout.take().unwrap().read_to_string(&mut output) {
                         Err(why) => return format!("ERROR: could not read cmd2 stdout: {}", why),
-                        Ok(_) => output,
+                        Ok(_) => output
                     }
                 },
-                Err(_) => pipe.commands[pipe.commands.len() - 1].name.clone(),
+                Err(_) => pipe.commands[pipe.commands.len() - 1].name.clone()
             }
         }
     }

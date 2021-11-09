@@ -1,8 +1,7 @@
 /// Prints a list of builtin commands.
 pub fn help(args: &[String]) {
     if args.is_empty() {
-        println!(
-            "\
+        println!("\
             crust [https://github.com/Phate6660/crust]\n\
             builtins:\n\
             ---------\n\
@@ -13,8 +12,7 @@ pub fn help(args: &[String]) {
             help\n\
             ls\n\
             pwd\n\
-            prompt\
-            "
+            prompt"
         );
         return;
     }
@@ -43,9 +41,10 @@ pub fn help(args: &[String]) {
         "prompt" => {
             println!("\
                 Can be set to a static string, by just setting the string in the PROMPT env variable,\n\
-                or can be set to a dynamic prompt, by including a command to be executed, by delimiting it with %E,\
-                in the prompt string.\ne.G.: `%Ewhoami%E@%Ehostname%E> `.\
-                This will, for my case, produce `zeno@aether> `."
+                or can be set to a dynamic prompt, by including a command to be executed, by delimiting it with %(),\
+                in the prompt string.\n\
+                Variables are also supported, such as %U for user, %C for CWD, etc.\n\
+                e.G.: `%(whoami)E@%(hostname)> `. This will, for my case, produce `zeno@aether> `."
             );
         },
         _ => {
@@ -60,8 +59,7 @@ pub fn help(args: &[String]) {
                 help\n\
                 ls\n\
                 pwd\n\
-                prompt\
-                "
+                prompt"
             );
         }
     }
