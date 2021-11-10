@@ -29,82 +29,79 @@ impl ShellState {
     pub fn init() -> ShellState {
         let args = std::env::args().collect();
         let prompt = env_var("PROMPT").unwrap_or_else(|_| String::from("[crust]: "));
-        let user_command = return_shellcommand(
-            String::from("whoami"),
-            Vec::new(),
-            Redirection::NoOp
-        );
+        let user_command = return_shellcommand(String::from("whoami"), Vec::new(), Redirection::NoOp);
         let user = env_var("USER").unwrap_or_else(|_| cmd(&user_command));
         let home = env_var("HOME").unwrap_or_else(|_| ["/home/", user.as_str()].concat());
         let na = String::from("no args");
         let share_dir = [&home, "/.local/share/crust"].concat();
         let cd_prev_dir = None;
-        let shell_state = ShellState { args, prompt, user, home, na, share_dir, cd_prev_dir };
+        let shell_state = ShellState {args, prompt, user, home, na, share_dir, cd_prev_dir};
         ensure_directory(Path::new(&shell_state.share_dir));
         shell_state
     }
-    pub fn eval_prompt(prompt_string: &str) -> String {
-        let split_prompt: Vec<&str> = prompt_string.split("%E").collect();
-        let mut commands: Vec<ShellCommand> = Vec::new();
-        let mut maybe_sep: bool = false;
-        let mut start_record: bool = false;
-        let mut command: String = String::new();
-        for c in prompt_string.chars() {
-            if !start_record && c == '%' {
-                maybe_sep = true;
-                continue;
-            }
-            if !start_record && maybe_sep && c == 'E' {
-                maybe_sep = false;
-                start_record = true;
-                continue;
-            }
-            if start_record {
-                command.push(c);
-            }
-            if start_record && c == '%' {
-                maybe_sep = true;
-                continue;
-            }
-            if maybe_sep && c == 'E' {
-                maybe_sep = false;
-                start_record = false;
-                command.pop();
-                command.pop();
-                commands.push(ShellCommand::new(&command.clone()));
-                command = String::from("");
-                continue;
-            }
-        }
-        let mut evaled_prompt: String = String::new();
-        for (idx, split) in split_prompt.iter().enumerate() {
-            if idx % 2 == 0 {
-                evaled_prompt.push_str(split);
-                continue;
-            }
-            // The part in the index maps the index of the split_prompt
-            // vector to the right command in the commands vector.
-            //
-            // Every second index of the split_prompt vector is a command to be executed.
-            //
-            // So the value at index 1 of the split_prompt is
-            // the appropriate command at index 0 of the commands vector.
-            //
-            // We add 1 to the index, because otherwise the division
-            // wouldn't return a valid interger, from which 1 can be
-            // subtracted to get the according index in the commands vector.
-            #[rustfmt::skip]
-            let command_output = cmd(
-                &commands[
-                    if idx == 1 {
-                        0
-                    } else {
-                        ((idx + 1) / 2) - 1
+    pub fn eval_prompt(&mut self) -> String {
+        let mut evaled_prompt = self.prompt.clone();
+        fn prompt_lex_tokenized_input(input: &str) -> Vec<ShellCommand> {
+            let tokenized_vec = tokenize(input);
+            let mut tmp_vec: String = String::new();
+            let mut command_vec: Vec<ShellCommand> = Vec::new();
+            let mut command = false;
+            let mut command_end = false;
+            let mut tok_iter = tokenized_vec.iter().peekable();
+            while tok_iter.peek() != None {
+                let tok_iter_char = tok_iter.next().unwrap().as_str();
+                if command_end {
+                    command_vec.push(ShellCommand::new(tmp_vec.as_str()));
+                    tmp_vec.clear();
+                    command = false;
+                    command_end = false;
+                    continue;
+                }
+                if tok_iter_char == "%" && tok_iter.peek().unwrap().as_str() == "(" {
+                    command = true;
+                } else if command {
+                    if tok_iter_char == "(" {
+                        continue;
+                    } else if tok_iter_char != ")" {
+                        tmp_vec.push_str(tok_iter_char);
+                    } else if tok_iter_char == ")" {
+                        command_end = true;
+                        continue;
                     }
-                ].clone()
+                }
+            }
+            command_vec
+        }
+        let commands = prompt_lex_tokenized_input(&self.prompt);
+        let mut command_output: String;
+        for command in commands {
+            if command.args.contains(&String::from("|")) {
+                command_output = piped_cmd(&PipedShellCommand::from(&command));
+            } else {
+                command_output = cmd(&command);
+            }
+            evaled_prompt = evaled_prompt.replace(
+                format!("%({})", command.to_string()).as_str(), command_output.trim()
             );
-            evaled_prompt.push_str(command_output.as_str());
-            evaled_prompt.pop();
+        }
+        let substitutions = vec!["%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}"];
+        for to_subst in substitutions {
+            let mut subst = String::new();
+            match to_subst {
+                "%{C}" => subst = std::env::current_dir().unwrap().display().to_string(),
+                "%{D12}" => {
+                    let date = chrono::Local::now();
+                    subst = date.format("%I:%M %p").to_string();
+                },
+                "%{D24}" => {
+                    let date = chrono::Local::now();
+                    subst = date.format("%H:%M").to_string();
+                },
+                "%{H}" => subst = self.home.clone(),
+                "%{U}" => subst = self.user.clone(),
+                _ => ()
+            }
+            evaled_prompt = evaled_prompt.replace(to_subst, &subst);
         }
         evaled_prompt
     }
@@ -138,9 +135,7 @@ pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirec
 }
 
 /// Tokenizes the input, returning a vector of every character in `input`.
-fn tokenize(input: &str) -> Vec<String> {
-    input.chars().map(|t| t.to_string()).collect::<Vec<String>>()
-}
+fn tokenize(input: &str) -> Vec<String> { input.chars().map(|t| t.to_string()).collect::<Vec<String>>() }
 
 /// Creates a lexified vector from a tokenized one.
 /// Example, if the tokenized vec was:
@@ -186,7 +181,7 @@ fn lex_tokenized_input(input: &str) -> Vec<String> {
                     quotes_ran = true;
                 }
             },
-            " " => { 
+            " " => {
                 if quoted {
                     quoted_vec.push(character.to_string());
                 } else {
@@ -232,6 +227,15 @@ impl ShellCommand {
             redirection: get_redirection_type(input)
         }
     }
+    /// Converts a `ShellCommand` to a `String`.
+    pub fn to_string(&self) -> String {
+        let mut arg_string = self.name.clone();
+        if !self.args.is_empty() {
+            arg_string.push(' ');
+            arg_string.push_str(&self.args.join(" "));
+        }
+        arg_string
+    }
     /// Takes a `ShellCommand`, figures out what to do given the name,
     /// then executes it.
     /// All builtins have to be listed here and point to their given function.
@@ -244,7 +248,7 @@ impl ShellCommand {
             || command.args.contains(&String::from(">>"))
             || command.args.contains(&String::from(">"))
         {
-            piped_cmd(&PipedShellCommand::from(&command));
+            println!("{}", piped_cmd(&PipedShellCommand::from(&command)));
         } else {
             match command.name.as_str() {
                 "calc" => println!("{}", calc(&command.args)),
@@ -326,7 +330,8 @@ pub fn cmd(command: &ShellCommand) -> String {
     output
 }
 
-/// Get the calculator vars (`math_op`, `first_number`, `second_number`) for calc.
+/// Get the calculator vars (`math_op`, `first_number`, `second_number`) for
+/// calc.
 pub fn get_calc_vars(problem: &str) -> (&str, i32, i32) {
     let math_op = if problem.contains('x') {
         "x"
@@ -395,7 +400,7 @@ pub fn is_piped(args: &[String], cmd: &str) {
 /// Takes a `PipedShellCommand`, iterating over all `ShellCommand` structs
 /// contained by it, checking if it is the first or the last in the pipeline,
 /// and taking the appropriate meassurements to pipe stdout.
-pub fn piped_cmd(pipe: &PipedShellCommand) {
+pub fn piped_cmd(pipe: &PipedShellCommand) -> String {
     let mut output_prev = String::new();
     match pipe.commands[0].name.as_str() {
         "cat" => output_prev = cat(&pipe.commands[0].args.clone()),
@@ -463,7 +468,7 @@ pub fn piped_cmd(pipe: &PipedShellCommand) {
         Redirection::Overwrite => {
             let mut file = std::fs::File::create(file_path).unwrap();
             file.write_all(output_prev.as_bytes()).unwrap();
-            return
+            return String::new();
         },
         Redirection::Append => {
             let mut file = std::fs::OpenOptions::new()
@@ -473,15 +478,15 @@ pub fn piped_cmd(pipe: &PipedShellCommand) {
                 .open(file_path)
                 .unwrap();
             writeln!(file, "{}", output_prev).unwrap();
-            return
+            return String::new();
         },
         Redirection::NoOp => ()
     }
     match pipe.commands[pipe.commands.len() - 1].name.as_str() {
-        "cat" => println!("{}", cat(&pipe.commands[pipe.commands.len() - 1].args.clone())),
-        "echo" => print!("{}", echo(&pipe.commands[pipe.commands.len() - 1].args.clone())),
-        "calc" => print!("{}", calc(&pipe.commands[pipe.commands.len() - 1].args.clone())),
-        "ls" => print!("{}", ls(pipe.commands[pipe.commands.len() - 1].args.clone())),
+        "cat" => cat(&pipe.commands[pipe.commands.len() - 1].args.clone()),
+        "echo" => echo(&pipe.commands[pipe.commands.len() - 1].args.clone()),
+        "calc" => calc(&pipe.commands[pipe.commands.len() - 1].args.clone()),
+        "ls" => ls(pipe.commands[pipe.commands.len() - 1].args.clone()),
         _ => {
             let child = Command::new(pipe.commands[pipe.commands.len() - 1].name.clone())
                 .args(&pipe.commands[pipe.commands.len() - 1].args)
@@ -494,11 +499,11 @@ pub fn piped_cmd(pipe: &PipedShellCommand) {
                     child.stdin.take().unwrap().write_all(output_prev.as_bytes()).unwrap();
                     let mut output = String::new();
                     match child.stdout.take().unwrap().read_to_string(&mut output) {
-                        Err(why) => println!("ERROR: could not read cmd2 stdout: {}", why),
-                        Ok(_) => println!("{}", output)
+                        Err(why) => return format!("ERROR: could not read cmd2 stdout: {}", why),
+                        Ok(_) => output
                     }
                 },
-                Err(_) => println!("{} failed", pipe.commands[pipe.commands.len() - 1].name.clone()),
+                Err(_) => pipe.commands[pipe.commands.len() - 1].name.clone()
             }
         }
     }

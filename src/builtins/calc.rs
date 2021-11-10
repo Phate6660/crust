@@ -1,7 +1,7 @@
 use crate::shared_functions::{get_calc_vars, is_piped};
 
-/// Takes the `args` part of a `ShellCommand` struct and tries
-/// to evaluate the given mathematical expression,
+/// Takes the `args` part of a `ShellCommand` struct,
+/// and tries to evaluate the given mathematical expression,
 /// returning a String with the result.
 pub fn calc(args: &[String]) -> String {
     let mut output = String::new();
