@@ -1,7 +1,13 @@
 [package]
 name = "crust"
+authors = ["Phate6660", "Zenomat"]
 version = "0.1.0"
 edition = "2018"
+readme = "README.creole"
+repository = "https://github.com/Phate6660/crust"
+license-file = "LICENSE"
+keywords = ["shell", "cross-platform"]
+exclude = [".github/"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
