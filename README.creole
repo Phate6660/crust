@@ -41,9 +41,9 @@ To run a non-interactive shell with a command:\\
 | FEATURE               | TODO  | WIP  | DONE  |
 | Set via env var       |       |      | X     |
 | Command output        |       | X    |       |
+| Replaceable variables |       | X    |       |
 | Colors                | X     |      |       |
 | File content          | X     |      |       |
-| Replaceable variables |       | X    |       |
 
 Customize the prompt by setting the PROMPT env variable.\\
 //PROMPT="[%{C}]-[%{U}@%(hostname)]-> "//
@@ -54,6 +54,7 @@ What you can use in the prompt:\\
 - %{H} for the current user's home directory.\\
 - %{U} for the current user.\\
 - %(//command//) for capturing the output of //command//.\\
+- \\n for newline.
 - Anything else will be printed as-is.
 
 ==== Rustyline ====
@@ -87,7 +88,7 @@ What you can use in the prompt:\\
 ==== echo ====
 | FEATURE          | TODO  | WIP  | DONE  |
 | Basic output     |       |      | X     |
-| Escape sequences | X     |      |       |
+| Escape sequences |       | X    |       |
 
 ==== help ====
 | FEATURE                     | TODO  | WIP  | DONE  |
