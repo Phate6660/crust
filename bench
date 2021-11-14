@@ -21,8 +21,7 @@ run_perf() {
     # `perf` requires root to get more detailed information do to kernel integration.
     printf "Don't panic, perf requires root to get more detailed info due to kernel integration.\n"
     sudo perf record -g --call-graph dwarf target/release/crust -c "ls src/ | sed s/src/source/g"
-    printf "Information is recorded to 'perf.data'.\n\
-    Use commands like 'sudo perf annotate' and 'sudo perf report' to get the info.\n"
+    printf "Information is recorded to 'perf.data'.\nUse commands like 'sudo perf annotate' and 'sudo perf report' to get the info.\n"
 }
 
 run_valgrind() {
@@ -30,8 +29,7 @@ run_valgrind() {
     valgrind --tool=callgrind --dump-instr=yes --collect-jumps=yes \
         target/release/crust -c "ls src/ | sed s/src/source/g"
 
-    printf "Valgrind information was gathered.\n\
-    Use commands like 'callgrind_annotate' to get the info.\n"
+    printf "Valgrind information was gathered.\nUse commands like 'callgrind_annotate' to get the info.\n"
 }
 
 profile() {
