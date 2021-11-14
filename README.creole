@@ -12,13 +12,9 @@
 
 {{https://user-images.githubusercontent.com/44369810/136675409-34ebf5b6-16a1-4720-9a07-f0dd0fa0c650.png|crusty mascot}}
 
-^ //Say hello to crust's mascot :D// ^
+^ Say hello to crust's mascot :D ^
 
 crust is a WIP shell written in Rust by [[https://github.com/Phate6660|Phate6660]] and [[https://github.com/TheOnAndOnlyZenomat|Zenomat]].
-
-Note: The CI is a little broken right now, not sure why it's failing.\\
-However, I do test before pushing/merging so everything should work.\\
-Once testing via //cargo test// is finished, I'll fix the CI.
 
 == Running ==
 To run an interactive shell:\\
@@ -47,7 +43,18 @@ To run a non-interactive shell with a command:\\
 | Command output        |       | X    |       |
 | Colors                | X     |      |       |
 | File content          | X     |      |       |
-| Replaceable variables | X     |      |       |
+| Replaceable variables |       | X    |       |
+
+Customize the prompt by setting the PROMPT env variable.\\
+//PROMPT="[%{C}]-[%{U}@%(hostname)]-> "//
+
+What you can use in the prompt:\\
+- %{C} for current working directory.
+- %{D12} and %{D24} for 12 and 24 hour time respectively.
+- %{H} for the current user's home directory.
+- %{U} for the current user.
+- %(//command//) for capturing the output of //command//.
+- Anything else will be printed as-is.
 
 ==== Rustyline ====
 | FEATURE                | TODO  | WIP  | DONE  |
