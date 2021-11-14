@@ -22,6 +22,21 @@ fn ensure_directory(dir: &Path) {
     }
 }
 
+/// Gets the current time with the format specified if the `time` feature is enabled.
+/// Otherwise it returns the format string back.
+fn get_time(format: &str) -> String {
+    #[cfg(not(feature = "time"))]
+    {
+        return format.to_string();
+    }
+    
+    #[cfg(feature = "time")]
+    {
+        let date = chrono::Local::now();
+        return date.format(format).to_string();
+    }
+}
+
 impl ShellState {
     /// Initalizes the shell state with all the informations needed.
     ///
@@ -90,14 +105,8 @@ impl ShellState {
             let mut subst = String::new();
             match to_subst {
                 "%{C}" => subst = std::env::current_dir().unwrap().display().to_string(),
-                "%{D12}" => {
-                    let date = chrono::Local::now();
-                    subst = date.format("%I:%M %p").to_string();
-                },
-                "%{D24}" => {
-                    let date = chrono::Local::now();
-                    subst = date.format("%H:%M").to_string();
-                },
+                "%{D12}" => subst = get_time("%I:%M %p").to_string(),
+                "%{D24}" => subst = get_time("%H:%M").to_string(),
                 "%{H}" => subst = self.home.clone(),
                 "%{U}" => subst = self.user.clone(),
                 "\\n" => subst = '\n'.to_string(), // Needed to support newlines in the prompt.

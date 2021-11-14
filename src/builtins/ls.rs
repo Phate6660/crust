@@ -1,4 +1,5 @@
 use crate::shared_functions::is_piped;
+#[cfg(feature = "color")]
 use colored::Colorize;
 
 /// List dir entries. Take the args part of `ShellCommand`.
@@ -42,9 +43,15 @@ pub fn ls(mut args: Vec<String>) -> String {
             let parts_count = line.split('\\').count();
             for part in parts {
                 if part.starts_with('.') || n == parts_count - 1 {
+                    #[cfg(feature = "color")]
                     output.push_str(format!("{}", part.white()).as_str());
+                    #[cfg(not(feature = "color"))]
+                    output.push_str(format!("{}", part).as_str());
                 } else {
+                    #[cfg(feature = "color")]
                     output.push_str(format!("{}", part.green()).as_str());
+                    #[cfg(not(feature = "color"))]
+                    output.push_str(format!("{}", part).as_str());
                 }
                 n += 1;
                 if n == parts_count {
