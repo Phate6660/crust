@@ -54,7 +54,7 @@ What you can use in the prompt:\\
 - %{H} for the current user's home directory.\\
 - %{U} for the current user.\\
 - %(//command//) for capturing the output of //command//.\\
-- \\n for newline.
+- \n for newline.
 - Anything else will be printed as-is.
 
 ==== Rustyline ====
