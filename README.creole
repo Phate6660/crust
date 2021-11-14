@@ -49,11 +49,11 @@ Customize the prompt by setting the PROMPT env variable.\\
 //PROMPT="[%{C}]-[%{U}@%(hostname)]-> "//
 
 What you can use in the prompt:\\
-- %{C} for current working directory.
-- %{D12} and %{D24} for 12 and 24 hour time respectively.
-- %{H} for the current user's home directory.
-- %{U} for the current user.
-- %(//command//) for capturing the output of //command//.
+- %{C} for current working directory.\\
+- %{D12} and %{D24} for 12 and 24 hour time respectively.\\
+- %{H} for the current user's home directory.\\
+- %{U} for the current user.\\
+- %(//command//) for capturing the output of //command//.\\
 - Anything else will be printed as-is.
 
 ==== Rustyline ====
