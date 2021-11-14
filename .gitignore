@@ -1,4 +1,4 @@
 Cargo.lock
 callgrind.out.*
-perf.data
+perf.*
 /target

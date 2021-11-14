@@ -1,27 +1,57 @@
 #!/usr/bin/env bash
 
 # Adding debug info to release builds.
-cat >> Cargo.toml <<EOF
-[profile.release]
-debug = 1
-EOF
+prep() {
+    # Define the release profile which contains debug info.
+    local release_profile="[profile.release]\ndebug = 1"
 
-# Build in release mode.
-cargo build --release
+    # Append the debug profile to the project's config.
+    echo -e "${release_profile}" >> Cargo.toml
 
-# Run perf to profile the build, with args to run commands in a pipeline.
-# `perf` requires root to get more detailed information do to kernel integration.
-printf "Don't panic, perf requires root to get more detailed info due to kernel integration.\n"
-sudo perf record -g --call-graph dwarf target/release/crust -c "ls src/ | sed s/src/source/g"
-printf "Information is recorded to 'perf.data'.\n\
-Use commands like 'sudo perf annotate' and 'sudo perf report' to get the info.\n"
+    # Build in release mode.
+    cargo build --release
 
-# Run valgrind to get more info.
-valgrind --tool=callgrind --dump-instr=yes --collect-jumps=yes \
-    target/release/crust -c "ls src/ | sed s/src/source/g"
+    # Remove the debug info from release builds,
+    # as well as the extra newlines added by removing the debug info.
+    sed -i -z -e 's/\[profile\.release\]\ndebug = 1//' -e '$!N; /^\(.*\)\n\1$/!P; D' Cargo.toml
+}
 
-printf "Valgrind information was gathered.\nUse commands like 'callgrind_annotate' to get the info.\n"
+run_perf() {
+    # Run perf to profile the build, with args to run commands in a pipeline.
+    # `perf` requires root to get more detailed information do to kernel integration.
+    printf "Don't panic, perf requires root to get more detailed info due to kernel integration.\n"
+    sudo perf record -g --call-graph dwarf target/release/crust -c "ls src/ | sed s/src/source/g"
+    printf "Information is recorded to 'perf.data'.\n\
+    Use commands like 'sudo perf annotate' and 'sudo perf report' to get the info.\n"
+}
 
-# Remove the debug info from release builds,
-# as well as the extra newlines added by removing the debug info.
-sed -i -z -e 's/\[profile\.release\]\ndebug = 1//' -e '$!N; /^\(.*\)\n\1$/!P; D' Cargo.toml
+run_valgrind() {
+    # Run valgrind to get more info.
+    valgrind --tool=callgrind --dump-instr=yes --collect-jumps=yes \
+        target/release/crust -c "ls src/ | sed s/src/source/g"
+
+    printf "Valgrind information was gathered.\n\
+    Use commands like 'callgrind_annotate' to get the info.\n"
+}
+
+profile() {
+    case "${1}" in
+        perf) run_perf;;
+        valgrind) run_valgrind;;
+        *)
+            printf "Profiling with both tools due to none being specified.\n"
+            run_perf
+            run_valgrind
+            ;;
+    esac
+}
+
+case "${1}" in
+    prep) prep;;
+    profile) profile "${2}";;
+    *)
+        printf "Uses:\n%s prep\n%s profile [perf|valgrind]*\n* Don't specify any tool to run both.\n" \
+            "${0}" "${0}"
+        exit 1
+        ;;
+esac
