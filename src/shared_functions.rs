@@ -84,6 +84,7 @@ impl ShellState {
                 format!("%({})", command.to_string()).as_str(), command_output.trim()
             );
         }
+        // TODO: Add support for more escape sequences.
         let substitutions = vec!["%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}", "\\n"];
         for to_subst in substitutions {
             let mut subst = String::new();
@@ -99,7 +100,7 @@ impl ShellState {
                 },
                 "%{H}" => subst = self.home.clone(),
                 "%{U}" => subst = self.user.clone(),
-                "\\n" => subst = '\n'.to_string(),
+                "\\n" => subst = '\n'.to_string(), // Needed to support newlines in the prompt.
                 _ => ()
             }
             evaled_prompt = evaled_prompt.replace(to_subst, &subst);

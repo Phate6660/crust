@@ -5,7 +5,9 @@ pub fn echo(args: &[String]) -> String {
     let mut output = String::new();
     is_piped(&args, "echo");
     for arg in args {
-        output.push_str(format!("{} ", arg).as_str());
+        // TODO: Support other escape sequences.
+        let arg_to_push = arg.replace("\\n", "\n"); // Needed to replace \n with newline.
+        output.push_str(format!("{} ", arg_to_push).as_str());
     }
     output
 }
