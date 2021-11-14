@@ -17,3 +17,4 @@ rustyline = { version = "9.0.0", optional = true }
 [features]
 default = ["readline"]
 readline = ["rustyline"]
+

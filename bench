@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# Adding debug info to release builds.
+cat >> Cargo.toml <<EOF
+[profile.release]
+debug = 1
+EOF
+
+# Build in release mode.
+cargo build --release
+
+# Run perf to profile the build, with args to run commands in a pipeline.
+# `perf` requires root to get more detailed information do to kernel integration.
+printf "Don't panic, perf requires root to get more detailed info due to kernel integration.\n"
+sudo perf record -g --call-graph dwarf target/release/crust -c "ls src/ | sed s/src/source/g"
+printf "Information is recorded to 'perf.data'.\n\
+Use commands like 'sudo perf annotate' and 'sudo perf report' to get the info.\n"
+
+# Run valgrind to get more info.
+valgrind --tool=callgrind --dump-instr=yes --collect-jumps=yes \
+    target/release/crust -c "ls src/ | sed s/src/source/g"
+
+printf "Valgrind information was gathered.\nUse commands like 'callgrind_annotate' to get the info.\n"
+
+# Remove the debug info from release builds,
+# as well as the extra newlines added by removing the debug info.
+sed -i -z -e 's/\[profile\.release\]\ndebug = 1//' -e '$!N; /^\(.*\)\n\1$/!P; D' Cargo.toml
