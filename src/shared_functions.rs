@@ -84,7 +84,7 @@ impl ShellState {
                 format!("%({})", command.to_string()).as_str(), command_output.trim()
             );
         }
-        let substitutions = vec!["%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}"];
+        let substitutions = vec!["%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}", "\\n"];
         for to_subst in substitutions {
             let mut subst = String::new();
             match to_subst {
@@ -99,6 +99,7 @@ impl ShellState {
                 },
                 "%{H}" => subst = self.home.clone(),
                 "%{U}" => subst = self.user.clone(),
+                "\\n" => subst = '\n'.to_string(),
                 _ => ()
             }
             evaled_prompt = evaled_prompt.replace(to_subst, &subst);
