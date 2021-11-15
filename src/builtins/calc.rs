@@ -5,7 +5,7 @@ use crate::shared_functions::{get_calc_vars, is_piped};
 /// returning a String with the result.
 pub fn calc(args: &[String]) -> String {
     let mut output = String::new();
-    is_piped(&args, "calc");
+    is_piped(args, "calc");
     let problem = args.concat();
     let (math_op, first_number, second_number) = get_calc_vars(&problem);
     match math_op {

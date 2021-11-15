@@ -2,77 +2,23 @@ mod builtins;
 mod shared_functions;
 
 #[cfg(feature = "readline")]
-use rustyline::{error::ReadlineError, Editor};
-use shared_functions::{non_interactive, ShellCommand, ShellState};
+use rustyline::Editor;
+use shared_functions::{non_interactive, run_loop, ShellState};
 
-#[cfg(feature = "readline")]
-use std::process::exit;
-
-#[cfg(not(feature = "readline"))]
-use shared_functions::parse_input;
-
-#[cfg(not(feature = "readline"))]
-use std::io::Write;
-
-// Process the input to run the appropriate builtin or external command.
-fn process_input(shell_state: &mut ShellState, input: &str) {
-    if input.is_empty() {
-        return;
-    }
-    let command = ShellCommand::new(input);
-    ShellCommand::run(shell_state, command);
-}
-
-#[cfg(feature = "readline")]
-fn main() {
-    let mut shell_state = ShellState::init();
-    non_interactive(&mut shell_state);
-    let mut rl = Editor::<()>::new();
-    let history_file = [shell_state.share_dir.as_str(), "/crust.history"].concat();
-    if rl.load_history(&history_file).is_err() {
-        println!("There was no previous history to load.");
-    }
-    loop {
-        let prompt = rl.readline(&ShellState::eval_prompt(&mut shell_state));
-        match prompt {
-            Ok(line) => {
-                rl.add_history_entry(line.as_str());
-                if line.starts_with("exit") {
-                    if line.contains(' ') {
-                        let input = line.split(' ').collect::<Vec<&str>>()[1];
-                        rl.save_history(&history_file).unwrap();
-                        exit(input.parse::<i32>().unwrap_or(0));
-                    } else {
-                        rl.save_history(&history_file).unwrap();
-                        exit(0);
-                    }
-                }
-                process_input(&mut shell_state, &line);
-            },
-            Err(ReadlineError::Interrupted) => {
-                continue;
-            },
-            Err(ReadlineError::Eof) => {
-                break;
-            },
-            Err(err) => {
-                println!("Error: {:?}", err);
-                break;
-            }
-        }
-    }
-    rl.save_history(&history_file).unwrap();
-}
-
-#[cfg(not(feature = "readline"))]
 fn main() {
     let mut shell_state = ShellState::init();
     let prompt = ShellState::eval_prompt(&mut shell_state);
     non_interactive(&mut shell_state);
-    loop {
-        print!("{}", prompt);
-        std::io::stdout().flush().unwrap();
-        let input = parse_input("interactive");
-        process_input(&mut shell_state, &input);
+    #[cfg(feature = "readline")]
+    let mut rl = Editor::<()>::new();
+    #[cfg(feature = "readline")]
+    let history_file = [shell_state.share_dir.as_str(), "/crust.history"].concat();
+    #[cfg(feature = "readline")]
+    if rl.load_history(&history_file).is_err() {
+        println!("There was no previous history to load.");
     }
+    #[cfg(not(feature = "readline"))]
+    run_loop(&prompt, shell_state);
+    #[cfg(feature = "readline")]
+    run_loop(&prompt, &mut rl, &history_file, shell_state);
 }

@@ -4,6 +4,12 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
+#[cfg(feature = "readline")]
+use std::process::exit;
+
+#[cfg(feature = "readline")]
+use rustyline::{error::ReadlineError, Editor};
+
 /// Holds all important informations for and about the shell.
 pub struct ShellState {
     pub args: Vec<String>,
@@ -27,13 +33,66 @@ fn ensure_directory(dir: &Path) {
 fn get_time(format: &str) -> String {
     #[cfg(not(feature = "time"))]
     {
-        return format.to_string();
+        format.to_string()
     }
     
     #[cfg(feature = "time")]
     {
         let date = chrono::Local::now();
-        return date.format(format).to_string();
+        date.format(format).to_string()
+    }
+}
+
+// Process the input to run the appropriate builtin or external command.
+fn process_input(shell_state: &mut ShellState, input: &str) {
+    if input.is_empty() {
+        return;
+    }
+    let command = ShellCommand::new(input);
+    ShellCommand::run(shell_state, command);
+}
+
+#[cfg(feature = "readline")]
+pub fn run_loop(prompt: &str, rl: &mut Editor<()>, history_file: &str, mut shell_state: ShellState) {
+    loop {
+        let prompt = rl.readline(prompt);
+        match prompt {
+            Ok(line) => {
+                rl.add_history_entry(line.as_str());
+                if line.starts_with("exit") {
+                    if line.contains(' ') {
+                        let input = line.split(' ').collect::<Vec<&str>>()[1];
+                        rl.save_history(&history_file).unwrap();
+                        exit(input.parse::<i32>().unwrap_or(0));
+                    } else {
+                        rl.save_history(&history_file).unwrap();
+                        exit(0);
+                    }
+                }
+                process_input(&mut shell_state, &line);
+            },
+            Err(ReadlineError::Interrupted) => {
+                continue;
+            },
+            Err(ReadlineError::Eof) => {
+                break;
+            },
+            Err(err) => {
+                println!("Error: {:?}", err);
+                break;
+            }
+        }
+    }
+    rl.save_history(&history_file).unwrap();
+}
+
+#[cfg(not(feature = "readline"))]
+pub fn run_loop(prompt: &str, mut shell_state: ShellState) {
+    loop {
+        print!("{}", prompt);
+        std::io::stdout().flush().unwrap();
+        let input = parse_input("interactive");
+        process_input(&mut shell_state, &input);
     }
 }
 
@@ -367,7 +426,7 @@ pub fn get_calc_vars(problem: &str) -> (&str, i32, i32) {
 pub fn non_interactive(shell_state: &mut ShellState) {
     if shell_state.args.get(1).unwrap_or(&shell_state.na) == "-c" {
         let input = parse_input("non-interactive");
-        crate::process_input(shell_state, &input);
+        process_input(shell_state, &input);
         std::process::exit(0);
     }
 }

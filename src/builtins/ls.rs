@@ -46,12 +46,12 @@ pub fn ls(mut args: Vec<String>) -> String {
                     #[cfg(feature = "colors")]
                     output.push_str(format!("{}", part.white()).as_str());
                     #[cfg(not(feature = "colors"))]
-                    output.push_str(format!("{}", part).as_str());
+                    output.push_str(&part.to_string());
                 } else {
                     #[cfg(feature = "colors")]
                     output.push_str(format!("{}", part.green()).as_str());
                     #[cfg(not(feature = "colors"))]
-                    output.push_str(format!("{}", part).as_str());
+                    output.push_str(&part.to_string());
                 }
                 n += 1;
                 if n == parts_count {
