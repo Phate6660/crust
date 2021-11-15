@@ -17,7 +17,7 @@
 crust is a WIP shell written in Rust by [[https://github.com/Phate6660|Phate6660]] and [[https://github.com/TheOnAndOnlyZenomat|Zenomat]].
 
 Some of the functionality is split off into features, to reduce the amount of crates pulled in by default. They are:
-* colors (for colorized output in ls)
+* colors (for colorized output in ls (and other builtins once implemented))
 * readline (a default feature (but can be turned off), for having a nice interactible prompt)
 ** when disabled, you'll have very basic line input (think of shells like dash)
 ** NOTE: the prompt is customizable regardless of whether or not you choose to enable the feature

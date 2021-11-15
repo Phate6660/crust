@@ -2,7 +2,7 @@
 authors = ["Phate6660", "Zenomat"]
 edition = "2018"
 exclude = [".github/"]
-keywords = ["shell", "cross-platform"]
+keywords = ["cross-platform", "shell"]
 license-file = "LICENSE"
 name = "crust"
 readme = "README.creole"
