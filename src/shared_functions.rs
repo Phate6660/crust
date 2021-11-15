@@ -104,7 +104,7 @@ impl ShellState {
         let args = std::env::args().collect();
         let prompt = env_var("PROMPT").unwrap_or_else(|_| String::from("[crust]: "));
         let user_command = return_shellcommand(String::from("whoami"), Vec::new(), Redirection::NoOp);
-        let user = env_var("USER").unwrap_or_else(|_| cmd(&user_command));
+        let user = env_var("USER").unwrap_or_else(|_| cmd(&user_command)).trim().to_string();
         let home = env_var("HOME").unwrap_or_else(|_| ["/home/", user.as_str()].concat());
         let na = String::from("no args");
         let share_dir = [&home, "/.local/share/crust"].concat();
