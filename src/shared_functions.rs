@@ -277,6 +277,13 @@ fn lex_tokenized_input(input: &str) -> Vec<String> {
     lexed_vec
 }
 
+/// Implement `Display` for `ShellCommand` which will in turn also implement `.to_string()`.
+impl std::fmt::Display for ShellCommand {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.name)
+    }
+}
+
 impl ShellCommand {
     /// Constructs a new `ShellCommand` and returns it.
     /// Takes the input given by the user, unprocessed.
@@ -297,15 +304,7 @@ impl ShellCommand {
             redirection: get_redirection_type(input)
         }
     }
-    /// Converts a `ShellCommand` to a `String`.
-    pub fn to_string(&self) -> String {
-        let mut arg_string = self.name.clone();
-        if !self.args.is_empty() {
-            arg_string.push(' ');
-            arg_string.push_str(&self.args.join(" "));
-        }
-        arg_string
-    }
+
     /// Takes a `ShellCommand`, figures out what to do given the name,
     /// then executes it.
     /// All builtins have to be listed here and point to their given function.
