@@ -16,7 +16,7 @@
 
 crust is a WIP shell written in Rust by [[https://github.com/Phate6660|Phate6660]] and [[https://github.com/TheOnAndOnlyZenomat|Zenomat]].
 
-Some of the functionality is split off into features, to reduce the amount of crates pulled in by default. They are:\\
+Some of the functionality is split off into features, to reduce the amount of crates pulled in by default. They are:
 * colors (for colorized output in ls)
 * readline (a default feature (but can be turned off), for having a nice interactible prompt)
 ** when disabled, you'll have very basic line input (think of shells like dash)
@@ -55,7 +55,7 @@ To run a non-interactive shell with a command:\\
 Customize the prompt by setting the PROMPT env variable.\\
 //PROMPT="[%{C}]-[%{U}@%(hostname)]-> "//
 
-What you can use in the prompt:\\
+What you can use in the prompt:
 * %{C} for current working directory.
 * %{D12} and %{D24} for 12 and 24 hour time respectively.
 * %{H} for the current user's home directory.
