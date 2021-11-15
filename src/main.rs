@@ -4,10 +4,15 @@ mod shared_functions;
 #[cfg(feature = "readline")]
 use rustyline::{error::ReadlineError, Editor};
 use shared_functions::{non_interactive, ShellCommand, ShellState};
+
+#[cfg(feature = "readline")]
 use std::process::exit;
 
 #[cfg(not(feature = "readline"))]
 use shared_functions::parse_input;
+
+#[cfg(not(feature = "readline"))]
+use std::io::Write;
 
 // Process the input to run the appropriate builtin or external command.
 fn process_input(shell_state: &mut ShellState, input: &str) {
@@ -61,12 +66,13 @@ fn main() {
 
 #[cfg(not(feature = "readline"))]
 fn main() {
-    let shell_state = ShellState::new();
+    let mut shell_state = ShellState::init();
+    let prompt = ShellState::eval_prompt(&mut shell_state);
     non_interactive(&mut shell_state);
     loop {
-        print!("{}", shell_state.prompt);
+        print!("{}", prompt);
         std::io::stdout().flush().unwrap();
         let input = parse_input("interactive");
-        process_input(&mut shell_state, input);
+        process_input(&mut shell_state, &input);
     }
 }
