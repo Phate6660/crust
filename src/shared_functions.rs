@@ -280,7 +280,7 @@ fn lex_tokenized_input(input: &str) -> Vec<String> {
 /// Implement `Display` for `ShellCommand` which will in turn also implement `.to_string()`.
 impl std::fmt::Display for ShellCommand {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", self.name)
+        write!(f, "{} {}", self.name, self.args.join(" "))
     }
 }
 
