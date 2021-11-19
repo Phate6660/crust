@@ -159,6 +159,10 @@ impl ShellState {
             );
         }
         // TODO: Add support for more escape sequences.
+        // To match an escape sequence, we need to match for an escaped version of the sequence,
+        // and then replace the escaped version with the actual sequence.
+        // This is because the escape sequence is a single character, and the actual sequence
+        // is escaped by the compiler in a user-supplied string literal.
         let substitutions = vec!["%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}", "\\n"];
         for to_subst in substitutions {
             let mut subst = String::new();
