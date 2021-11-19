@@ -96,6 +96,40 @@ pub fn run_loop(prompt: &str, mut shell_state: ShellState) {
     }
 }
 
+// TODO: Unify this with the `lex_tokenized_input` function at line 237.
+/// Parses the input and returns a vector `ShellCommand`s.
+fn get_commands_from_input(input: &str) -> Vec<ShellCommand> {
+    let tokenized_vec = tokenize(input);
+    let mut tmp_vec: String = String::new();
+    let mut command_vec: Vec<ShellCommand> = Vec::new();
+    let mut command = false;
+    let mut command_end = false;
+    let mut tok_iter = tokenized_vec.iter().peekable();
+    while tok_iter.peek() != None {
+        let tok_iter_char = tok_iter.next().unwrap().as_str();
+        if command_end {
+            command_vec.push(ShellCommand::new(tmp_vec.as_str()));
+            tmp_vec.clear();
+            command = false;
+            command_end = false;
+            continue;
+        }
+        if tok_iter_char == "%" && tok_iter.peek().unwrap().as_str() == "(" {
+            command = true;
+        } else if command {
+            if tok_iter_char == "(" {
+                continue;
+            } else if tok_iter_char != ")" {
+                tmp_vec.push_str(tok_iter_char);
+            } else if tok_iter_char == ")" {
+                command_end = true;
+                continue;
+            }
+        }
+    }
+    command_vec
+}
+
 impl ShellState {
     /// Initalizes the shell state with all the informations needed.
     ///
@@ -115,38 +149,7 @@ impl ShellState {
     }
     pub fn eval_prompt(&mut self) -> String {
         let mut evaled_prompt = self.prompt.clone();
-        fn prompt_lex_tokenized_input(input: &str) -> Vec<ShellCommand> {
-            let tokenized_vec = tokenize(input);
-            let mut tmp_vec: String = String::new();
-            let mut command_vec: Vec<ShellCommand> = Vec::new();
-            let mut command = false;
-            let mut command_end = false;
-            let mut tok_iter = tokenized_vec.iter().peekable();
-            while tok_iter.peek() != None {
-                let tok_iter_char = tok_iter.next().unwrap().as_str();
-                if command_end {
-                    command_vec.push(ShellCommand::new(tmp_vec.as_str()));
-                    tmp_vec.clear();
-                    command = false;
-                    command_end = false;
-                    continue;
-                }
-                if tok_iter_char == "%" && tok_iter.peek().unwrap().as_str() == "(" {
-                    command = true;
-                } else if command {
-                    if tok_iter_char == "(" {
-                        continue;
-                    } else if tok_iter_char != ")" {
-                        tmp_vec.push_str(tok_iter_char);
-                    } else if tok_iter_char == ")" {
-                        command_end = true;
-                        continue;
-                    }
-                }
-            }
-            command_vec
-        }
-        let commands = prompt_lex_tokenized_input(&self.prompt);
+        let commands = get_commands_from_input(&self.prompt);
         let mut command_output: String;
         for command in commands {
             if command.args.contains(&String::from("|")) {
@@ -211,6 +214,16 @@ pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirec
 /// Tokenizes the input, returning a vector of every character in `input`.
 fn tokenize(input: &str) -> Vec<String> { input.chars().map(|t| t.to_string()).collect::<Vec<String>>() }
 
+fn push_to_vec(from_vec: &mut Vec<String>, to_vec: &mut Vec<String>) {
+    let element = from_vec.concat();
+    // Don't push to the vector if element is empty.
+    if element.is_empty() {
+        return;
+    }
+    to_vec.push(element);
+    from_vec.clear();
+}
+
 /// Creates a lexified vector from a tokenized one.
 /// Example, if the tokenized vec was:
 /// ```
@@ -224,15 +237,6 @@ fn tokenize(input: &str) -> Vec<String> { input.chars().map(|t| t.to_string()).c
 /// `["echo", "arg 1", "arg 2"]`
 fn lex_tokenized_input(input: &str) -> Vec<String> {
     let tokenized_vec = tokenize(input);
-    fn push_to_vec(from_vec: &mut Vec<String>, to_vec: &mut Vec<String>) {
-        let element = from_vec.concat();
-        // Don't push to the vector if element is empty.
-        if element.is_empty() {
-            return;
-        }
-        to_vec.push(element);
-        from_vec.clear();
-    }
     // This is the final vector that will be returned.
     let mut lexed_vec: Vec<String> = Vec::new();
     // This is a temporary vec that gets pushed to lexed_vec.
@@ -470,6 +474,16 @@ pub fn is_piped(args: &[String], cmd: &str) {
     }
 }
 
+/// Returns a `Child` of a command wrapped in a `Result`.
+fn return_child(cmd: &str, args: &[String]) -> Result<std::process::Child, ()> {
+    Command::new(cmd)
+        .args(args)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .or(Err(()))
+}
+
 /// Takes a `PipedShellCommand`, iterating over all `ShellCommand` structs
 /// contained by it, checking if it is the first or the last in the pipeline,
 /// and taking the appropriate meassurements to pipe stdout.
@@ -481,12 +495,7 @@ pub fn piped_cmd(pipe: &PipedShellCommand) -> String {
         "calc" => output_prev = calc(&pipe.commands[0].args.clone()),
         "ls" => output_prev = ls(pipe.commands[0].args.clone()),
         _ => {
-            let child = Command::new(pipe.commands[0].name.clone())
-                .args(&pipe.commands[0].args)
-                .stdin(Stdio::piped())
-                .stdout(Stdio::piped())
-                .spawn()
-                .or(Err(()));
+            let child = return_child(&pipe.commands[0].name.clone(), &pipe.commands[0].args);
             if child.is_err() {
                 println!("{} failed", pipe.commands[0].name.clone());
             }
@@ -496,29 +505,24 @@ pub fn piped_cmd(pipe: &PipedShellCommand) -> String {
     for (idx, command) in pipe.commands.iter().enumerate() {
         if idx == 0 {
             continue;
-        } else if idx == pipe.commands.len() - 1 {
+        }
+        if idx == pipe.commands.len() - 1 {
             break;
-        } else {
-            match command.name.as_str() {
-                "cat" => output_prev = cat(&command.args.clone()),
-                "echo" => output_prev = echo(&command.args.clone()),
-                "calc" => output_prev = calc(&command.args.clone()),
-                "ls" => output_prev = ls(command.args.clone()),
-                _ => {
-                    let child = Command::new(command.name.clone())
-                        .args(&command.args)
-                        .stdout(Stdio::piped())
-                        .stdin(Stdio::piped())
-                        .spawn()
-                        .or(Err(()));
-                    match child {
-                        Ok(mut child) => {
-                            child.stdin.take().unwrap().write_all(output_prev.as_bytes()).unwrap();
-                            output_prev = "".to_string();
-                            child.stdout.unwrap().read_to_string(&mut output_prev).unwrap();
-                        },
-                        Err(_) => println!("{} failed", command.name.clone())
-                    }
+        }
+        match command.name.as_str() {
+            "cat" => output_prev = cat(&command.args.clone()),
+            "echo" => output_prev = echo(&command.args.clone()),
+            "calc" => output_prev = calc(&command.args.clone()),
+            "ls" => output_prev = ls(command.args.clone()),
+            _ => {
+                let child = return_child(&command.name.clone(), &command.args);
+                match child {
+                    Ok(mut child) => {
+                        child.stdin.take().unwrap().write_all(output_prev.as_bytes()).unwrap();
+                        output_prev = "".to_string();
+                        child.stdout.unwrap().read_to_string(&mut output_prev).unwrap();
+                    },
+                    Err(_) => println!("{} failed", command.name.clone())
                 }
             }
         }
@@ -561,12 +565,7 @@ pub fn piped_cmd(pipe: &PipedShellCommand) -> String {
         "calc" => calc(&pipe.commands[pipe.commands.len() - 1].args.clone()),
         "ls" => ls(pipe.commands[pipe.commands.len() - 1].args.clone()),
         _ => {
-            let child = Command::new(pipe.commands[pipe.commands.len() - 1].name.clone())
-                .args(&pipe.commands[pipe.commands.len() - 1].args)
-                .stdout(Stdio::piped())
-                .stdin(Stdio::piped())
-                .spawn()
-                .or(Err(()));
+            let child = return_child(&pipe.commands[pipe.commands.len() - 1].name.clone(), &pipe.commands[pipe.commands.len() - 1].args);
             match child {
                 Ok(mut child) => {
                     child.stdin.take().unwrap().write_all(output_prev.as_bytes()).unwrap();

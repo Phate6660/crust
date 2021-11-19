@@ -58,9 +58,8 @@ pub fn ls(mut args: Vec<String>) -> String {
                 n += 1;
                 if n == parts_count {
                     break;
-                } else {
-                    output.push('/');
                 }
+                output.push('/');
             }
             output.push('\n');
         }
