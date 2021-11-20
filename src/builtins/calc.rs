@@ -1,5 +1,27 @@
 use crate::commands::is_piped;
-use crate::shared_functions::get_calc_vars;
+
+/// Get the calculator vars (`math_op`, `first_number`, `second_number`) for calc.
+pub fn get_calc_vars(problem: &str) -> (&str, i32, i32) {
+    let math_op = if problem.contains('x') {
+        "x"
+    } else if problem.contains('*') {
+        "*"
+    } else if problem.contains('/') {
+        "/"
+    } else if problem.contains('%') {
+        "%"
+    } else if problem.contains('+') {
+        "+"
+    } else if problem.contains('-') {
+        "-"
+    } else {
+        ""
+    };
+    let problem_vector: Vec<&str> = problem.split(math_op).collect();
+    let first_number: i32 = problem_vector[0].parse().unwrap();
+    let second_number: i32 = problem_vector[1].parse().unwrap();
+    (math_op, first_number, second_number)
+}
 
 /// Takes the `args` part of a `ShellCommand` struct,
 /// and tries to evaluate the given mathematical expression,
