@@ -273,9 +273,7 @@ pub fn get_calc_vars(problem: &str) -> (&str, i32, i32) {
     } else {
         ""
     };
-    println!("{}", math_op);
     let problem_vector: Vec<&str> = problem.split(math_op).collect();
-    println!("{:?}", problem_vector);
     let first_number: i32 = problem_vector[0].parse().unwrap();
     let second_number: i32 = problem_vector[1].parse().unwrap();
     (math_op, first_number, second_number)
