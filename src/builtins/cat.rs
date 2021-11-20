@@ -1,4 +1,4 @@
-use crate::shared_functions::is_piped;
+use crate::commands::is_piped;
 use std::fs::File;
 use std::io::{BufReader, Read};
 

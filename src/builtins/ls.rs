@@ -1,4 +1,4 @@
-use crate::shared_functions::is_piped;
+use crate::commands::is_piped;
 
 /// List dir entries. Take the args part of `ShellCommand`.
 pub fn ls(mut args: Vec<String>) -> String {

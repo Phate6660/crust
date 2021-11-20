@@ -1,4 +1,5 @@
-use crate::shared_functions::{ShellCommand, ShellState};
+use crate::commands::ShellCommand;
+use crate::shared_functions::ShellState;
 use std::env::current_dir;
 
 /// Helper for cd, to actually change the dirctory.

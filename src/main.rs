@@ -1,4 +1,5 @@
 mod builtins;
+mod commands;
 mod shared_functions;
 
 #[cfg(feature = "readline")]
