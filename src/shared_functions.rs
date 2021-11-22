@@ -8,6 +8,9 @@ use std::process::exit;
 #[cfg(feature = "readline")]
 use rustyline::{error::ReadlineError, Editor};
 
+#[cfg(not(feature = "readline"))]
+use std::io::Write;
+
 /// Holds all important informations for and about the shell.
 pub struct ShellState {
     pub args: Vec<String>,
@@ -89,7 +92,7 @@ pub fn run_loop(prompt: &str, mut shell_state: ShellState) {
     loop {
         print!("{}", prompt);
         std::io::stdout().flush().unwrap();
-        let input = parse_input("interactive");
+        let input = crate::parse_input("interactive");
         process_input(&mut shell_state, &input);
     }
 }
