@@ -23,6 +23,8 @@ Some of the functionality is split off into features, to reduce the amount of cr
 ** NOTE: the prompt is customizable regardless of whether or not you choose to enable the feature
 * time (for getting the time with the %{D12} and %{D24} variables)
 
+If you don't want any features at all, then build or run with the arg //--no-default-features//.
+
 == Running ==
 To run an interactive shell:\\
 //cargo run --release//
