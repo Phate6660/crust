@@ -92,6 +92,7 @@ What you can use in the prompt:
 | FEATURE             | TODO | WIP | DONE |
 | Read file           |      |     | X    |
 | Print line numbers  |      |     | X    |
+| Print specific line |      |     | X    |
 | Paging support      | X    |     |      |
 | Syntax highlighting | X    |     |      |
 
