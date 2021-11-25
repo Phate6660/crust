@@ -1,6 +1,7 @@
 use crate::commands::{cmd, piped_cmd, return_shellcommand, PipedShellCommand, Redirection, ShellCommand};
+use sflib::ensure_directory;
 use std::env::var as env_var;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 #[cfg(feature = "readline")]
 use std::process::exit;
@@ -20,13 +21,6 @@ pub struct ShellState {
     pub na: String,
     pub share_dir: String,
     pub cd_prev_dir: Option<PathBuf>
-}
-
-/// Ensures that a directory and it's parents exist.
-pub fn ensure_directory(dir: &Path) {
-    if !dir.exists() {
-        std::fs::create_dir_all(dir).unwrap();
-    }
 }
 
 /// Gets the current time with the format specified if the `time` feature is enabled.
@@ -145,7 +139,7 @@ impl ShellState {
         let share_dir = [&home, "/.local/share/crust"].concat();
         let cd_prev_dir = None;
         let shell_state = ShellState {args, prompt, user, home, na, share_dir, cd_prev_dir};
-        ensure_directory(Path::new(&shell_state.share_dir));
+        ensure_directory(&shell_state.share_dir, true).unwrap();
         shell_state
     }
     pub fn eval_prompt(&mut self) -> String {

@@ -1,6 +1,7 @@
 use crate::builtins::{calc::calc, cat::cat, cd::cd, echo::echo, help::help, ls::ls};
-use crate::shared_functions::{ensure_directory, lex_tokenized_input};
+use crate::shared_functions::lex_tokenized_input;
 use crate::ShellState;
+use sflib::ensure_directory;
 use std::io::{Read, Write};
 use std::path::Path;
 use std::process::{Command, Stdio};
@@ -237,7 +238,7 @@ pub fn piped_cmd(pipe: &PipedShellCommand) -> String {
             let part = format!("{}/", chunk);
             parent_dir.push_str(&part);
         }
-        ensure_directory(Path::new(&parent_dir));
+        ensure_directory(&parent_dir, true).unwrap();
     }
     let file_path = &Path::new(file_string);
     match pipe.commands[pipe.commands.len() - 1].redirection {
