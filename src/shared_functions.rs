@@ -153,7 +153,7 @@ impl ShellState {
                 command_output = cmd(&command);
             }
             evaled_prompt = evaled_prompt.replace(
-                format!("%({})", command.to_string()).as_str(), command_output.trim()
+                format!("%({})", command.to_string().trim()).as_str(), command_output.trim()
             );
         }
         // TODO: Add support for more escape sequences.
