@@ -46,7 +46,7 @@ pub fn ls(mut args: Vec<String>) -> String {
                     use colored::Colorize;
                     if part.starts_with('.') || n == parts_count - 1 {
                         #[cfg(feature = "colors")]
-                        output.push_str(format!("{}", part.white()).as_str());    
+                        output.push_str(format!("{}", part.white()).as_str());
                     } else {
                         #[cfg(feature = "colors")]
                         output.push_str(format!("{}", part.green()).as_str());

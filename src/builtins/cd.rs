@@ -7,7 +7,7 @@ fn cd_helper(dir: &str) {
     let path = std::path::Path::new(dir);
     match std::env::set_current_dir(&path) {
         Ok(()) => (),
-        Err(_) => println!("Failed to change directory to '{}'", path.display())
+        Err(_) => println!("Failed to change directory to '{}'", path.display()),
     }
 }
 

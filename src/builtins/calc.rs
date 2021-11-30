@@ -42,7 +42,7 @@ pub fn calc(args: &[String]) -> String {
         "+" => output.push_str(format!("{}", first_number + second_number).as_str()),
         // Subtraction
         "-" => output.push_str(format!("{}", first_number - second_number).as_str()),
-        _ => output.push_str(format!("Error, '{}' is an unsupported operation.", math_op).as_str())
+        _ => output.push_str(format!("Error, '{}' is an unsupported operation.", math_op).as_str()),
     }
     output
 }

@@ -10,7 +10,7 @@ use std::process::{Command, Stdio};
 pub enum Redirection {
     Overwrite,
     Append,
-    NoOp
+    NoOp,
 }
 
 /// This struct is used to construct a shellcommand,
@@ -22,14 +22,14 @@ pub enum Redirection {
 pub struct ShellCommand {
     pub name: String,
     pub args: Vec<String>,
-    pub redirection: Redirection
+    pub redirection: Redirection,
 }
 
 pub fn return_shellcommand(name: String, args: Vec<String>, redirection: Redirection) -> ShellCommand {
     ShellCommand {
         name,
         args,
-        redirection
+        redirection,
     }
 }
 
@@ -57,7 +57,7 @@ impl ShellCommand {
         ShellCommand {
             name: lexed_vec[0].clone(),
             args: lexed_vec[1..].to_vec(),
-            redirection: get_redirection_type(input)
+            redirection: get_redirection_type(input),
         }
     }
 
@@ -95,7 +95,7 @@ impl ShellCommand {
 /// in a pipeline. Every command is represented by a `ShellCommand`.
 #[derive(Debug)]
 pub struct PipedShellCommand {
-    pub commands: Vec<ShellCommand>
+    pub commands: Vec<ShellCommand>,
 }
 
 impl PipedShellCommand {
@@ -123,14 +123,14 @@ impl PipedShellCommand {
                 let command = ShellCommand {
                     name: input.name.clone(),
                     args: part[0..].to_vec(),
-                    redirection: get_redirection_type(input)
+                    redirection: get_redirection_type(input),
                 };
                 commands.push(command);
             } else {
                 let command = ShellCommand {
                     name: part[0].clone(),
                     args: part[1..].to_vec(),
-                    redirection: get_redirection_type(input)
+                    redirection: get_redirection_type(input),
                 };
                 commands.push(command);
             }
@@ -221,8 +221,8 @@ pub fn piped_cmd(pipe: &PipedShellCommand) -> String {
                         child.stdin.take().unwrap().write_all(output_prev.as_bytes()).unwrap();
                         output_prev = "".to_string();
                         child.stdout.unwrap().read_to_string(&mut output_prev).unwrap();
-                    },
-                    Err(_) => println!("{} failed", command.name.clone())
+                    }
+                    Err(_) => println!("{} failed", command.name.clone()),
                 }
             }
         }
@@ -246,7 +246,7 @@ pub fn piped_cmd(pipe: &PipedShellCommand) -> String {
             let mut file = std::fs::File::create(file_path).unwrap();
             file.write_all(output_prev.as_bytes()).unwrap();
             return String::new();
-        },
+        }
         Redirection::Append => {
             let mut file = std::fs::OpenOptions::new()
                 .write(true)
@@ -256,8 +256,8 @@ pub fn piped_cmd(pipe: &PipedShellCommand) -> String {
                 .unwrap();
             writeln!(file, "{}", output_prev).unwrap();
             return String::new();
-        },
-        Redirection::NoOp => ()
+        }
+        Redirection::NoOp => (),
     }
     match pipe.commands[pipe.commands.len() - 1].name.as_str() {
         "cat" => cat(&pipe.commands[pipe.commands.len() - 1].args.clone()),
@@ -265,17 +265,20 @@ pub fn piped_cmd(pipe: &PipedShellCommand) -> String {
         "calc" => calc(&pipe.commands[pipe.commands.len() - 1].args.clone()),
         "ls" => ls(pipe.commands[pipe.commands.len() - 1].args.clone()),
         _ => {
-            let child = return_child(&pipe.commands[pipe.commands.len() - 1].name.clone(), &pipe.commands[pipe.commands.len() - 1].args);
+            let child = return_child(
+                &pipe.commands[pipe.commands.len() - 1].name.clone(),
+                &pipe.commands[pipe.commands.len() - 1].args,
+            );
             match child {
                 Ok(mut child) => {
                     child.stdin.take().unwrap().write_all(output_prev.as_bytes()).unwrap();
                     let mut output = String::new();
                     match child.stdout.take().unwrap().read_to_string(&mut output) {
                         Err(why) => return format!("ERROR: could not read cmd2 stdout: {}", why),
-                        Ok(_) => output
+                        Ok(_) => output,
                     }
-                },
-                Err(_) => pipe.commands[pipe.commands.len() - 1].name.clone()
+                }
+                Err(_) => pipe.commands[pipe.commands.len() - 1].name.clone(),
             }
         }
     }
