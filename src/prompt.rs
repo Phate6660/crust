@@ -1,3 +1,4 @@
+use crate::shared_functions::tokenize;
 use std::fmt::{Formatter, Display};
 
 #[derive(Debug, Copy, Clone)]
@@ -145,5 +146,91 @@ impl EsBuilder {
             escape_sequence: self.escape_sequence,
         }
     }
+}
+
+pub fn get_bgcolors_from_input(input: &str) -> Vec<BgColor> {
+    let tokenized_vec = tokenize(input);
+    let mut tmp_vec: String = String::new();
+    let mut bgcolor_vec: Vec<BgColor> = Vec::new();
+    let mut color = false;
+    let mut bgcolor_end = false;
+    let mut tok_iter = tokenized_vec.iter().peekable();
+    while tok_iter.peek() != None {
+        let tok_iter_char = tok_iter.next().unwrap().as_str();
+        if bgcolor_end {
+            let ret_color: BgColor = match tmp_vec.as_str() {
+                "BLACK" => BgColor::Black,
+                "RED" => BgColor::Red,
+                "GREEN" => BgColor::Green,
+                "YELLOW" => BgColor::Yellow,
+                "BLUE" => BgColor::Blue,
+                "MAGENTA" => BgColor::Magenta,
+                "CYAN" => BgColor::Cyan,
+                "WHITE" => BgColor::White,
+                _ => BgColor::Default,
+            };
+            bgcolor_vec.push(ret_color);
+            tmp_vec.clear();
+            color = false;
+            bgcolor_end = false;
+            continue;
+        }
+        if tok_iter_char == "B" && tok_iter.peek().unwrap().as_str() == "<" {
+            color = true;
+        } else if color {
+            if tok_iter_char == "<" {
+                continue;
+            } else if tok_iter_char != ">" {
+                tmp_vec.push_str(tok_iter_char);
+            } else if tok_iter_char == ">" {
+                bgcolor_end = true;
+                continue;
+            }
+        }
+    }
+    bgcolor_vec
+}
+
+pub fn get_fgcolors_from_input(input: &str) -> Vec<FgColor> {
+    let tokenized_vec = tokenize(input);
+    let mut tmp_vec: String = String::new();
+    let mut fgcolor_vec: Vec<FgColor> = Vec::new();
+    let mut color = false;
+    let mut fgcolor_end = false;
+    let mut tok_iter = tokenized_vec.iter().peekable();
+    while tok_iter.peek() != None {
+        let tok_iter_char = tok_iter.next().unwrap().as_str();
+        if fgcolor_end {
+            let ret_color: FgColor = match tmp_vec.as_str() {
+                "BLACK" => FgColor::Black,
+                "RED" => FgColor::Red,
+                "GREEN" => FgColor::Green,
+                "YELLOW" => FgColor::Yellow,
+                "BLUE" => FgColor::Blue,
+                "MAGENTA" => FgColor::Magenta,
+                "CYAN" => FgColor::Cyan,
+                "WHITE" => FgColor::White,
+                _ => FgColor::Default,
+            };
+            fgcolor_vec.push(ret_color);
+            tmp_vec.clear();
+            color = false;
+            fgcolor_end = false;
+            continue;
+        }
+        if tok_iter_char == "F" && tok_iter.peek().unwrap().as_str() == "<" {
+            color = true;
+        } else if color {
+            if tok_iter_char == "<" {
+                continue;
+            } else if tok_iter_char != ">" {
+                tmp_vec.push_str(tok_iter_char);
+            } else if tok_iter_char == ">" {
+                fgcolor_end = true;
+                continue;
+            }
+        }
+    }
+    fgcolor_vec
 }
 
