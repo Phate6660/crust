@@ -1,4 +1,5 @@
 use crate::commands::{cmd, piped_cmd, return_shellcommand, PipedShellCommand, Redirection, ShellCommand};
+use crate::prompt::{BgColor, FgColor};
 use sflib::ensure_directory;
 use std::env::var as env_var;
 use std::path::PathBuf;
@@ -21,75 +22,6 @@ pub struct ShellState {
     pub na: String,
     pub share_dir: String,
     pub cd_prev_dir: Option<PathBuf>,
-}
-
-#[derive(Debug, Copy, Clone)]
-enum FgColor {
-    Black = 30,
-    Red = 31,
-    Green = 32,
-    Yellow = 33,
-    Blue = 34,
-    Magenta = 35,
-    Cyan = 36,
-    White = 37,
-    Default = 39,
-}
-
-enum BgColor {
-    Black = 40,
-    Red = 41,
-    Green = 42,
-    Yellow = 43,
-    Blue = 44,
-    Magenta = 45,
-    Cyan = 46,
-    White = 47,
-    Default = 49,
-}
-
-#[derive(Debug, Clone)]
-pub struct EscapeSequence {
-    escapeSequence: String,
-}
-
-impl EscapeSequence {
-    pub fn builder() -> EsBuilder {
-        EsBuilder::default()
-    }
-}
-
-pub struct EsBuilder {
-    escapeSequence: String,
-}
-
-impl Default for EsBuilder {
-    fn default() -> EsBuilder {
-        EsBuilder {
-            escapeSequence: String::from("\x1b["),
-        }
-    }
-}
-
-impl EsBuilder {
-    pub fn new() -> EsBuilder {
-        EsBuilder {
-            escapeSequence: String::from("\x1b["),
-        }
-    }
-
-    pub fn append(mut self, argument: u8) -> EsBuilder {
-        self.escapeSequence.push(';');
-        self.escapeSequence.push_str(&argument.to_string());
-        self
-    }
-
-    pub fn build(mut self) -> EscapeSequence {
-        self.escapeSequence.push('m');
-        EscapeSequence {
-            escapeSequence: self.escapeSequence,
-        }
-    }
 }
 
 /// Gets the current time with the format specified if the `time` feature is enabled.
@@ -119,7 +51,7 @@ pub fn process_input(shell_state: &mut ShellState, input: &str) {
 #[cfg(feature = "readline")]
 pub fn run_loop(prompt: &str, rl: &mut Editor<()>, history_file: &str, mut shell_state: ShellState) {
     loop {
-        let prompt = rl.readline(&("\x1b[31;42m".to_owned() + prompt));
+        let prompt = rl.readline(prompt);
         match prompt {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
@@ -194,8 +126,7 @@ fn get_commands_from_input(input: &str) -> Vec<ShellCommand> {
     command_vec
 }
 
-// FIXME(zeno): get it to recognize %F{}, because not it doesnt and as a result doesnt fint color
-fn get_colors_from_input(input: &str) -> Vec<FgColor> {
+fn get_fgcolors_from_input(input: &str) -> Vec<FgColor> {
     let tokenized_vec = tokenize(input);
     let mut tmp_vec: String = String::new();
     let mut fgcolor_vec: Vec<FgColor> = Vec::new();
@@ -207,6 +138,13 @@ fn get_colors_from_input(input: &str) -> Vec<FgColor> {
         if fgcolor_end {
             let ret_color: FgColor = match tmp_vec.as_str() {
                 "BLACK" => FgColor::Black,
+                "RED" => FgColor::Red,
+                "GREEN" => FgColor::Green,
+                "YELLOW" => FgColor::Yellow,
+                "BLUE" => FgColor::Blue,
+                "MAGENTA" => FgColor::Magenta,
+                "CYAN" => FgColor::Cyan,
+                "WHITE" => FgColor::White,
                 _ => FgColor::Default,
             };
             fgcolor_vec.push(ret_color);
@@ -215,14 +153,14 @@ fn get_colors_from_input(input: &str) -> Vec<FgColor> {
             fgcolor_end = false;
             continue;
         }
-        if tok_iter_char == "%" && tok_iter.peek().unwrap().as_str() == "F" && tok_iter.peek().unwrap().as_str() == "{" {
+        if tok_iter_char == "F" && tok_iter.peek().unwrap().as_str() == "<" {
             color = true;
         } else if color {
-            if tok_iter_char == "{" {
+            if tok_iter_char == "<" {
                 continue;
-            } else if tok_iter_char != "}" {
+            } else if tok_iter_char != ">" {
                 tmp_vec.push_str(tok_iter_char);
-            } else if tok_iter_char == "}" {
+            } else if tok_iter_char == ">" {
                 fgcolor_end = true;
                 continue;
             }
@@ -230,13 +168,58 @@ fn get_colors_from_input(input: &str) -> Vec<FgColor> {
     }
     fgcolor_vec
 }
+
+fn get_bgcolors_from_input(input: &str) -> Vec<BgColor> {
+    let tokenized_vec = tokenize(input);
+    let mut tmp_vec: String = String::new();
+    let mut bgcolor_vec: Vec<BgColor> = Vec::new();
+    let mut color = false;
+    let mut bgcolor_end = false;
+    let mut tok_iter = tokenized_vec.iter().peekable();
+    while tok_iter.peek() != None {
+        let tok_iter_char = tok_iter.next().unwrap().as_str();
+        if bgcolor_end {
+            let ret_color: BgColor = match tmp_vec.as_str() {
+                "BLACK" => BgColor::Black,
+                "RED" => BgColor::Red,
+                "GREEN" => BgColor::Green,
+                "YELLOW" => BgColor::Yellow,
+                "BLUE" => BgColor::Blue,
+                "MAGENTA" => BgColor::Magenta,
+                "CYAN" => BgColor::Cyan,
+                "WHITE" => BgColor::White,
+                _ => BgColor::Default,
+            };
+            bgcolor_vec.push(ret_color);
+            tmp_vec.clear();
+            color = false;
+            bgcolor_end = false;
+            continue;
+        }
+        if tok_iter_char == "B" && tok_iter.peek().unwrap().as_str() == "<" {
+            color = true;
+        } else if color {
+            if tok_iter_char == "<" {
+                continue;
+            } else if tok_iter_char != ">" {
+                tmp_vec.push_str(tok_iter_char);
+            } else if tok_iter_char == ">" {
+                bgcolor_end = true;
+                continue;
+            }
+        }
+    }
+    bgcolor_vec
+}
+
 impl ShellState {
     /// Initalizes the shell state with all the informations needed.
     ///
     /// `cd_prev_dir` doesnt hold a value, because there is no previous dir yet.
     pub fn init() -> ShellState {
         let args = std::env::args().collect();
-        let prompt = env_var("PROMPT").unwrap_or_else(|_| String::from("[crust]: "));
+        let prompt = env_var("PROMPT").unwrap_or_else(|_| String::from("F<BLACK>B<CYAN>[crust]:%{f}%{b} "));
+        println!("{}", prompt);
         let user_command = return_shellcommand(String::from("whoami"), Vec::new(), Redirection::NoOp);
         let user = env_var("USER").unwrap_or_else(|_| cmd(&user_command)).trim().to_string();
         let home = env_var("HOME").unwrap_or_else(|_| ["/home/", user.as_str()].concat());
@@ -256,7 +239,6 @@ impl ShellState {
         shell_state
     }
     pub fn eval_prompt(&mut self) -> String {
-        println!("Colors found: {:#?}", get_colors_from_input(&self.prompt));
         let mut evaled_prompt = self.prompt.clone();
         let commands = get_commands_from_input(&self.prompt);
         let mut command_output: String;
@@ -271,14 +253,20 @@ impl ShellState {
                 command_output.trim(),
             );
         }
-        let fgcolors = get_colors_from_input(&self.prompt);
-        println!("{:#?}", format!("%{{{:#?}}}", fgcolors[0]));
-        for fgcolor in fgcolors {
-            let esb = EsBuilder::new();
-            let fesb = esb.append(fgcolor as u8).build();
+        let fgcolors = get_fgcolors_from_input(&self.prompt);
+        let bgcolors = get_bgcolors_from_input(&self.prompt);
+        for fgcolor in &fgcolors {
+            println!("fgcolor = {:#?}", fgcolor);
             evaled_prompt = evaled_prompt.replace(
-                format!("%{{{:#?}}}", fgcolor).as_str(),
-                fesb.escapeSequence.as_str(),
+                format!("F<{}>", fgcolor.to_str()).as_str(),
+                format!("{}", fgcolor.to_string()).as_str(),
+            );
+        }
+        for bgcolor in &bgcolors {
+            println!("bgcolor = {:#?}", bgcolor);
+            evaled_prompt = evaled_prompt.replace(
+                format!("B<{}>", bgcolor.to_str()).as_str(),
+                format!("{}", bgcolor.to_string()).as_str(),
             );
         }
         // TODO: Add support for more escape sequences.
@@ -297,7 +285,7 @@ impl ShellState {
                 "%{U}" => subst = self.user.clone(),
                 "\\n" => subst = '\n'.to_string(), // Needed to support newlines in the prompt.
                 "%{f}" => subst = "\x1b[39m".to_string(), // Reset to default text color
-                "%{b}" => subst = "\x1b[49m".to_string(), // Reset to default text color
+                "%{b}" => subst = "\x1b[49m".to_string(), // Reset to default background color
 
                 _ => (),
             }
