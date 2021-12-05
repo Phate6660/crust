@@ -131,7 +131,7 @@ impl ShellState {
     /// `cd_prev_dir` doesnt hold a value, because there is no previous dir yet.
     pub fn init() -> ShellState {
         let args = std::env::args().collect();
-        let prompt = env_var("PROMPT").unwrap_or_else(|_| String::from("F<BLACK>B<CYAN>[crust]:%{f}%{b} "));
+        let prompt = env_var("PROMPT").unwrap_or_else(|_| String::from("F<BLACK>B<CYAN>%{i}%{u}[crust]:%{re} "));
         println!("{}", prompt);
         let user_command = return_shellcommand(String::from("whoami"), Vec::new(), Redirection::NoOp);
         let user = env_var("USER").unwrap_or_else(|_| cmd(&user_command)).trim().to_string();
@@ -187,7 +187,14 @@ impl ShellState {
         // and then replace the escaped version with the actual sequence.
         // This is because the escape sequence is a single character, and the actual sequence
         // is escaped by the compiler in a user-supplied string literal.
-        let substitutions = vec!["%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}", "\\n", "%{f}", "%{b}"];
+        let substitutions = vec![
+            "%{C}",
+            "%{D12}", "%{D24}",
+            "%{H}", "%{U}",
+            "\\n",
+            "%{i}", "%{u}",
+            "%{re}", "%{rf}", "%{rb}"
+        ];
         for to_subst in substitutions {
             let mut subst = String::new();
             match to_subst {
@@ -196,10 +203,12 @@ impl ShellState {
                 "%{D24}" => subst = get_time("%H:%M").to_string(),
                 "%{H}" => subst = self.home.clone(),
                 "%{U}" => subst = self.user.clone(),
-                "\\n" => subst = '\n'.to_string(), // Needed to support newlines in the prompt.
-                "%{f}" => subst = "\x1b[39m".to_string(), // Reset to default text color
-                "%{b}" => subst = "\x1b[49m".to_string(), // Reset to default background color
-
+                "\\n" => subst = '\n'.to_string(), // Needed to support newlines in the prompt
+                "%{i}" => subst = "\x1b[3m".to_string(), // Italicize text
+                "%{re}" => subst = "\x1b[0m".to_string(), // Reset all attributes
+                "%{rf}" => subst = "\x1b[39m".to_string(), // Reset to default text color
+                "%{rb}" => subst = "\x1b[49m".to_string(), // Reset to default background color
+                "%{u}" => subst = "\x1b[4m".to_string(), // Underline test
                 _ => (),
             }
             evaled_prompt = evaled_prompt.replace(to_subst, &subst);
