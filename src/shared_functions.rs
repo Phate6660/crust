@@ -188,12 +188,10 @@ impl ShellState {
         // This is because the escape sequence is a single character, and the actual sequence
         // is escaped by the compiler in a user-supplied string literal.
         let substitutions = vec![
-            "%{C}",
-            "%{D12}", "%{D24}",
-            "%{H}", "%{U}",
-            "\\n",
-            "%{i}", "%{u}",
-            "%{re}", "%{rf}", "%{rb}"
+            "%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}", // Information-related variables
+            "\\n", // Explicit escape sequences
+            "%{i}", "%{u}", // Font effect variables
+            "%{re}", "%{rf}", "%{rb}" // Reset-related variables
         ];
         for to_subst in substitutions {
             let mut subst = String::new();
