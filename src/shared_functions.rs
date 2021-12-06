@@ -1,4 +1,5 @@
 use crate::commands::{cmd, piped_cmd, return_shellcommand, PipedShellCommand, Redirection, ShellCommand};
+use crate::prompt::Color;
 use sflib::ensure_directory;
 use std::env::var as env_var;
 use std::path::PathBuf;
@@ -166,22 +167,37 @@ impl ShellState {
                 command_output.trim(),
             );
         }
-        let fgcolors = crate::prompt::get_fgcolors_from_input(&self.prompt);
-        let bgcolors = crate::prompt::get_bgcolors_from_input(&self.prompt);
-        for fgcolor in &fgcolors {
-            println!("fgcolor = {:#?}", fgcolor);
-            evaled_prompt = evaled_prompt.replace(
-                format!("F<{}>", fgcolor.to_str()).as_str(),
-                format!("{}", fgcolor.to_string()).as_str(),
-            );
+        let colors = crate::prompt::get_colors_from_input(&self.prompt);
+        for color in colors {
+            match color {
+                Color::Fg(fg) => {
+                    evaled_prompt = evaled_prompt.replace(
+                        format!("F<{}>", fg.to_str()).as_str(),
+                        format!("{}", fg.to_string()).as_str(),
+                    );
+                },
+                Color::Bg(bg) => {
+                    evaled_prompt = evaled_prompt.replace(
+                        format!("B<{}>", bg.to_str()).as_str(),
+                        format!("{}", bg.to_string()).as_str(),
+                    );
+                }
+            }
         }
-        for bgcolor in &bgcolors {
-            println!("bgcolor = {:#?}", bgcolor);
-            evaled_prompt = evaled_prompt.replace(
-                format!("B<{}>", bgcolor.to_str()).as_str(),
-                format!("{}", bgcolor.to_string()).as_str(),
-            );
-        }
+       // for fgcolor in &fgcolors {
+       //     println!("fgcolor = {:#?}", fgcolor);
+       //     evaled_prompt = evaled_prompt.replace(
+       //         format!("F<{}>", fgcolor.to_str()).as_str(),
+       //         format!("{}", fgcolor.to_string()).as_str(),
+       //     );
+       // }
+       // for bgcolor in &bgcolors {
+       //     println!("bgcolor = {:#?}", bgcolor);
+       //     evaled_prompt = evaled_prompt.replace(
+       //         format!("B<{}>", bgcolor.to_str()).as_str(),
+       //         format!("{}", bgcolor.to_string()).as_str(),
+       //     );
+       // }
         // TODO: Add support for more escape sequences.
         // To match an escape sequence, we need to match for an escaped version of the sequence,
         // and then replace the escaped version with the actual sequence.

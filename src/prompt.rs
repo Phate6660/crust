@@ -16,6 +16,7 @@ pub enum BgColor {
 }
 
 #[derive(Debug, Copy, Clone)]
+/// An enum for foreground colors.
 pub enum FgColor {
     Black = 30,
     Red = 31,
@@ -28,53 +29,40 @@ pub enum FgColor {
     Default = 39,
 }
 
-impl Display for FgColor {
-    fn fmt(self: &FgColor, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "\x1b[{}m", &self.to_u8())
-    }
-
+#[derive(Debug, Copy, Clone)]
+/// A unified enum for accessing both foreground and background colors.
+pub enum Color {
+    Bg(BgColor),
+    Fg(FgColor),
 }
 
 impl Display for BgColor {
-    fn fmt(self: &BgColor, f: &mut Formatter) -> std::fmt::Result {
+    // Displays the full escape sequence.
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "\x1b[{}m", &self.to_u8())
     }
-
 }
 
-// TODO: Support both bg and fg colors in the same impl.
-impl FgColor {
-    pub fn to_u8(self: &FgColor) -> u8 {
-        match self {
-            FgColor::Black => 30,
-            FgColor::Red => 31,
-            FgColor::Green => 32,
-            FgColor::Yellow => 33,
-            FgColor::Blue => 34,
-            FgColor::Magenta => 35,
-            FgColor::Cyan => 36,
-            FgColor::White => 37,
-            FgColor::Default => 39,
-        }
-    }
-
-    pub fn to_str(self: &FgColor) -> &'static str {
-        match self {
-            FgColor::Black => "BLACK",
-            FgColor::Red => "RED",
-            FgColor::Green => "GREEN",
-            FgColor::Yellow => "YELLOW",
-            FgColor::Blue => "BLUE",
-            FgColor::Magenta => "MAGENTA",
-            FgColor::Cyan => "CYAN",
-            FgColor::White => "WHITE",
-            FgColor::Default => "DEFAULT",
-        }
+impl Display for FgColor {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "\x1b[{}m", &self.to_u8())
     }
 }
 
-// TODO: Support both bg and fg colors in the same impl.
 impl BgColor {
+    pub fn to_str(self: &BgColor) -> String {
+        match self {
+            BgColor::Black => "BLACK".to_string(),
+            BgColor::Red => "RED".to_string(),
+            BgColor::Green => "GREEN".to_string(),
+            BgColor::Yellow => "YELLOW".to_string(),
+            BgColor::Blue => "BLUE".to_string(),
+            BgColor::Magenta => "MAGENTA".to_string(),
+            BgColor::Cyan => "CYAN".to_string(),
+            BgColor::White => "WHITE".to_string(),
+            BgColor::Default => "DEFAULT".to_string(),
+        }
+    }
     pub fn to_u8(self: &BgColor) -> u8 {
         match self {
             BgColor::Black => 40,
@@ -88,18 +76,33 @@ impl BgColor {
             BgColor::Default => 49,
         }
     }
+}
 
-    pub fn to_str(self: &BgColor) -> &'static str {
+impl FgColor {
+    pub fn to_str(self: &FgColor) -> String {
         match self {
-            BgColor::Black => "BLACK",
-            BgColor::Red => "RED",
-            BgColor::Green => "GREEN",
-            BgColor::Yellow => "YELLOW",
-            BgColor::Blue => "BLUE",
-            BgColor::Magenta => "MAGENTA",
-            BgColor::Cyan => "CYAN",
-            BgColor::White => "WHITE",
-            BgColor::Default => "DEFAULT",
+            FgColor::Black => "BLACK".to_string(),
+            FgColor::Red => "RED".to_string(),
+            FgColor::Green => "GREEN".to_string(),
+            FgColor::Yellow => "YELLOW".to_string(),
+            FgColor::Blue => "BLUE".to_string(),
+            FgColor::Magenta => "MAGENTA".to_string(),
+            FgColor::Cyan => "CYAN".to_string(),
+            FgColor::White => "WHITE".to_string(),
+            FgColor::Default => "DEFAULT".to_string(),
+        }
+    }
+    pub fn to_u8(self: &FgColor) -> u8 {
+        match self {
+            FgColor::Black => 30,
+            FgColor::Red => 31,
+            FgColor::Green => 32,
+            FgColor::Yellow => 33,
+            FgColor::Blue => 34,
+            FgColor::Magenta => 35,
+            FgColor::Cyan => 36,
+            FgColor::White => 37,
+            FgColor::Default => 39,
         }
     }
 }
@@ -148,89 +151,73 @@ impl EsBuilder {
     }
 }
 
-pub fn get_bgcolors_from_input(input: &str) -> Vec<BgColor> {
+pub fn get_colors_from_input(input: &str) -> Vec<Color> {
     let tokenized_vec = tokenize(input);
     let mut tmp_vec: String = String::new();
-    let mut bgcolor_vec: Vec<BgColor> = Vec::new();
+    let mut color_vec: Vec<Color> = Vec::new();
     let mut color = false;
-    let mut bgcolor_end = false;
+    let mut bg_color = false;
+    let mut fg_color = false;
     let mut tok_iter = tokenized_vec.iter().peekable();
     while tok_iter.peek() != None {
         let tok_iter_char = tok_iter.next().unwrap().as_str();
-        if bgcolor_end {
-            let ret_color: BgColor = match tmp_vec.as_str() {
-                "BLACK" => BgColor::Black,
-                "RED" => BgColor::Red,
-                "GREEN" => BgColor::Green,
-                "YELLOW" => BgColor::Yellow,
-                "BLUE" => BgColor::Blue,
-                "MAGENTA" => BgColor::Magenta,
-                "CYAN" => BgColor::Cyan,
-                "WHITE" => BgColor::White,
-                _ => BgColor::Default,
-            };
-            bgcolor_vec.push(ret_color);
-            tmp_vec.clear();
-            color = false;
-            bgcolor_end = false;
-            continue;
-        }
         if tok_iter_char == "B" && tok_iter.peek().unwrap().as_str() == "<" {
+            bg_color = true;
             color = true;
-        } else if color {
-            if tok_iter_char == "<" {
-                continue;
-            } else if tok_iter_char != ">" {
-                tmp_vec.push_str(tok_iter_char);
-            } else if tok_iter_char == ">" {
-                bgcolor_end = true;
-                continue;
-            }
-        }
-    }
-    bgcolor_vec
-}
-
-pub fn get_fgcolors_from_input(input: &str) -> Vec<FgColor> {
-    let tokenized_vec = tokenize(input);
-    let mut tmp_vec: String = String::new();
-    let mut fgcolor_vec: Vec<FgColor> = Vec::new();
-    let mut color = false;
-    let mut fgcolor_end = false;
-    let mut tok_iter = tokenized_vec.iter().peekable();
-    while tok_iter.peek() != None {
-        let tok_iter_char = tok_iter.next().unwrap().as_str();
-        if fgcolor_end {
-            let ret_color: FgColor = match tmp_vec.as_str() {
-                "BLACK" => FgColor::Black,
-                "RED" => FgColor::Red,
-                "GREEN" => FgColor::Green,
-                "YELLOW" => FgColor::Yellow,
-                "BLUE" => FgColor::Blue,
-                "MAGENTA" => FgColor::Magenta,
-                "CYAN" => FgColor::Cyan,
-                "WHITE" => FgColor::White,
-                _ => FgColor::Default,
-            };
-            fgcolor_vec.push(ret_color);
-            tmp_vec.clear();
-            color = false;
-            fgcolor_end = false;
             continue;
-        }
-        if tok_iter_char == "F" && tok_iter.peek().unwrap().as_str() == "<" {
+        } else if tok_iter_char == "F" && tok_iter.peek().unwrap().as_str() == "<" {
+            fg_color = true;
             color = true;
+            continue;
         } else if color {
             if tok_iter_char == "<" {
                 continue;
             } else if tok_iter_char != ">" {
                 tmp_vec.push_str(tok_iter_char);
+                continue;
             } else if tok_iter_char == ">" {
-                fgcolor_end = true;
+                if fg_color {
+                    let ret_color: Color = match tmp_vec.as_str() {
+                        "BLACK" => Color::Fg(FgColor::Black),
+                        "RED" => Color::Fg(FgColor::Red),
+                        "GREEN" => Color::Fg(FgColor::Green),
+                        "YELLOW" => Color::Fg(FgColor::Yellow),
+                        "BLUE" => Color::Fg(FgColor::Blue),
+                        "MAGENTA" => Color::Fg(FgColor::Magenta),
+                        "CYAN" => Color::Fg(FgColor::Cyan),
+                        "WHITE" => Color::Fg(FgColor::White),
+                        _ => Color::Fg(FgColor::Default),
+                    };
+                    color_vec.push(ret_color);
+                    tmp_vec.clear();
+                    color = false;
+                    fg_color = false;
+                    continue;
+                } else if bg_color {
+                    let ret_color: Color = match tmp_vec.as_str() {
+                        "BLACK" => Color::Bg(BgColor::Black),
+                        "RED" => Color::Bg(BgColor::Red),
+                        "GREEN" => Color::Bg(BgColor::Green),
+                        "YELLOW" => Color::Bg(BgColor::Yellow),
+                        "BLUE" => Color::Bg(BgColor::Blue),
+                        "MAGENTA" => Color::Bg(BgColor::Magenta),
+                        "CYAN" => Color::Bg(BgColor::Cyan),
+                        "WHITE" => Color::Bg(BgColor::White),
+                        _ => Color::Bg(BgColor::Default),
+                    };
+                    color_vec.push(ret_color);
+                    tmp_vec.clear();
+                    color = false;
+                    bg_color = false;
+                    continue;
+                } else {
+                    // Do nothing.
+                }
                 continue;
             }
+        } else {
+            // Do nothing.
         }
     }
-    fgcolor_vec
+    color_vec
 }
-
