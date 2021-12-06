@@ -184,25 +184,6 @@ impl ShellState {
                 }
             }
         }
-       // for fgcolor in &fgcolors {
-       //     println!("fgcolor = {:#?}", fgcolor);
-       //     evaled_prompt = evaled_prompt.replace(
-       //         format!("F<{}>", fgcolor.to_str()).as_str(),
-       //         format!("{}", fgcolor.to_string()).as_str(),
-       //     );
-       // }
-       // for bgcolor in &bgcolors {
-       //     println!("bgcolor = {:#?}", bgcolor);
-       //     evaled_prompt = evaled_prompt.replace(
-       //         format!("B<{}>", bgcolor.to_str()).as_str(),
-       //         format!("{}", bgcolor.to_string()).as_str(),
-       //     );
-       // }
-        // TODO: Add support for more escape sequences.
-        // To match an escape sequence, we need to match for an escaped version of the sequence,
-        // and then replace the escaped version with the actual sequence.
-        // This is because the escape sequence is a single character, and the actual sequence
-        // is escaped by the compiler in a user-supplied string literal.
         let substitutions = vec![
             "%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}", // Information-related variables
             "\\n", // Explicit escape sequences
