@@ -50,7 +50,7 @@ impl Display for FgColor {
 }
 
 impl BgColor {
-    pub fn to_str(self: &BgColor) -> String {
+    pub fn to_str(self) -> String {
         match self {
             BgColor::Black => "BLACK".to_string(),
             BgColor::Red => "RED".to_string(),
@@ -63,7 +63,7 @@ impl BgColor {
             BgColor::Default => "DEFAULT".to_string(),
         }
     }
-    pub fn to_u8(self: &BgColor) -> u8 {
+    pub fn to_u8(self) -> u8 {
         match self {
             BgColor::Black => 40,
             BgColor::Red => 41,
@@ -79,7 +79,7 @@ impl BgColor {
 }
 
 impl FgColor {
-    pub fn to_str(self: &FgColor) -> String {
+    pub fn to_str(self) -> String {
         match self {
             FgColor::Black => "BLACK".to_string(),
             FgColor::Red => "RED".to_string(),
@@ -92,7 +92,7 @@ impl FgColor {
             FgColor::Default => "DEFAULT".to_string(),
         }
     }
-    pub fn to_u8(self: &FgColor) -> u8 {
+    pub fn to_u8(self) -> u8 {
         match self {
             FgColor::Black => 30,
             FgColor::Red => 31,
@@ -210,13 +210,9 @@ pub fn get_colors_from_input(input: &str) -> Vec<Color> {
                     color = false;
                     bg_color = false;
                     continue;
-                } else {
-                    // Do nothing.
                 }
                 continue;
             }
-        } else {
-            // Do nothing.
         }
     }
     color_vec

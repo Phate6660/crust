@@ -173,13 +173,13 @@ impl ShellState {
                 Color::Fg(fg) => {
                     evaled_prompt = evaled_prompt.replace(
                         format!("F<{}>", fg.to_str()).as_str(),
-                        format!("{}", fg.to_string()).as_str(),
+                        fg.to_string().as_str(),
                     );
                 },
                 Color::Bg(bg) => {
                     evaled_prompt = evaled_prompt.replace(
                         format!("B<{}>", bg.to_str()).as_str(),
-                        format!("{}", bg.to_string()).as_str(),
+                        bg.to_string().as_str(),
                     );
                 }
             }
