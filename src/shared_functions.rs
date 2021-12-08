@@ -167,7 +167,7 @@ impl ShellState {
                 command_output.trim(),
             );
         }
-        evaled_prompt = crate::prompt::get_colors_from_input(&evaled_prompt);
+        evaled_prompt = crate::prompt::parse_prompt_colors(&evaled_prompt);
         let substitutions = vec![
             "%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}", // Information-related variables
             "\\n", // Explicit escape sequences

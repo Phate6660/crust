@@ -186,7 +186,7 @@ impl EsBuilder {
     }
 }
 
-pub fn get_colors_from_input(input: &str) -> String {
+pub fn parse_prompt_colors(input: &str) -> String {
     let tokenized_vec = tokenize(input);
     let mut tok_iter = tokenized_vec.iter().peekable();
     let mut es_builder = EscapeSequence::builder();
