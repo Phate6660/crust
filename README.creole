@@ -88,8 +88,8 @@ Formatting:
 * CYAN
 * WHITE
 
-Example for formatting: //PROMPT="F<BLACK>B<CYAN>%{i}%{u}[crust]:%{re} "//
-This will output "//__[crust]:__// ", with black text and cyan background.
+Example for formatting: //PROMPT="F<BLACK>B<CYAN>%{i}%{u}[crust]:%{re} "//\\
+This will output "__//[crust]://__ ", with black text and cyan background.
 
 ==== Line Editing ====
 ===== Basic Line Editing =====
