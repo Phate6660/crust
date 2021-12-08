@@ -166,14 +166,13 @@ pub fn parse_prompt_colors(input: &str) -> String {
     let mut option = false;
     let mut option_fin = false;
     let mut es_fin = false;
-    // TODO: Figure out what `not_pos_option` is overwritten before being read.
+    // TODO: Figure out why `not_pos_option` is overwritten before being read.
     let mut not_pos_option = true;
-    // Go through every character in the input, until end is reached
+    // Go through every character in the input, until the end is reached.
     while tok_iter.peek() != None {
-        // get next char
-        // unwrap is safe, won't be none, checking that in the while condition
+        // Get the next char unwrapping is safe as we ensured that the next char is never None.
         let cur_char = tok_iter.next().unwrap().as_str();
-        // match for certain key chars like % for options, F for fgcolor, B for bgcolor
+        // Match for certain key chars like % for options, F for fgcolor, B for bgcolor.
         match cur_char {
             "%" => {
                 not_pos_option = false;
@@ -195,30 +194,30 @@ pub fn parse_prompt_colors(input: &str) -> String {
                 // if the char wasn't matched, it is not a possbiel option, but could be an
                 // argument for an option, like a color or font effect
                 // this is checked later 
+                // TODO(phate): Figure out why this is causing the "never read" warning.
                 not_pos_option = true;
-                // if the option is finished, the escape sequence is finished too, except the char
-                // is matched by a possible identifier
+                // If the option is finished, the escape sequence is finished too, except the char
+                // is matched by a possible identifier.
                 if option_fin {
                     es_fin = true;
                 }
             }
         }
 
-        // if an escape sequence has finished, build the sequence and push it in the prompt string
+        // If an escape sequence has finished, build the sequence and push it in the prompt string.
         if es_fin {
-            // do nothing if there is nothing in the es_seqs vector, because then we dont have
-            // anything to build
+            // Do nothing if the es_seqs vector is empty, because then we dont have anything to build.
             if es_seqs.is_empty() {
                 continue;
             }
-            // take the identifier and the sequence out of the vector
-            // there is an identifier, because we can't know if we ment a fgcol or bgcol just from
-            // the color, so I (zeno) introduced an indentifier
-            // could be usefull, if on value can mean different things in different contexts
+            // Take the identifier and the sequence out of the vector.
+            // There is an identifier, because we can't know if we meant fg/bg just from the color,
+            // so I (zeno) introduced an indentifier which could be useful,
+            // if one value can mean different things in different contexts.
             for (ty, seq) in &es_seqs {
-                // default arg, shoudl be reset
+                // Default arg, should be reset to 0.
                 let mut arg = 0;
-                // actually check for the identifier, to know, what escape sequence we should use
+                // Actually check for the identifier to know what escape sequence we should use.
                 match ty.as_str() {
                     "O" => {
                         arg = match seq.as_str() {
@@ -273,17 +272,17 @@ pub fn parse_prompt_colors(input: &str) -> String {
                 }
                 es_builder.append(arg);
             }
-            // push finished escape sequence to prompt string
+            // Push finished escape sequence to prompt string.
             fin_prompt.push_str(es_builder.build().escape_sequence.as_str());
-            // clear the EsBuilder, so the old escape sequence doenst get expended
+            // Clear the EsBuilder, so the old escape sequence doenst get expended.
             es_builder = EsBuilder::new();
-            // clear the es_seqs vector from any escape sequences, because we begin a new set
+            // Clear the es_seqs vector from any escape sequences, because we begin a new set.
             es_seqs.clear();
             option_fin = false;
             es_fin = false;
         }
 
-        // check if prev determined possible option, color is actually an option, color
+        // Check if prev determined possible option, color is actually an option, color
         // and set appropriate flags for checking
         if pos_option && cur_char == "{" {
             option = true;

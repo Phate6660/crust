@@ -55,7 +55,8 @@ To run a non-interactive shell with a command:\\
 | File content          | X     |      |       |
 
 Customize the prompt by setting the PROMPT env variable.\\
-//PROMPT="[%{C}]-[%{U}@%(hostname)]-> "//
+Example for info variables: //PROMPT="[%{C}]-[%{U}@%(hostname)]-> "//\\
+For me, this outputs "[/home/valley/projects/crust]-[valley@gentoo]-> "
 
 What you can use in the prompt:
 
@@ -86,6 +87,9 @@ Formatting:
 * MAGENTA
 * CYAN
 * WHITE
+
+Example for formatting: //PROMPT="F<BLACK>B<CYAN>%{i}%{u}[crust]:%{re} "//
+This will output "//__[crust]:__// ", with black text and cyan background.
 
 ==== Line Editing ====
 ===== Basic Line Editing =====
