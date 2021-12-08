@@ -58,13 +58,34 @@ Customize the prompt by setting the PROMPT env variable.\\
 //PROMPT="[%{C}]-[%{U}@%(hostname)]-> "//
 
 What you can use in the prompt:
+
+Information variables:
 * %{C} for current working directory.
 * %{D12} and %{D24} for 12 and 24 hour time respectively.
 * %{H} for the current user's home directory.
 * %{U} for the current user.
 * %(//command//) for capturing the output of //command//.
+
+Formatting:
+* %{i} to italicize text.
+* %{rb} to reset the background color.
+* %{re} to reset all text attributes.
+* %{rf} to reset the text color.
+* %{u} to underline text.
+* B<//COLOR//> for changing the background color.
+* F<//COLOR//> for changing the text color.
 * \n for newline.
 * Anything else will be printed as-is.
+
+//COLOR// should be replaced with one of:
+* BLACK
+* RED
+* GREEN
+* YELLOW
+* BLUE
+* MAGENTA
+* CYAN
+* WHITE
 
 ==== Line Editing ====
 ===== Basic Line Editing =====
