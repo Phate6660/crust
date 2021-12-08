@@ -107,9 +107,43 @@ impl FgColor {
     }
 }
 
+pub enum FontEffects {
+    Italics = 3,
+    Underline = 4,
+}
+
+impl Display for FontEffects {
+    // Displays the full escape sequence.
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "\x1b[{}m", &self.to_u8())
+    }
+}
+
+impl FontEffects {
+    pub fn to_str(self: &FontEffects) -> String {
+        match self {
+            FontEffects::Italics => "3".to_string(),
+            FontEffects::Underline => "4".to_string(),
+        }
+    }
+    pub fn to_u8(self: &FontEffects) -> u8 {
+        match self {
+            FontEffects::Italics => 3,
+            FontEffects::Underline => 4,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct EscapeSequence {
     escape_sequence: String,
+}
+
+impl Display for EscapeSequence {
+    // Displays the full escape sequence.
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.escape_sequence)
+    }
 }
 
 impl EscapeSequence {
@@ -118,6 +152,7 @@ impl EscapeSequence {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct EsBuilder {
     escape_sequence: String,
 }
@@ -137,16 +172,16 @@ impl EsBuilder {
         }
     }
 
-    pub fn append(mut self, argument: u8) -> EsBuilder {
-        self.escape_sequence.push(';');
+    pub fn append(&mut self, argument: u8) {
         self.escape_sequence.push_str(&argument.to_string());
-        self
+        self.escape_sequence.push(';');
     }
 
-    pub fn build(mut self) -> EscapeSequence {
+    pub fn build(&mut self) -> EscapeSequence {
+        self.escape_sequence.pop();
         self.escape_sequence.push('m');
         EscapeSequence {
-            escape_sequence: self.escape_sequence,
+            escape_sequence: self.escape_sequence.clone(),
         }
     }
 }
