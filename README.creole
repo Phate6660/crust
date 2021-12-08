@@ -89,7 +89,7 @@ Formatting:
 * WHITE
 
 Example for formatting: //PROMPT="F<BLACK>B<CYAN>%{i}%{u}[crust]:%{re} "//\\
-This will output "__//[crust]://__ ", with black text and cyan background.
+This will output "[crust]: ", which is italicized and underlined, with black text and cyan background.
 
 ==== Line Editing ====
 ===== Basic Line Editing =====
