@@ -167,27 +167,10 @@ impl ShellState {
                 command_output.trim(),
             );
         }
-        let colors = crate::prompt::get_colors_from_input(&self.prompt);
-        for color in colors {
-            match color {
-                Color::Fg(fg) => {
-                    evaled_prompt = evaled_prompt.replace(
-                        format!("F<{}>", fg.to_str()).as_str(),
-                        format!("{}", fg.to_string()).as_str(),
-                    );
-                },
-                Color::Bg(bg) => {
-                    evaled_prompt = evaled_prompt.replace(
-                        format!("B<{}>", bg.to_str()).as_str(),
-                        format!("{}", bg.to_string()).as_str(),
-                    );
-                }
-            }
-        }
+        evaled_prompt = crate::prompt::get_colors_from_input(&evaled_prompt);
         let substitutions = vec![
             "%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}", // Information-related variables
             "\\n", // Explicit escape sequences
-            "%{i}", "%{u}", // Font effect variables
             "%{re}", "%{rf}", "%{rb}" // Reset-related variables
         ];
         for to_subst in substitutions {
@@ -199,11 +182,9 @@ impl ShellState {
                 "%{H}" => subst = self.home.clone(),
                 "%{U}" => subst = self.user.clone(),
                 "\\n" => subst = '\n'.to_string(), // Needed to support newlines in the prompt
-                "%{i}" => subst = "\x1b[3m".to_string(), // Italicize text
                 "%{re}" => subst = "\x1b[0m".to_string(), // Reset all attributes
                 "%{rf}" => subst = "\x1b[39m".to_string(), // Reset to default text color
                 "%{rb}" => subst = "\x1b[49m".to_string(), // Reset to default background color
-                "%{u}" => subst = "\x1b[4m".to_string(), // Underline test
                 _ => (),
             }
             evaled_prompt = evaled_prompt.replace(to_subst, &subst);
