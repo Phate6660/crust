@@ -12,7 +12,6 @@ pub enum BgColor {
     Magenta = 45,
     Cyan = 46,
     White = 47,
-    Default = 49,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -26,7 +25,6 @@ pub enum FgColor {
     Magenta = 35,
     Cyan = 36,
     White = 37,
-    Default = 39,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -50,19 +48,6 @@ impl Display for FgColor {
 }
 
 impl BgColor {
-    pub fn to_str(self) -> String {
-        match self {
-            BgColor::Black => "BLACK".to_string(),
-            BgColor::Red => "RED".to_string(),
-            BgColor::Green => "GREEN".to_string(),
-            BgColor::Yellow => "YELLOW".to_string(),
-            BgColor::Blue => "BLUE".to_string(),
-            BgColor::Magenta => "MAGENTA".to_string(),
-            BgColor::Cyan => "CYAN".to_string(),
-            BgColor::White => "WHITE".to_string(),
-            BgColor::Default => "DEFAULT".to_string(),
-        }
-    }
     pub fn to_u8(self) -> u8 {
         match self {
             BgColor::Black => 40,
@@ -73,25 +58,11 @@ impl BgColor {
             BgColor::Magenta => 45,
             BgColor::Cyan => 46,
             BgColor::White => 47,
-            BgColor::Default => 49,
         }
     }
 }
 
 impl FgColor {
-    pub fn to_str(self) -> String {
-        match self {
-            FgColor::Black => "BLACK".to_string(),
-            FgColor::Red => "RED".to_string(),
-            FgColor::Green => "GREEN".to_string(),
-            FgColor::Yellow => "YELLOW".to_string(),
-            FgColor::Blue => "BLUE".to_string(),
-            FgColor::Magenta => "MAGENTA".to_string(),
-            FgColor::Cyan => "CYAN".to_string(),
-            FgColor::White => "WHITE".to_string(),
-            FgColor::Default => "DEFAULT".to_string(),
-        }
-    }
     pub fn to_u8(self) -> u8 {
         match self {
             FgColor::Black => 30,
@@ -102,11 +73,11 @@ impl FgColor {
             FgColor::Magenta => 35,
             FgColor::Cyan => 36,
             FgColor::White => 37,
-            FgColor::Default => 39,
         }
     }
 }
 
+/// An enum for the different types of font effects.
 pub enum FontEffects {
     Italics = 3,
     Underline = 4,
@@ -120,12 +91,6 @@ impl Display for FontEffects {
 }
 
 impl FontEffects {
-    pub fn to_str(self: &FontEffects) -> String {
-        match self {
-            FontEffects::Italics => "3".to_string(),
-            FontEffects::Underline => "4".to_string(),
-        }
-    }
     pub fn to_u8(self: &FontEffects) -> u8 {
         match self {
             FontEffects::Italics => 3,
@@ -201,6 +166,7 @@ pub fn parse_prompt_colors(input: &str) -> String {
     let mut option = false;
     let mut option_fin = false;
     let mut es_fin = false;
+    // TODO: Figure out what `not_pos_option` is overwritten before being read.
     let mut not_pos_option = true;
     // Go through every character in the input, until end is reached
     while tok_iter.peek() != None {

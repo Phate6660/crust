@@ -1,5 +1,4 @@
 use crate::commands::{cmd, piped_cmd, return_shellcommand, PipedShellCommand, Redirection, ShellCommand};
-use crate::prompt::Color;
 use sflib::ensure_directory;
 use std::env::var as env_var;
 use std::path::PathBuf;
@@ -166,6 +165,7 @@ impl ShellState {
                 command_output.trim(),
             );
         }
+        // Parse the prompt and replace the colors with the escape sequences.
         evaled_prompt = crate::prompt::parse_prompt_colors(&evaled_prompt);
         let substitutions = vec![
             "%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}", // Information-related variables
