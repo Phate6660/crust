@@ -186,73 +186,201 @@ impl EsBuilder {
     }
 }
 
-pub fn get_colors_from_input(input: &str) -> Vec<Color> {
+pub fn get_colors_from_input(input: &str) -> String {
     let tokenized_vec = tokenize(input);
-    let mut tmp_vec: String = String::new();
-    let mut color_vec: Vec<Color> = Vec::new();
-    let mut color = false;
-    let mut bg_color = false;
-    let mut fg_color = false;
     let mut tok_iter = tokenized_vec.iter().peekable();
+    let mut es_builder = EscapeSequence::builder();
+    let mut es_seqs: Vec<(String, String)> = Vec::new();
+    let mut fin_prompt = String::new();
+    let mut tmp_string = String::new();
+    let mut pos_option = false;
+    let mut pos_bgcol = false;
+    let mut bgcol = false;
+    let mut fgcol = false;
+    let mut pos_fgcol = false;
+    let mut option = false;
+    let mut option_fin = false;
+    let mut es_fin = false;
+    let mut not_pos_option = true;
+    // Go through every character in the input, until end is reached
     while tok_iter.peek() != None {
-        let tok_iter_char = tok_iter.next().unwrap().as_str();
-        if tok_iter_char == "B" && tok_iter.peek().unwrap().as_str() == "<" {
-            bg_color = true;
-            color = true;
-            continue;
-        } else if tok_iter_char == "F" && tok_iter.peek().unwrap().as_str() == "<" {
-            fg_color = true;
-            color = true;
-            continue;
-        } else if color {
-            if tok_iter_char == "<" {
-                continue;
-            } else if tok_iter_char != ">" {
-                tmp_vec.push_str(tok_iter_char);
-                continue;
-            } else if tok_iter_char == ">" {
-                if fg_color {
-                    let ret_color: Color = match tmp_vec.as_str() {
-                        "BLACK" => Color::Fg(FgColor::Black),
-                        "RED" => Color::Fg(FgColor::Red),
-                        "GREEN" => Color::Fg(FgColor::Green),
-                        "YELLOW" => Color::Fg(FgColor::Yellow),
-                        "BLUE" => Color::Fg(FgColor::Blue),
-                        "MAGENTA" => Color::Fg(FgColor::Magenta),
-                        "CYAN" => Color::Fg(FgColor::Cyan),
-                        "WHITE" => Color::Fg(FgColor::White),
-                        _ => Color::Fg(FgColor::Default),
-                    };
-                    color_vec.push(ret_color);
-                    tmp_vec.clear();
-                    color = false;
-                    fg_color = false;
-                    continue;
-                } else if bg_color {
-                    let ret_color: Color = match tmp_vec.as_str() {
-                        "BLACK" => Color::Bg(BgColor::Black),
-                        "RED" => Color::Bg(BgColor::Red),
-                        "GREEN" => Color::Bg(BgColor::Green),
-                        "YELLOW" => Color::Bg(BgColor::Yellow),
-                        "BLUE" => Color::Bg(BgColor::Blue),
-                        "MAGENTA" => Color::Bg(BgColor::Magenta),
-                        "CYAN" => Color::Bg(BgColor::Cyan),
-                        "WHITE" => Color::Bg(BgColor::White),
-                        _ => Color::Bg(BgColor::Default),
-                    };
-                    color_vec.push(ret_color);
-                    tmp_vec.clear();
-                    color = false;
-                    bg_color = false;
-                    continue;
-                } else {
-                    // Do nothing.
+        // get next char
+        // unwrap is safe, won't be none, checking that in the while condition
+        let cur_char = tok_iter.next().unwrap().as_str();
+        // match for certain key chars like % for options, F for fgcolor, B for bgcolor
+        match cur_char {
+            "%" => {
+                not_pos_option = false;
+                option_fin = false;
+                pos_option = true;
+            }
+            "B" => {
+                not_pos_option = false;
+                option_fin = false;
+                pos_bgcol = true;
+            }
+            "F" => {
+                not_pos_option = false;
+                option_fin = false;
+                pos_fgcol = true;
+            }
+            _ => {
+                // TODO(zeno): Push every char to the prompt and pop it, if it belongs to an option
+                // if the char wasn't matched, it is not a possbiel option, but could be an
+                // argument for an option, like a color or font effect
+                // this is checked later 
+                not_pos_option = true;
+                // if the option is finished, the escape sequence is finished too, except the char
+                // is matched by a possible identifier
+                if option_fin {
+                    es_fin = true;
                 }
+            }
+        }
+
+        // if an escape sequence has finished, build the sequence and push it in the prompt string
+        if es_fin {
+            // do nothing if there is nothing in the es_seqs vector, because then we dont have
+            // anything to build
+            if es_seqs.is_empty() {
                 continue;
             }
-        } else {
-            // Do nothing.
+            // take the identifier and the sequence out of the vector
+            // there is an identifier, because we can't know if we ment a fgcol or bgcol just from
+            // the color, so I (zeno) introduced an indentifier
+            // could be usefull, if on value can mean different things in different contexts
+            for (ty, seq) in &es_seqs {
+                // default arg, shoudl be reset
+                let mut arg = 0;
+                // actually check for the identifier, to know, what escape sequence we should use
+                match ty.as_str() {
+                    "O" => {
+                        arg = match seq.as_str() {
+                            "i" => FontEffects::Italics.to_u8(),
+                            "u" => FontEffects::Underline.to_u8(),
+                            _ => 0,
+                        }
+                    }
+                    "B" => {
+                        let tmp_arg = match seq.as_str() {
+                            "BLACK" => Color::Fg(FgColor::Black),
+                            "RED" => Color::Fg(FgColor::Red),
+                            "GREEN" => Color::Fg(FgColor::Green),
+                            "YELLOW" => Color::Fg(FgColor::Yellow),
+                            "BLUE" => Color::Fg(FgColor::Blue),
+                            "MAGENTA" => Color::Fg(FgColor::Magenta),
+                            "CYAN" => Color::Fg(FgColor::Cyan),
+                            "WHITE" => Color::Fg(FgColor::White),
+                            _ => Color::Fg(FgColor::White),
+                        };
+                        arg = match tmp_arg {
+                            Color::Fg(fg) => {
+                                fg.to_u8()
+                            },
+                            Color::Bg(bg) => {
+                                bg.to_u8()
+                            }
+                        };
+                    }
+                    "F" => {
+                        let tmp_arg = match seq.as_str() {
+                            "BLACK" => Color::Fg(FgColor::Black),
+                            "RED" => Color::Fg(FgColor::Red),
+                            "GREEN" => Color::Fg(FgColor::Green),
+                            "YELLOW" => Color::Fg(FgColor::Yellow),
+                            "BLUE" => Color::Fg(FgColor::Blue),
+                            "MAGENTA" => Color::Fg(FgColor::Magenta),
+                            "CYAN" => Color::Fg(FgColor::Cyan),
+                            "WHITE" => Color::Fg(FgColor::White),
+                            _ => Color::Fg(FgColor::White),
+                        };
+                        arg = match tmp_arg {
+                            Color::Fg(fg) => {
+                                fg.to_u8()
+                            },
+                            Color::Bg(bg) => {
+                                bg.to_u8()
+                            }
+                        };
+                    }
+                    _ => (),
+                }
+                es_builder.append(arg);
+            }
+            // push finished escape sequence to prompt string
+            fin_prompt.push_str(es_builder.build().escape_sequence.as_str());
+            // clear the EsBuilder, so the old escape sequence doenst get expended
+            es_builder = EsBuilder::new();
+            // clear the es_seqs vector from any escape sequences, because we begin a new set
+            es_seqs.clear();
+            option_fin = false;
+            es_fin = false;
         }
-    }
-    color_vec
+
+        // check if prev determined possible option, color is actually an option, color
+        // and set appropriate flags for checking
+        if pos_option && cur_char == "{" {
+            option = true;
+            option_fin = false;
+            pos_option = false;
+            continue;
+        } else if pos_bgcol && cur_char == "<" {
+            bgcol = true;
+            option_fin = false;
+            pos_bgcol= false;
+            continue;
+        } else if pos_fgcol && cur_char == "<" {
+            fgcol = true;
+            option_fin = false;
+            pos_fgcol = false;
+            continue;
+        }
+
+        // handle found option
+        if option {
+            if cur_char != "}" {
+                // if option doesn't end, push char to tmp_string
+                tmp_string.push_str(cur_char);
+            } else if cur_char == "}" {
+                // if option ends, push option to es_seqs vec
+                option_fin = true;
+                es_seqs.push(("O".to_string(), tmp_string.to_owned()));
+                tmp_string.clear();
+                option = false;
+            }
+            continue;
+        // Handle foudn bgcol
+        } else if bgcol {
+            if cur_char != ">" {
+                // if bgcol doesn't end, push char to tmp_string
+                tmp_string.push_str(cur_char);
+            } else if cur_char == ">" {
+                // if bgcol ends, push option to es_seqs vec
+                option_fin = true;
+                es_seqs.push(("B".to_string(), tmp_string.to_owned()));
+                tmp_string.clear();
+                bgcol = false;
+            }
+            continue;
+        // handle found fgcol
+        } else if fgcol {
+            if cur_char != ">" {
+                // if fgcol doesn't end, push char to tmp_string
+                tmp_string.push_str(cur_char);
+            } else if cur_char == ">" {
+                // if fgcol ends, push option to es_seqs vec
+                option_fin = true;
+                es_seqs.push(("F".to_string(), tmp_string.to_owned()));
+                tmp_string.clear();
+                fgcol = false;
+            }
+            continue;
+        }
+
+        // check if char belongs to an option, otherwise push it as is to prompt string
+        if not_pos_option && (!option || !bgcol || !fgcol) {
+            fin_prompt.push_str(cur_char);
+        }
+    };
+    fin_prompt
 }
