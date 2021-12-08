@@ -263,15 +263,15 @@ pub fn parse_prompt_colors(input: &str) -> String {
                     }
                     "B" => {
                         let tmp_arg = match seq.as_str() {
-                            "BLACK" => Color::Fg(FgColor::Black),
-                            "RED" => Color::Fg(FgColor::Red),
-                            "GREEN" => Color::Fg(FgColor::Green),
-                            "YELLOW" => Color::Fg(FgColor::Yellow),
-                            "BLUE" => Color::Fg(FgColor::Blue),
-                            "MAGENTA" => Color::Fg(FgColor::Magenta),
-                            "CYAN" => Color::Fg(FgColor::Cyan),
-                            "WHITE" => Color::Fg(FgColor::White),
-                            _ => Color::Fg(FgColor::White),
+                            "BLACK" => Color::Bg(BgColor::Black),
+                            "RED" => Color::Bg(BgColor::Red),
+                            "GREEN" => Color::Bg(BgColor::Green),
+                            "YELLOW" => Color::Bg(BgColor::Yellow),
+                            "BLUE" => Color::Bg(BgColor::Blue),
+                            "MAGENTA" => Color::Bg(BgColor::Magenta),
+                            "CYAN" => Color::Bg(BgColor::Cyan),
+                            "WHITE" => Color::Bg(BgColor::White),
+                            _ => Color::Bg(BgColor::White),
                         };
                         arg = match tmp_arg {
                             Color::Fg(fg) => {
