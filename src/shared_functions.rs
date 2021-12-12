@@ -131,7 +131,7 @@ impl ShellState {
     /// `cd_prev_dir` doesnt hold a value, because there is no previous dir yet.
     pub fn init() -> ShellState {
         let args = std::env::args().collect();
-        let prompt = env_var("PROMPT").unwrap_or_else(|_| String::from("F<BLACK>B<CYAN>%{i}%{u}[crust]:%{re} "));
+        let prompt = env_var("PROMPT").unwrap_or_else(|_| String::from("F<GREEN>B<BLACK>%{b}%{u}[crust]-[%{C}]:%{re} "));
         let user_command = return_shellcommand(String::from("whoami"), Vec::new(), Redirection::NoOp);
         let user = env_var("USER").unwrap_or_else(|_| cmd(&user_command)).trim().to_string();
         let home = env_var("HOME").unwrap_or_else(|_| ["/home/", user.as_str()].concat());
@@ -166,12 +166,8 @@ impl ShellState {
             );
         }
         // Parse the prompt and replace the colors with the escape sequences.
-        evaled_prompt = crate::prompt::parse_prompt_colors(&evaled_prompt);
-        let substitutions = vec![
-            "%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}", // Information-related variables
-            "\\n", // Explicit escape sequences
-            "%{re}", "%{rf}", "%{rb}" // Reset-related variables
-        ];
+        evaled_prompt = crate::prompt::parse_prompt_effects(&evaled_prompt);
+        let substitutions = vec!["%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}", "\\n"];
         for to_subst in substitutions {
             let mut subst = String::new();
             match to_subst {
@@ -181,9 +177,6 @@ impl ShellState {
                 "%{H}" => subst = self.home.clone(),
                 "%{U}" => subst = self.user.clone(),
                 "\\n" => subst = '\n'.to_string(), // Needed to support newlines in the prompt
-                "%{re}" => subst = "\x1b[0m".to_string(), // Reset all attributes
-                "%{rf}" => subst = "\x1b[39m".to_string(), // Reset to default text color
-                "%{rb}" => subst = "\x1b[49m".to_string(), // Reset to default background color
                 _ => (),
             }
             evaled_prompt = evaled_prompt.replace(to_subst, &subst);

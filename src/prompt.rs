@@ -79,6 +79,10 @@ impl FgColor {
 
 /// An enum for the different types of font effects.
 pub enum FontEffects {
+    ResetBackground = 49,
+    ResetEverything = 0,
+    ResetForeground = 39,
+    Bold = 1,
     Italics = 3,
     Underline = 4,
 }
@@ -93,6 +97,10 @@ impl Display for FontEffects {
 impl FontEffects {
     pub fn to_u8(self: &FontEffects) -> u8 {
         match self {
+            FontEffects::ResetBackground => 49,
+            FontEffects::ResetEverything => 0,
+            FontEffects::ResetForeground => 39,
+            FontEffects::Bold => 1,
             FontEffects::Italics => 3,
             FontEffects::Underline => 4,
         }
@@ -151,7 +159,7 @@ impl EsBuilder {
     }
 }
 
-pub fn parse_prompt_colors(input: &str) -> String {
+pub fn parse_prompt_effects(input: &str) -> String {
     let tokenized_vec = tokenize(input);
     let mut tok_iter = tokenized_vec.iter().peekable();
     let mut es_builder = EscapeSequence::builder();
@@ -166,8 +174,7 @@ pub fn parse_prompt_colors(input: &str) -> String {
     let mut option = false;
     let mut option_fin = false;
     let mut es_fin = false;
-    // TODO: Figure out why `not_pos_option` is overwritten before being read.
-    let mut not_pos_option = true;
+    let mut not_pos_option;
     // Go through every character in the input, until the end is reached.
     while tok_iter.peek() != None {
         // Get the next char unwrapping is safe as we ensured that the next char is never None.
@@ -176,17 +183,21 @@ pub fn parse_prompt_colors(input: &str) -> String {
         match cur_char {
             "%" => {
                 not_pos_option = false;
-                option_fin = false;
+                if option_fin != true {
+                    option_fin = false;
+                }
                 pos_option = true;
             }
             "B" => {
                 not_pos_option = false;
                 option_fin = false;
                 pos_bgcol = true;
+                pos_fgcol = false;
             }
             "F" => {
                 not_pos_option = false;
                 option_fin = false;
+                pos_bgcol = false;
                 pos_fgcol = true;
             }
             _ => {
@@ -194,7 +205,6 @@ pub fn parse_prompt_colors(input: &str) -> String {
                 // if the char wasn't matched, it is not a possbiel option, but could be an
                 // argument for an option, like a color or font effect
                 // this is checked later 
-                // TODO(phate): Figure out why this is causing the "never read" warning.
                 not_pos_option = true;
                 // If the option is finished, the escape sequence is finished too, except the char
                 // is matched by a possible identifier.
@@ -206,10 +216,9 @@ pub fn parse_prompt_colors(input: &str) -> String {
 
         // If an escape sequence has finished, build the sequence and push it in the prompt string.
         if es_fin {
-            // Do nothing if the es_seqs vector is empty, because then we dont have anything to build.
-            if es_seqs.is_empty() {
-                continue;
-            }
+            //if es_seqs.is_empty() {
+            //    continue;
+            //}
             // Take the identifier and the sequence out of the vector.
             // There is an identifier, because we can't know if we meant fg/bg just from the color,
             // so I (zeno) introduced an indentifier which could be useful,
@@ -221,10 +230,14 @@ pub fn parse_prompt_colors(input: &str) -> String {
                 match ty.as_str() {
                     "O" => {
                         arg = match seq.as_str() {
+                            "b" => FontEffects::Bold.to_u8(),
                             "i" => FontEffects::Italics.to_u8(),
+                            "rb" => FontEffects::ResetBackground.to_u8(),
+                            "re" => FontEffects::ResetEverything.to_u8(),
+                            "rf" => FontEffects::ResetForeground.to_u8(),
                             "u" => FontEffects::Underline.to_u8(),
                             _ => 0,
-                        }
+                        };
                     }
                     "B" => {
                         let tmp_arg = match seq.as_str() {
@@ -299,7 +312,7 @@ pub fn parse_prompt_colors(input: &str) -> String {
             option_fin = false;
             pos_fgcol = false;
             continue;
-        }
+        } 
 
         // handle found option
         if option {
@@ -309,7 +322,10 @@ pub fn parse_prompt_colors(input: &str) -> String {
             } else if cur_char == "}" {
                 // if option ends, push option to es_seqs vec
                 option_fin = true;
-                es_seqs.push(("O".to_string(), tmp_string.to_owned()));
+                match tmp_string.as_str() {
+                    "b" | "i" | "rb" | "re" | "rf" | "u" => es_seqs.push(("O".to_string(), tmp_string.clone())),
+                    _ => fin_prompt.push_str(format!("%{{{}}}", tmp_string).as_str()),
+                }
                 tmp_string.clear();
                 option = false;
             }
