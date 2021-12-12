@@ -183,7 +183,7 @@ pub fn parse_prompt_effects(input: &str) -> String {
         match cur_char {
             "%" => {
                 not_pos_option = false;
-                if option_fin != true {
+                if !option_fin {
                     option_fin = false;
                 }
                 pos_option = true;
@@ -248,7 +248,6 @@ pub fn parse_prompt_effects(input: &str) -> String {
                             "BLUE" => Color::Bg(BgColor::Blue),
                             "MAGENTA" => Color::Bg(BgColor::Magenta),
                             "CYAN" => Color::Bg(BgColor::Cyan),
-                            "WHITE" => Color::Bg(BgColor::White),
                             _ => Color::Bg(BgColor::White),
                         };
                         arg = match tmp_arg {
@@ -269,7 +268,6 @@ pub fn parse_prompt_effects(input: &str) -> String {
                             "BLUE" => Color::Fg(FgColor::Blue),
                             "MAGENTA" => Color::Fg(FgColor::Magenta),
                             "CYAN" => Color::Fg(FgColor::Cyan),
-                            "WHITE" => Color::Fg(FgColor::White),
                             _ => Color::Fg(FgColor::White),
                         };
                         arg = match tmp_arg {
@@ -338,7 +336,7 @@ pub fn parse_prompt_effects(input: &str) -> String {
             } else if cur_char == ">" {
                 // if bgcol ends, push option to es_seqs vec
                 option_fin = true;
-                es_seqs.push(("B".to_string(), tmp_string.to_owned()));
+                es_seqs.push(("B".to_string(), tmp_string.clone()));
                 tmp_string.clear();
                 bgcol = false;
             }
@@ -351,7 +349,7 @@ pub fn parse_prompt_effects(input: &str) -> String {
             } else if cur_char == ">" {
                 // if fgcol ends, push option to es_seqs vec
                 option_fin = true;
-                es_seqs.push(("F".to_string(), tmp_string.to_owned()));
+                es_seqs.push(("F".to_string(), tmp_string.clone()));
                 tmp_string.clear();
                 fgcol = false;
             }
