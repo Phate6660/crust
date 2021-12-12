@@ -68,6 +68,7 @@ Information variables:
 * %(//command//) for capturing the output of //command//.
 
 Formatting:
+* %{b} to make text bold.
 * %{i} to italicize text.
 * %{rb} to reset the background color.
 * %{re} to reset all text attributes.
