@@ -49,9 +49,9 @@ To run a non-interactive shell with a command:\\
 ==== Prompt ====
 | FEATURE               | TODO  | WIP  | DONE  |
 | Set via env var       |       |      | X     |
-| Command output        |       | X    |       |
-| Replaceable variables |       | X    |       |
-| Colors                | X     |      |       |
+| Command output        |       |      | X     |
+| Replaceable variables |       |      | X     |
+| Colors                |       |      | X     |
 | File content          | X     |      |       |
 
 The default prompt looks like:\\
@@ -92,9 +92,10 @@ Formatting:
 * WHITE
 
 Example for formatting:\\
-//PROMPT="[F<GREEN>B<BLACK>%{u}%{D12}%{re}]-[F<RED>B<WHITE>%{b}crust%{re}]-[F<YELLOW>B<MAGENTA>%{C}%{re}]: "//\\
-Which for me looks like:\\
+//PROMPT="%{b}F<MAGENTA>%{D24}%{re} - %{i}%{U}@%(hostname)%{re}\nB<GREEN>F<BLACK>%{C}%{re}» "//\\
+Which for me looks like this:\\
 {{images/customized-prompt.png|Customized Prompt}}
+This showcases a multiline prompt with different foreground and background colors, as well as a command substitution and shell-prompt-features, like time and user.
 
 ==== Line Editing ====
 ===== Basic Line Editing =====
