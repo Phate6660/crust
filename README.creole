@@ -94,7 +94,7 @@ Formatting:
 Example for formatting:\\
 //PROMPT="%{b}F<MAGENTA>%{D24}%{re} - %{i}%{U}@%(hostname)%{re}\nB<GREEN>F<BLACK>%{C}%{re}» "//\\
 Which for me looks like this:\\
-{{images/customized-prompt.png|Customized Prompt}}
+{{images/customized-prompt.png|Customized Prompt}}\\
 This showcases a multiline prompt with different foreground and background colors, as well as a command substitution and shell-prompt-features, like time and user.
 
 ==== Line Editing ====
