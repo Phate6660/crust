@@ -91,40 +91,6 @@ pub fn run_loop(prompt: &str, mut shell_state: ShellState) {
     }
 }
 
-// TODO: Unify this with the `lex_tokenized_input` function at line 237.
-/// Parses the input and returns a vector `ShellCommand`s.
-fn get_commands_from_input(input: &str) -> Vec<ShellCommand> {
-    let tokenized_vec = tokenize(input);
-    let mut tmp_vec: String = String::new();
-    let mut command_vec: Vec<ShellCommand> = Vec::new();
-    let mut command = false;
-    let mut command_end = false;
-    let mut tok_iter = tokenized_vec.iter().peekable();
-    while tok_iter.peek() != None {
-        let tok_iter_char = tok_iter.next().unwrap().as_str();
-        if command_end {
-            command_vec.push(ShellCommand::new(tmp_vec.as_str()));
-            tmp_vec.clear();
-            command = false;
-            command_end = false;
-            continue;
-        }
-        if tok_iter_char == "%" && tok_iter.peek().unwrap().as_str() == "(" {
-            command = true;
-        } else if command {
-            if tok_iter_char == "(" {
-                continue;
-            } else if tok_iter_char != ")" {
-                tmp_vec.push_str(tok_iter_char);
-            } else if tok_iter_char == ")" {
-                command_end = true;
-                continue;
-            }
-        }
-    }
-    command_vec
-}
-
 impl ShellState {
     /// Initalizes the shell state with all the informations needed.
     ///
@@ -152,7 +118,7 @@ impl ShellState {
     }
     pub fn eval_prompt(&mut self) -> String {
         let mut evaled_prompt = self.prompt.clone();
-        let commands = get_commands_from_input(&self.prompt);
+        let commands = crate::prompt::get_commands_from_input(&self.prompt);
         let mut command_output: String;
         for command in commands {
             if command.args.contains(&String::from("|")) {
