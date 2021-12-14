@@ -84,7 +84,7 @@ impl ShellCommand {
                 "ls" => print!("{}", ls(command.args)),
                 "pwd" => println!("{}", std::env::current_dir().unwrap().display()),
                 _ => {
-                    print!("{}", cmd(&command));
+                    cmd(&command);
                 }
             }
         }
@@ -140,19 +140,28 @@ impl PipedShellCommand {
 }
 
 /// Helper function to a command, optionally with args.
-pub fn cmd(command: &ShellCommand) -> String {
-    let mut output = String::new();
+pub fn cmd(command: &ShellCommand) {
     let child = Command::new(&command.name)
         .args(&command.args)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
         .spawn();
     if let Ok(..) = child {
-        child.unwrap().stdout.unwrap().read_to_string(&mut output).unwrap();
+        let output = child.unwrap().wait_with_output().unwrap().stdout;
+        let usable_output = std::str::from_utf8(&output).unwrap();
+        println!("{}", usable_output);
     } else {
         println!("Sorry, '{}' was not found!", command.name);
     }
-    output
+}
+
+pub fn cmd_with_output(command: &ShellCommand) -> String {
+    let child = Command::new(&command.name)
+        .args(&command.args)
+        .output();
+    if let Ok(..) = child {
+        std::string::String::from_utf8_lossy(&child.unwrap().stdout).to_string()
+    } else {
+        String::from("Sorry, '{}' was not found!".to_string())
+    }
 }
 
 /// This is a function for checking if the command is piped.
