@@ -7,7 +7,7 @@ pub fn cat(args: &[String]) -> String {
         "-l" => {
             let line_number = args[1].parse::<usize>().unwrap() - 1; // -1 to account for 0-indexing.
             line(&args[2], line_number).unwrap()
-        },
+        }
         "-n" => {
             let mut final_output = String::new();
             let output = read(&args[1]).unwrap();
@@ -17,7 +17,7 @@ pub fn cat(args: &[String]) -> String {
                 final_output.push_str(&string);
             }
             final_output
-        },
-        _ => read(&args[0]).unwrap()
+        }
+        _ => read(&args[0]).unwrap(),
     }
 }
