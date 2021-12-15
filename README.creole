@@ -50,9 +50,10 @@ To run a non-interactive shell with a command:\\
 | FEATURE               | TODO  | WIP  | DONE  |
 | Set via env var       |       |      | X     |
 | Command output        |       |      | X     |
+| File content          |       |      | X     |
 | Replaceable variables |       |      | X     |
 | Colors                |       |      | X     |
-| File content          | X     |      |       |
+| Automatically update  | X     |      |       |
 
 The default prompt looks like:\\
 {{images/default-prompt.png|Default Prompt}}
@@ -68,6 +69,7 @@ Information variables:
 * %{H} for the current user's home directory.
 * %{U} for the current user.
 * %(//command//) for capturing the output of //command//.
+* %[//file//] to get the contents of //file//.
 
 Formatting:
 * %{b} to make text bold.

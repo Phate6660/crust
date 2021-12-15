@@ -160,6 +160,43 @@ impl EsBuilder {
     }
 }
 
+pub fn get_files_from_input(input: &str) -> Vec<String> {
+    let tokenized_vec = tokenize(input);
+    let mut tmp_vec: String = String::new();
+    let mut file_vec: Vec<String> = Vec::new();
+    let mut file = false;
+    let mut file_end = false;
+    let mut tok_iter = tokenized_vec.iter().peekable();
+    while tok_iter.peek() != None {
+        let tok_iter_char = tok_iter.next().unwrap().as_str();
+        if file_end {
+            file_vec.push(tmp_vec.to_string());
+            tmp_vec.clear();
+            file = false;
+            file_end = false;
+            continue;
+        }
+        if tok_iter_char == "%" && tok_iter.peek().unwrap().as_str() == "[" {
+            file = true;
+        } else if file {
+            if tok_iter_char == "[" {
+                continue;
+            } else if tok_iter_char != "]" {
+                tmp_vec.push_str(tok_iter_char);
+            } else if tok_iter_char == "]" {
+                file_end = true;
+                continue;
+            }
+        }
+    } {
+        if file_end {
+            file_vec.push(tmp_vec.to_string());
+            file_vec.clear();
+        }
+    }
+    file_vec
+}
+
 pub fn get_commands_from_input(input: &str) -> Vec<ShellCommand> {
     let tokenized_vec = tokenize(input);
     let mut tmp_vec: String = String::new();

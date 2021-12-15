@@ -131,6 +131,13 @@ impl ShellState {
                 command_output.trim(),
             );
         }
+        let files = crate::prompt::get_files_from_input(&evaled_prompt);
+        for file in files {
+            evaled_prompt = evaled_prompt.replace(
+                format!("%[{}]", file.to_string().trim()).as_str(),
+                crate::builtins::cat::cat(&[file]).trim(),
+            );
+        }
         // Parse the prompt and replace the colors with the escape sequences.
         evaled_prompt = crate::prompt::parse_prompt_effects(&evaled_prompt);
         let substitutions = vec!["%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}", "\\n"];
