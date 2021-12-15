@@ -39,11 +39,11 @@ To run a non-interactive shell with a command:\\
 | CMDs with args |       |      | X     |
 | Paging         |       |      | X     |
 | Piping         |       |      | X     |
+| Prompt         |       |      | X     |
 | Redirection    |       |      | X     |
 | Builtins       |       | X    |       |
 | Job control    |       | X    |       |
 | Line editor    |       | X    |       |
-| Prompt         |       | X    |       |
 | Scripting      | X     |      |       |
 
 ==== Prompt ====
