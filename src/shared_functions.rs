@@ -1,4 +1,4 @@
-use crate::commands::{cmd, piped_cmd, return_shellcommand, PipedShellCommand, Redirection, ShellCommand};
+use crate::commands::{cmd_with_output, piped_cmd, return_shellcommand, PipedShellCommand, Redirection, ShellCommand};
 use sflib::ensure_directory;
 use std::env::var as env_var;
 use std::path::PathBuf;
@@ -99,7 +99,7 @@ impl ShellState {
         let args = std::env::args().collect();
         let prompt = env_var("PROMPT").unwrap_or_else(|_| String::from("F<GREEN>B<BLACK>%{b}%{u}[crust]-[%{C}]:%{re} "));
         let user_command = return_shellcommand(String::from("whoami"), Vec::new(), Redirection::NoOp);
-        let user = env_var("USER").unwrap_or_else(|_| cmd(&user_command)).trim().to_string();
+        let user = env_var("USER").unwrap_or_else(|_| cmd_with_output(&user_command)).trim().to_string();
         let home = env_var("HOME").unwrap_or_else(|_| ["/home/", user.as_str()].concat());
         let na = String::from("no args");
         let share_dir = [&home, "/.local/share/crust"].concat();
@@ -124,7 +124,7 @@ impl ShellState {
             if command.args.contains(&String::from("|")) {
                 command_output = piped_cmd(&PipedShellCommand::from(&command));
             } else {
-                command_output = cmd(&command);
+                command_output = cmd_with_output(&command);
             }
             evaled_prompt = evaled_prompt.replace(
                 format!("%({})", command.to_string().trim()).as_str(),
