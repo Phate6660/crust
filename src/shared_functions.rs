@@ -48,9 +48,9 @@ pub fn process_input(shell_state: &mut ShellState, input: &str) {
 }
 
 #[cfg(feature = "readline")]
-pub fn run_loop(prompt: &str, rl: &mut Editor<()>, history_file: &str, mut shell_state: ShellState) {
+pub fn run_loop(rl: &mut Editor<()>, history_file: &str, mut shell_state: ShellState) {
     loop {
-        let prompt = rl.readline(prompt);
+        let prompt = rl.readline(&ShellState::eval_prompt(&mut shell_state));
         match prompt {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());

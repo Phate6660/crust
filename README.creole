@@ -48,12 +48,12 @@ To run a non-interactive shell with a command:\\
 
 ==== Prompt ====
 | FEATURE               | TODO  | WIP  | DONE  |
-| Set via env var       |       |      | X     |
+| Automatically update  |       |      | X     |
+| Colors                |       |      | X     |
 | Command output        |       |      | X     |
 | File content          |       |      | X     |
 | Replaceable variables |       |      | X     |
-| Colors                |       |      | X     |
-| Automatically update  | X     |      |       |
+| Set via env var       |       |      | X     |
 
 The default prompt looks like:\\
 {{images/default-prompt.png|Default Prompt}}
