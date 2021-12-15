@@ -47,7 +47,7 @@ fn main() {
         println!("There was no previous history to load.");
     }
     #[cfg(not(feature = "readline"))]
-    run_loop(&prompt, shell_state);
+    run_loop(shell_state);
     #[cfg(feature = "readline")]
     run_loop(&mut rl, &history_file, shell_state);
 }

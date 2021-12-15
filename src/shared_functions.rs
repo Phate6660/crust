@@ -82,8 +82,9 @@ pub fn run_loop(rl: &mut Editor<()>, history_file: &str, mut shell_state: ShellS
 }
 
 #[cfg(not(feature = "readline"))]
-pub fn run_loop(prompt: &str, mut shell_state: ShellState) {
+pub fn run_loop(mut shell_state: ShellState) {
     loop {
+        let prompt = ShellState::eval_prompt(&mut shell_state);
         print!("{}", prompt);
         std::io::stdout().flush().unwrap();
         let input = crate::parse_input("interactive");
