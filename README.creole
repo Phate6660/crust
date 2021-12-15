@@ -37,13 +37,13 @@ To run a non-interactive shell with a command:\\
 | FEATURE        | TODO  | WIP  | DONE  |
 | Basic commands |       |      | X     |
 | CMDs with args |       |      | X     |
+| Paging         |       |      | X     |
 | Piping         |       |      | X     |
 | Redirection    |       |      | X     |
 | Builtins       |       | X    |       |
+| Job control    |       | X    |       |
 | Line editor    |       | X    |       |
 | Prompt         |       | X    |       |
-| Job control    | X     |      |       |
-| Paging         | X     |      |       |
 | Scripting      | X     |      |       |
 
 ==== Prompt ====
