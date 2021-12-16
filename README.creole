@@ -66,6 +66,7 @@ What you can use in the prompt:
 Information variables:
 * %{CL} for the full current working directory (e.g. /home/valley/projects/crust).
 * %{CS} for the short current working directory (e.g. crust).
+* %{D} for the date (e.g. Wed Dec 15).
 * %{H} for the current user's home directory.
 * %{T12} and %{T24} for 12 and 24 hour time respectively.
 * %{U} for the current user.
