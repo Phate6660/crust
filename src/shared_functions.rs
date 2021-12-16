@@ -141,7 +141,7 @@ impl ShellState {
         }
         // Parse the prompt and replace the colors with the escape sequences.
         evaled_prompt = crate::prompt::parse_prompt_effects(&evaled_prompt);
-        let substitutions = vec!["%{CL}", "%{CS}", "%{H}", "%{T12}", "%{T24}", "%{U}", "\\n"];
+        let substitutions = vec!["%{CL}", "%{CS}", "%{D}", "%{H}", "%{T12}", "%{T24}", "%{U}", "\\n"];
         for to_subst in substitutions {
             let mut subst = String::new();
             match to_subst {
@@ -150,6 +150,7 @@ impl ShellState {
                     let cwd = std::env::current_dir().unwrap().display().to_string();
                     subst = cwd.split("/").collect::<Vec<&str>>()[cwd.split("/").count() - 1].to_string();
                 },
+                "%{D}" => subst = get_time("%a %b %d"),
                 "%{H}" => subst = self.home.clone(),
                 "%{T12}" => subst = get_time("%I:%M %p").to_string(),
                 "%{T24}" => subst = get_time("%H:%M").to_string(),
