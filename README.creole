@@ -44,6 +44,7 @@ To run a non-interactive shell with a command:\\
 | Builtins       |       | X    |       |
 | Job control    |       | X    |       |
 | Line editor    |       | X    |       |
+| Env variables  | X     |      |       |
 | Scripting      | X     |      |       |
 
 ==== Prompt ====
