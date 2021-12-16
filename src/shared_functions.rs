@@ -141,14 +141,18 @@ impl ShellState {
         }
         // Parse the prompt and replace the colors with the escape sequences.
         evaled_prompt = crate::prompt::parse_prompt_effects(&evaled_prompt);
-        let substitutions = vec!["%{C}", "%{D12}", "%{D24}", "%{H}", "%{U}", "\\n"];
+        let substitutions = vec!["%{CL}", "%{CS}", "%{H}", "%{T12}", "%{T24}", "%{U}", "\\n"];
         for to_subst in substitutions {
             let mut subst = String::new();
             match to_subst {
-                "%{C}" => subst = std::env::current_dir().unwrap().display().to_string(),
-                "%{D12}" => subst = get_time("%I:%M %p").to_string(),
-                "%{D24}" => subst = get_time("%H:%M").to_string(),
+                "%{CL}" => subst = std::env::current_dir().unwrap().display().to_string(),
+                "%{CS}" => {
+                    let cwd = std::env::current_dir().unwrap().display().to_string();
+                    subst = cwd.split("/").collect::<Vec<&str>>()[cwd.split("/").count() - 1].to_string();
+                },
                 "%{H}" => subst = self.home.clone(),
+                "%{T12}" => subst = get_time("%I:%M %p").to_string(),
+                "%{T24}" => subst = get_time("%H:%M").to_string(),
                 "%{U}" => subst = self.user.clone(),
                 "\\n" => subst = '\n'.to_string(), // Needed to support newlines in the prompt
                 _ => (),

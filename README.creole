@@ -64,9 +64,10 @@ Example for info variables: //PROMPT="[%{C}]-[%{U}@%(hostname)]-> "//\\
 What you can use in the prompt:
 
 Information variables:
-* %{C} for current working directory.
-* %{D12} and %{D24} for 12 and 24 hour time respectively.
+* %{CL} for the full current working directory (e.g. /home/valley/projects/crust).
+* %{CS} for the short current working directory (e.g. crust).
 * %{H} for the current user's home directory.
+* %{T12} and %{T24} for 12 and 24 hour time respectively.
 * %{U} for the current user.
 * %(//command//) for capturing the output of //command//.
 * %[//file//] to get the contents of //file//.
