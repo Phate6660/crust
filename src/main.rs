@@ -46,10 +46,10 @@ fn main() {
     // history size=500
     // history spaces ignored=true
     // prompt="`shell_state.prompt`"
-    // should_be_invalid="N/A"
+    // should be invalid="N/A"
     // ```
     let default_config = format!(
-        "bell style=\"{}\"\nedit mode=\"{}\"\nhistory auto add lines={}\nhistory file=\"{}\"\nhistory size={}\nprompt=\"{}\"\nshould_be_invalid=\"N/A\"",
+        "bell style=\"{}\"\nedit mode=\"{}\"\nhistory auto add lines={}\nhistory file=\"{}\"\nhistory size={}\nprompt=\"{}\"\nshould be invalid=\"N/A\"",
         &shell_state.bell_style,
         &shell_state.edit_mode,
         &shell_state.history_auto_add_lines,
