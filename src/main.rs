@@ -37,6 +37,16 @@ pub fn non_interactive(shell_state: &mut ShellState) {
 
 fn main() {
     let mut shell_state = ShellState::init();
+    let default_config = format!("prompt=\"{}\"", &shell_state.prompt);
+    let options = conf::get_options(shell_state.config.as_str(), &default_config);
+    if let Ok(options) = options {
+        for option in options {
+            match option.0.as_str() {
+                "prompt" => shell_state.prompt = option.1,
+                _ => println!("[WARNING]: '{}' is an invalid option, ignoring.", option.0)
+            }
+        }
+    }
     non_interactive(&mut shell_state);
     #[cfg(feature = "readline")]
     let mut rl = Editor::<()>::new();

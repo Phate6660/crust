@@ -21,6 +21,8 @@ pub struct ShellState {
     pub na: String,
     pub share_dir: String,
     pub cd_prev_dir: Option<PathBuf>,
+    pub config_dir: String,
+    pub config: String
 }
 
 /// Gets the current time with the format specified if the `time` feature is enabled.
@@ -105,6 +107,8 @@ impl ShellState {
         let na = String::from("no args");
         let share_dir = [&home, "/.local/share/crust"].concat();
         let cd_prev_dir = None;
+        let config_dir = [&home, "/.config/crust/"].concat();
+        let config = [&config_dir, "config"].concat();
         let shell_state = ShellState {
             args,
             prompt,
@@ -113,8 +117,11 @@ impl ShellState {
             na,
             share_dir,
             cd_prev_dir,
+            config_dir,
+            config
         };
         ensure_directory(&shell_state.share_dir, true).unwrap();
+        ensure_directory(&shell_state.config_dir, true).unwrap();
         shell_state
     }
     pub fn eval_prompt(&mut self) -> String {
