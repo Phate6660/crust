@@ -25,6 +25,10 @@ pub struct ShellState {
     pub config: String,
     pub history_file: String,
     pub edit_mode: String,
+    pub bell_style: String,
+    pub history_auto_add_lines: bool,
+    pub history_size: usize,
+    pub history_spaces_ignored: bool,
 }
 
 /// Gets the current time with the format specified if the `time` feature is enabled.
@@ -124,6 +128,10 @@ impl ShellState {
             config,
             history_file,
             edit_mode: String::from("emacs"),
+            bell_style: String::from("nothing"),
+            history_auto_add_lines: true,
+            history_size: 500,
+            history_spaces_ignored: true,
         };
         ensure_directory(&shell_state.share_dir, true).unwrap();
         ensure_directory(&shell_state.config_dir, true).unwrap();

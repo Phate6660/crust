@@ -1,9 +1,15 @@
+# Allowed values are "bell", "flashing", and "nothing".
+bell style="nothing"
 # Allowed values are "emacs" and "vi".
 edit mode="emacs"
+history auto add lines=true
+# The file to write history to, must be writable (e.g. in an existing directory).
 history file="/home/valley/.local/share/crust/crust.history"
+history spaces ignored=true
+history size=500
 # Example of how prompt looks:
 # [05:47 AM]-[Mon Jan 10]
 # [valley@gentoo]
 # [/home/valley/projects/crust]->
 prompt=""[F<MAGENTA>%{T12}%{rf}]-[F<CYAN>%{D}%{rf}]\n[F<GREEN>%{U}%{rf}@F<BLUE>%(hostname)%{rf}]\n[F<WHITE>%{CL}%{rf}]F<YELLOW>->%{rf} "
-should_be_invalid="N/A"
+should be invalid="N/A"

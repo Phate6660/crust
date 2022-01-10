@@ -39,27 +39,46 @@ fn main() {
     let mut shell_state = ShellState::init();
     // Default config:
     // ```
+    // bell style="nothing"
     // edit mode="emacs"
+    // history auto add lines=true
     // history file="`shell_state.history`"
+    // history size=500
+    // history spaces ignored=true
     // prompt="`shell_state.prompt`"
     // should_be_invalid="N/A"
     // ```
     let default_config = format!(
-        "edit mode=\"emacs\"\nhistory file=\"{}\"\nprompt=\"{}\"\nshould_be_invalid=\"N/A\"", 
+        "bell style=\"{}\"\nedit mode=\"{}\"\nhistory auto add lines={}\nhistory file=\"{}\"\nhistory size={}\nprompt=\"{}\"\nshould_be_invalid=\"N/A\"",
+        &shell_state.bell_style,
+        &shell_state.edit_mode,
+        &shell_state.history_auto_add_lines,
         &shell_state.history_file,
+        &shell_state.history_size,
         &shell_state.prompt
     );
     let options = conf::get_options(shell_state.config.as_str(), &default_config);
     if let Ok(options) = options {
         for option in options {
             match option.0.as_str() {
+                "bell style" => shell_state.bell_style = option.1,
                 "edit mode" => shell_state.edit_mode = option.1,
+                "history auto add lines" => shell_state.history_auto_add_lines = option.1.parse::<bool>().unwrap(),
                 "history file" => shell_state.history_file = option.1,
+                "history size" => shell_state.history_size = option.1.parse::<usize>().unwrap(),
+                "history spaces ignored" => shell_state.history_spaces_ignored = option.1.parse::<bool>().unwrap(),
                 "prompt" => shell_state.prompt = option.1,
                 _ => println!("[WARNING]: '{}' is an invalid option, ignoring.", option.0)
             }
         }
     }
+    #[cfg(feature = "readline")]
+    let bell_style: rustyline::config::BellStyle = match shell_state.bell_style.as_str() {
+        "nothing" => rustyline::config::BellStyle::None,
+        "bell" => rustyline::config::BellStyle::Audible,
+        "flashing" => rustyline::config::BellStyle::Visible,
+        _ => rustyline::config::BellStyle::None
+    };
     #[cfg(feature = "readline")]
     let edit_mode: rustyline::EditMode = match shell_state.edit_mode.as_str() {
         "emacs" => rustyline::EditMode::Emacs,
@@ -68,7 +87,11 @@ fn main() {
     };
     #[cfg(feature = "readline")]
     let config = rustyline::Config::builder()
+        .auto_add_history(shell_state.history_auto_add_lines)
+        .bell_style(bell_style)
         .edit_mode(edit_mode)
+        .history_ignore_space(shell_state.history_spaces_ignored)
+        .max_history_size(shell_state.history_size)
         .build();
     non_interactive(&mut shell_state);
     #[cfg(feature = "readline")]
