@@ -42,6 +42,7 @@ To run a non-interactive shell with a command:\\
 | Prompt         |       |      | X     |
 | Redirection    |       |      | X     |
 | Builtins       |       | X    |       |
+| Config file    |       | X    |       |
 | Job control    |       | X    |       |
 | Line editor    |       | X    |       |
 | Env variables  | X     |      |       |
@@ -59,9 +60,7 @@ To run a non-interactive shell with a command:\\
 The default prompt looks like:\\
 {{images/default-prompt.png|Default Prompt}}
 
-Customize the prompt by setting the PROMPT env variable.\\
-Example for info variables: //PROMPT="[%{C}]-[%{U}@%(hostname)]-> "//\\
-
+Customize the prompt by setting the PROMPT variable in the environment or through the config.\\
 What you can use in the prompt:
 
 Information variables:
@@ -155,3 +154,17 @@ This showcases a multiline prompt with different foreground and background color
 | Cross-platform       |       |      | X     |
 | List files           |       |      | X     |
 | Additional details   | X     |      |       |
+
+=== Config File ===
+| OPTION                 | TODO | WIP | DONE |
+| Edit mode              |      |     | X    |
+| History auto add lines |      |     | X    |
+| History file           |      |     | X    |
+| History ignore spaces  |      |     | X    |
+| History size           |      |     | X    |
+| Prompt                 |      |     | X    |
+
+Notes:
+* A default config is created for you if non-existant, look at //example-config// in the repo for an example.
+* Comments (lines that start with //*//) or ignored.
+* Invalid options are ignored and a warning is issued.
