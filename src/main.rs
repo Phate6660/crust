@@ -39,7 +39,7 @@ fn main() {
     let mut shell_state = ShellState::init();
     // Default config:
     // ```
-    // history file="shell_state.history"
+    // history file="`shell_state.history`"
     // prompt="`shell_state.prompt`"
     // should_be_invalid="N/A"
     // ```
