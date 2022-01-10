@@ -157,10 +157,11 @@ This showcases a multiline prompt with different foreground and background color
 
 === Config File ===
 | OPTION          | TODO | WIP | DONE |
+| Edit mode       |      |     | X    |
 | History file    |      |     | X    |
 | Prompt          |      |     | X    |
 
 Notes:
-* A default config is created for you if non-existant, look at //$HOME/.config/crust/config// for the format.
+* A default config is created for you if non-existant, look at //example-config// in the repo for an example.
 * Comments (lines that start with //*//) or ignored.
 * Invalid options are ignored and a warning is issued.

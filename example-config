@@ -1,0 +1,9 @@
+# Allowed values are "emacs" and "vi".
+edit mode="emacs"
+history file="/home/valley/.local/share/crust/crust.history"
+# Example of how prompt looks:
+# [05:47 AM]-[Mon Jan 10]
+# [valley@gentoo]
+# [/home/valley/projects/crust]->
+prompt=""[F<MAGENTA>%{T12}%{rf}]-[F<CYAN>%{D}%{rf}]\n[F<GREEN>%{U}%{rf}@F<BLUE>%(hostname)%{rf}]\n[F<WHITE>%{CL}%{rf}]F<YELLOW>->%{rf} "
+should_be_invalid="N/A"

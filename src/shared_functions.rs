@@ -23,7 +23,8 @@ pub struct ShellState {
     pub cd_prev_dir: Option<PathBuf>,
     pub config_dir: String,
     pub config: String,
-    pub history_file: String
+    pub history_file: String,
+    pub edit_mode: String,
 }
 
 /// Gets the current time with the format specified if the `time` feature is enabled.
@@ -121,7 +122,8 @@ impl ShellState {
             cd_prev_dir,
             config_dir,
             config,
-            history_file
+            history_file,
+            edit_mode: String::from("emacs"),
         };
         ensure_directory(&shell_state.share_dir, true).unwrap();
         ensure_directory(&shell_state.config_dir, true).unwrap();

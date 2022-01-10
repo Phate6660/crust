@@ -39,12 +39,13 @@ fn main() {
     let mut shell_state = ShellState::init();
     // Default config:
     // ```
+    // edit mode="emacs"
     // history file="`shell_state.history`"
     // prompt="`shell_state.prompt`"
     // should_be_invalid="N/A"
     // ```
     let default_config = format!(
-        "history file=\"{}\"\nprompt=\"{}\"\nshould_be_invalid=\"N/A\"", 
+        "edit mode=\"emacs\"\nhistory file=\"{}\"\nprompt=\"{}\"\nshould_be_invalid=\"N/A\"", 
         &shell_state.history_file,
         &shell_state.prompt
     );
@@ -52,15 +53,26 @@ fn main() {
     if let Ok(options) = options {
         for option in options {
             match option.0.as_str() {
+                "edit mode" => shell_state.edit_mode = option.1,
                 "history file" => shell_state.history_file = option.1,
                 "prompt" => shell_state.prompt = option.1,
                 _ => println!("[WARNING]: '{}' is an invalid option, ignoring.", option.0)
             }
         }
     }
+    #[cfg(feature = "readline")]
+    let edit_mode: rustyline::EditMode = match shell_state.edit_mode.as_str() {
+        "emacs" => rustyline::EditMode::Emacs,
+        "vi" => rustyline::EditMode::Vi,
+        _ => rustyline::EditMode::Emacs
+    };
+    #[cfg(feature = "readline")]
+    let config = rustyline::Config::builder()
+        .edit_mode(edit_mode)
+        .build();
     non_interactive(&mut shell_state);
     #[cfg(feature = "readline")]
-    let mut rl = Editor::<()>::new();
+    let mut rl = Editor::with_config(config);
     #[cfg(feature = "readline")]
     if rl.load_history(&shell_state.history_file).is_err() {
         println!("There was no previous history to load.");
