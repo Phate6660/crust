@@ -22,7 +22,8 @@ pub struct ShellState {
     pub share_dir: String,
     pub cd_prev_dir: Option<PathBuf>,
     pub config_dir: String,
-    pub config: String
+    pub config: String,
+    pub history_file: String
 }
 
 /// Gets the current time with the format specified if the `time` feature is enabled.
@@ -50,7 +51,7 @@ pub fn process_input(shell_state: &mut ShellState, input: &str) {
 }
 
 #[cfg(feature = "readline")]
-pub fn run_loop(rl: &mut Editor<()>, history_file: &str, mut shell_state: ShellState) {
+pub fn run_loop(rl: &mut Editor<()>, mut shell_state: ShellState) {
     loop {
         let prompt = rl.readline(&ShellState::eval_prompt(&mut shell_state));
         match prompt {
@@ -59,10 +60,10 @@ pub fn run_loop(rl: &mut Editor<()>, history_file: &str, mut shell_state: ShellS
                 if line.starts_with("exit") {
                     if line.contains(' ') {
                         let input = line.split(' ').collect::<Vec<&str>>()[1];
-                        rl.save_history(&history_file).unwrap();
+                        rl.save_history(&shell_state.history_file).unwrap();
                         exit(input.parse::<i32>().unwrap_or(0));
                     } else {
-                        rl.save_history(&history_file).unwrap();
+                        rl.save_history(&shell_state.history_file).unwrap();
                         exit(0);
                     }
                 }
@@ -80,7 +81,7 @@ pub fn run_loop(rl: &mut Editor<()>, history_file: &str, mut shell_state: ShellS
             }
         }
     }
-    rl.save_history(&history_file).unwrap();
+    rl.save_history(&shell_state.history_file).unwrap();
 }
 
 #[cfg(not(feature = "readline"))]
@@ -109,6 +110,7 @@ impl ShellState {
         let cd_prev_dir = None;
         let config_dir = [&home, "/.config/crust/"].concat();
         let config = [&config_dir, "config"].concat();
+        let history_file = [&share_dir, "/crust.history"].concat();
         let shell_state = ShellState {
             args,
             prompt,
@@ -118,7 +120,8 @@ impl ShellState {
             share_dir,
             cd_prev_dir,
             config_dir,
-            config
+            config,
+            history_file
         };
         ensure_directory(&shell_state.share_dir, true).unwrap();
         ensure_directory(&shell_state.config_dir, true).unwrap();

@@ -37,11 +37,22 @@ pub fn non_interactive(shell_state: &mut ShellState) {
 
 fn main() {
     let mut shell_state = ShellState::init();
-    let default_config = format!("prompt=\"{}\"\nshould_be_invalid=\"N/A\"", &shell_state.prompt);
+    // Default config:
+    // ```
+    // history file="shell_state.history"
+    // prompt="`shell_state.prompt`"
+    // should_be_invalid="N/A"
+    // ```
+    let default_config = format!(
+        "history file=\"{}\"\nprompt=\"{}\"\nshould_be_invalid=\"N/A\"", 
+        &shell_state.history_file,
+        &shell_state.prompt
+    );
     let options = conf::get_options(shell_state.config.as_str(), &default_config);
     if let Ok(options) = options {
         for option in options {
             match option.0.as_str() {
+                "history file" => shell_state.history_file = option.1,
                 "prompt" => shell_state.prompt = option.1,
                 _ => println!("[WARNING]: '{}' is an invalid option, ignoring.", option.0)
             }
@@ -51,13 +62,11 @@ fn main() {
     #[cfg(feature = "readline")]
     let mut rl = Editor::<()>::new();
     #[cfg(feature = "readline")]
-    let history_file = [shell_state.share_dir.as_str(), "/crust.history"].concat();
-    #[cfg(feature = "readline")]
-    if rl.load_history(&history_file).is_err() {
+    if rl.load_history(&shell_state.history_file).is_err() {
         println!("There was no previous history to load.");
     }
     #[cfg(not(feature = "readline"))]
     run_loop(shell_state);
     #[cfg(feature = "readline")]
-    run_loop(&mut rl, &history_file, shell_state);
+    run_loop(&mut rl, shell_state);
 }
