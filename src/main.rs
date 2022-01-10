@@ -57,7 +57,9 @@ fn main() {
         &shell_state.history_size,
         &shell_state.prompt
     );
+    #[cfg(feature = "readline")]
     let options = conf::get_options(shell_state.config.as_str(), &default_config);
+    #[cfg(feature = "readline")]
     if let Ok(options) = options {
         for option in options {
             match option.0.as_str() {
