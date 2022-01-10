@@ -37,7 +37,7 @@ pub fn non_interactive(shell_state: &mut ShellState) {
 
 fn main() {
     let mut shell_state = ShellState::init();
-    let default_config = format!("prompt=\"{}\"", &shell_state.prompt);
+    let default_config = format!("prompt=\"{}\"\nshould_be_invalid=\"N/A\"", &shell_state.prompt);
     let options = conf::get_options(shell_state.config.as_str(), &default_config);
     if let Ok(options) = options {
         for option in options {
