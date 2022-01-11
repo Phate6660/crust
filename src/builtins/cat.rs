@@ -18,6 +18,13 @@ pub fn cat(args: &[String]) -> String {
             }
             final_output
         }
-        _ => read(&args[0]).unwrap(),
+        _ => {
+            let contents = read(&args[0]);
+            if contents.is_err() {
+                format!("[cat: '{}']: No such file or directory.", args[0])
+            } else {
+                contents.unwrap()
+            }
+        }
     }
 }
