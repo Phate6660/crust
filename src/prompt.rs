@@ -167,7 +167,7 @@ pub fn get_files_from_input(input: &str) -> Vec<String> {
     let mut file = false;
     let mut file_end = false;
     let mut tok_iter = tokenized_vec.iter().peekable();
-    while tok_iter.peek() != None {
+    while tok_iter.peek().is_some() {
         let tok_iter_char = tok_iter.next().unwrap().as_str();
         if file_end {
             file_vec.push(tmp_vec.to_string());
@@ -204,7 +204,7 @@ pub fn get_commands_from_input(input: &str) -> Vec<ShellCommand> {
     let mut command = false;
     let mut command_end = false;
     let mut tok_iter = tokenized_vec.iter().peekable();
-    while tok_iter.peek() != None {
+    while tok_iter.peek().is_some() {
         let tok_iter_char = tok_iter.next().unwrap().as_str();
         if command_end {
             command_vec.push(ShellCommand::new(tmp_vec.as_str()));
@@ -251,7 +251,7 @@ pub fn parse_prompt_effects(input: &str) -> String {
     let mut es_fin = false;
     let mut not_pos_option;
     // Go through every character in the input, until the end is reached.
-    while tok_iter.peek() != None {
+    while tok_iter.peek().is_some() {
         // Get the next char unwrapping is safe as we ensured that the next char is never None.
         let cur_char = tok_iter.next().unwrap().as_str();
         // Match for certain key chars like % for options, F for fgcolor, B for bgcolor.

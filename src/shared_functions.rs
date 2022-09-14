@@ -168,7 +168,7 @@ impl ShellState {
                 "%{CL}" => subst = std::env::current_dir().unwrap().display().to_string(),
                 "%{CS}" => {
                     let cwd = std::env::current_dir().unwrap().display().to_string();
-                    subst = cwd.split("/").collect::<Vec<&str>>()[cwd.split("/").count() - 1].to_string();
+                    subst = cwd.split('/').collect::<Vec<&str>>()[cwd.split('/').count() - 1].to_string();
                 },
                 "%{D}" => subst = get_time("%a %b %d"),
                 "%{H}" => subst = self.home.clone(),

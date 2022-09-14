@@ -161,7 +161,7 @@ pub fn cmd_with_output(command: &ShellCommand) -> String {
     if let Ok(..) = child {
         std::string::String::from_utf8_lossy(&child.unwrap().stdout).to_string()
     } else {
-        String::from("Sorry, '{}' was not found!".to_string())
+        "Sorry, '{}' was not found!".to_string()
     }
 }
 
@@ -284,7 +284,7 @@ pub fn piped_cmd(pipe: &PipedShellCommand) -> String {
                     child.stdin.take().unwrap().write_all(output_prev.as_bytes()).unwrap();
                     let mut output = String::new();
                     match child.stdout.take().unwrap().read_to_string(&mut output) {
-                        Err(why) => return format!("ERROR: could not read cmd2 stdout: {}", why),
+                        Err(why) => format!("ERROR: could not read cmd2 stdout: {}", why),
                         Ok(_) => output,
                     }
                 }
