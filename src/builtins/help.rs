@@ -3,6 +3,7 @@ pub fn help(args: &[String]) {
     if args.is_empty() {
         println!("\
             crust [https://github.com/Phate6660/crust]\n\
+            For more info on each topic, use `help TOPIC`.\n\
             builtins:\n\
             ---------\n\
             calc\n\
@@ -12,6 +13,9 @@ pub fn help(args: &[String]) {
             help\n\
             ls\n\
             pwd\n\
+            spwd\n\n\
+            shell:\n\
+            ------\n\
             prompt"
         );
         return;
@@ -41,6 +45,12 @@ pub fn help(args: &[String]) {
                 in the prompt string.\n\
                 Variables are also supported, such as %{{U}} for user, %{{C}} for CWD, etc.\n\
                 e.G.: `%(whoami)E@%(hostname)> `. This will, for my case, produce `zeno@aether> `."
+            );
+        }
+        "spwd" => {
+            println!("\
+                It's basically a shortened `pwd`.\n\
+                Instead of a full dir like `/home/valley/Downloads/git`, it'll print something like `/h/v/D/git`."
             );
         }
         _ => {

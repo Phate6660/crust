@@ -1,4 +1,4 @@
-use crate::builtins::{calc::calc, cat::cat, cd::cd, echo::echo, help::help, ls::ls};
+use crate::builtins::{calc::calc, cat::cat, cd::cd, echo::echo, help::help, ls::ls, spwd::print};
 use crate::shared_functions::lex_tokenized_input;
 use crate::ShellState;
 use sflib::ensure_directory;
@@ -83,6 +83,7 @@ impl ShellCommand {
                 "help" => help(&command.args),
                 "ls" => print!("{}", ls(command.args)),
                 "pwd" => println!("{}", std::env::current_dir().unwrap().display()),
+                "spwd" => println!("{}", print(command.args)),
                 _ => {
                     cmd(&command);
                 }
