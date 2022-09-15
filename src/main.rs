@@ -2,6 +2,7 @@ mod builtins;
 mod commands;
 mod prompt;
 mod shared_functions;
+mod tests;
 
 #[cfg(feature = "readline")]
 use rustyline::Editor;
